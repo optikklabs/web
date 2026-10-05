@@ -21,7 +21,6 @@ function formFromTemplate(t: Template): TemplateForm {
 
 import { getErrorMessage } from "@shared/utils/errorUtils";
 
-
 export default function TemplatesTab() {
   const q = useTemplates();
   const { create, update, remove } = useTemplateMutations();

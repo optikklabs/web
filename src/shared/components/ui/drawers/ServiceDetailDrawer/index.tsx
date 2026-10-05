@@ -1,5 +1,4 @@
 import { ExternalLink, ScrollText, Waypoints } from "lucide-react";
-import { useMemo } from "react";
 
 import {
   DrawerHeader,
@@ -32,6 +31,23 @@ function initialsOf(name: string): string {
     .join("");
 }
 
+/** Version, environment, language, and instance count, when the caller supplied them. */
+function serviceMetaBits(initialData: ServiceDetailDrawerProps["initialData"]): string[] {
+  const out: string[] = [];
+  const version = typeof initialData?.version === "string" ? initialData.version : null;
+  const environment =
+    typeof initialData?.environment === "string" && initialData.environment !== "—"
+      ? initialData.environment
+      : null;
+  const lang = typeof initialData?.lang === "string" ? initialData.lang : null;
+  const instances = readNumber(initialData?.instances);
+  if (version) out.push(version);
+  if (environment) out.push(environment);
+  if (lang) out.push(lang);
+  if (instances != null) out.push(`${instances} inst`);
+  return out;
+}
+
 export default function ServiceDetailDrawer({
   open,
   onClose,
@@ -44,34 +60,11 @@ export default function ServiceDetailDrawer({
   const variant = healthVariantForErrorRate(m?.errorRate);
   const statusColor = STATUS_COLOR[variant];
 
-  const requestSpark = useMemo(
-    () => model.requestTrendSeries.map((p) => p.requestCount),
-    [model.requestTrendSeries]
-  );
-  const errorSpark = useMemo(
-    () => model.errorTrendSeries.map((p) => p.errorRate),
-    [model.errorTrendSeries]
-  );
-  const latencySpark = useMemo(
-    () => model.latencyTrendSeries.map((p) => p.p99Ms),
-    [model.latencyTrendSeries]
-  );
+  const requestSpark = model.requestTrendSeries.map((p) => p.requestCount);
+  const errorSpark = model.errorTrendSeries.map((p) => p.errorRate);
+  const latencySpark = model.latencyTrendSeries.map((p) => p.p99Ms);
 
-  const metaBits = useMemo(() => {
-    const out: string[] = [];
-    const version = typeof initialData?.version === "string" ? initialData.version : null;
-    const environment =
-      typeof initialData?.environment === "string" && initialData.environment !== "—"
-        ? initialData.environment
-        : null;
-    const lang = typeof initialData?.lang === "string" ? initialData.lang : null;
-    const instances = readNumber(initialData?.instances);
-    if (version) out.push(version);
-    if (environment) out.push(environment);
-    if (lang) out.push(lang);
-    if (instances != null) out.push(`${instances} inst`);
-    return out;
-  }, [initialData]);
+  const metaBits = serviceMetaBits(initialData);
 
   const footer = (
     <>

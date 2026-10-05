@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { ExternalLink, GitFork } from "lucide-react";
-import { memo, useMemo } from "react";
+import { memo } from "react";
 
 import { DrawerAttrTable } from "@shared/components/ui/overlay/detail-drawer/DrawerAttrTable";
 import { DrawerSection } from "@shared/components/ui/overlay/detail-drawer/DrawerSection";
@@ -18,10 +18,7 @@ function LogDetailEventTabComponent({ log, traceId }: Props) {
   const navigate = useNavigate();
 
   const sev = severityStyle(log.severityBucket);
-  const attrGroups = useMemo(
-    () => buildAttrGroups(log, sev.label, sev.color),
-    [log, sev.label, sev.color]
-  );
+  const attrGroups = buildAttrGroups(log, sev.label, sev.color);
 
   return (
     <>

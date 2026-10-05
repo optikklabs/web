@@ -1,31 +1,34 @@
-import { memo } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
 
+import DataTable from "@shared/components/ui/data-display/DataTable";
+import { DrawerSection } from "@shared/components/ui/overlay/detail-drawer/DrawerSection";
 import { formatDuration, formatNumber } from "@shared/utils/formatters";
 
-import { DrawerSection } from "@shared/components/ui/overlay/detail-drawer/DrawerSection";
+import type { DependencyRow } from "../types";
 
-import { CompactTable } from "../CompactTable";
-import type { Column, DependencyRow } from "../types";
-
-const DEPENDENCY_COLUMNS: Column<DependencyRow>[] = [
+const DEPENDENCY_COLUMNS: ColumnDef<DependencyRow>[] = [
   {
-    key: "service",
-    label: "Service",
-    render: (row) => row.serviceName || "Unknown",
+    header: "Service",
+    accessorKey: "serviceName",
+    cell: ({ row: { original: row } }) => row.serviceName || "Unknown",
   },
   {
-    key: "calls",
-    label: "Calls",
-    align: "right",
-    render: (row) => formatNumber(row.callCount),
+    header: "Calls",
+    accessorKey: "callCount",
+    size: 80,
+    meta: { align: "right" },
+    cell: ({ row: { original: row } }) => formatNumber(row.callCount),
   },
   {
-    key: "latency",
-    label: "p95",
-    align: "right",
-    render: (row) => formatDuration(row.p95LatencyMs),
+    header: "p95",
+    accessorKey: "p95LatencyMs",
+    size: 80,
+    meta: { align: "right" },
+    cell: ({ row: { original: row } }) => formatDuration(row.p95LatencyMs),
   },
 ];
+
+const DEPENDENCY_TABLE_CONFIG = { maxRows: 6, rowHeight: 36 } as const;
 
 type Props = {
   isError: boolean;
@@ -34,7 +37,7 @@ type Props = {
   downstreamRows: DependencyRow[];
 };
 
-function ServiceDrawerDependenciesSectionComponent({
+export function ServiceDrawerDependenciesSection({
   isError,
   isLoading,
   upstreamRows,
@@ -44,24 +47,23 @@ function ServiceDrawerDependenciesSectionComponent({
     <DrawerSection title="Dependencies">
       {isError ? (
         <div className="text-[12px] text-foreground-muted">Dependency map is unavailable.</div>
-      ) : isLoading ? (
-        <div className="text-[12px] text-foreground-muted">Loading dependencies…</div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           <div>
             <div className="mb-2 font-medium text-[12px] text-foreground-secondary">Upstream</div>
-            <CompactTable
-              rows={upstreamRows}
-              emptyText="No upstream callers in range."
-              columns={DEPENDENCY_COLUMNS}
+            <DataTable
+              data={{ columns: DEPENDENCY_COLUMNS, rows: upstreamRows, loading: isLoading }}
+              config={{ ...DEPENDENCY_TABLE_CONFIG, emptyText: "No upstream callers in range." }}
             />
           </div>
           <div>
             <div className="mb-2 font-medium text-[12px] text-foreground-secondary">Downstream</div>
-            <CompactTable
-              rows={downstreamRows}
-              emptyText="No downstream dependencies in range."
-              columns={DEPENDENCY_COLUMNS}
+            <DataTable
+              data={{ columns: DEPENDENCY_COLUMNS, rows: downstreamRows, loading: isLoading }}
+              config={{
+                ...DEPENDENCY_TABLE_CONFIG,
+                emptyText: "No downstream dependencies in range.",
+              }}
             />
           </div>
         </div>
@@ -69,5 +71,3 @@ function ServiceDrawerDependenciesSectionComponent({
     </DrawerSection>
   );
 }
-
-export const ServiceDrawerDependenciesSection = memo(ServiceDrawerDependenciesSectionComponent);

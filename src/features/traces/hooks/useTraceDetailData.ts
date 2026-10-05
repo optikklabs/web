@@ -143,13 +143,10 @@ export function useTraceDetailData(selectedTenantId: number | null, traceIdParam
   } = useTracePayload(traceEnabled, selectedTenantId, traceIdParam, startMs, endMs);
   const detailData = spansQuery.data;
 
-  const stats = useMemo(() => calculateTraceStats(spans), [spans]);
-  const selectedSpan = useMemo(
-    () => spans.find((s) => s.spanId === selectedSpanId),
-    [spans, selectedSpanId]
-  );
+  const stats = calculateTraceStats(spans);
+  const selectedSpan = spans.find((s) => s.spanId === selectedSpanId);
 
-  const traceTimeBounds = useMemo(() => traceBoundsWithLogs(spans, traceLogs), [spans, traceLogs]);
+  const traceTimeBounds = traceBoundsWithLogs(spans, traceLogs);
 
   const boundsStartMs = traceTimeBounds.startMs ?? 0;
   const boundsEndMs = traceTimeBounds.endMs ?? 0;

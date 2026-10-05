@@ -42,7 +42,7 @@ export function DatabaseDetailHeader({ row }: { row: DatastoreSystemRow }) {
             <StatusPill status={INSTANCE_HEALTH[status]} label={detail ?? STATUS_LABEL[status]} />
           </div>
           <div className="text-[12px] text-foreground-muted">
-            {row.category} · {row.serverHint || "unknown region"}
+            {row.category} · {row.region || "unknown region"}
           </div>
         </div>
       </div>

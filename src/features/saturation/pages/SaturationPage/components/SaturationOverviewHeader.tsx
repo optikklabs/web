@@ -19,9 +19,7 @@ function SaturationOverviewHeaderImpl({ summary }: Props): JSX.Element {
           <h1 className="m-0 font-semibold text-[20px] text-[var(--fg-0)] tracking-[-0.012em]">
             Saturation
           </h1>
-          <div className='mt-[2px] font-["Geist_Mono",monospace] text-[12px] text-[var(--fg-3)]'>
-            {summary.subline}
-          </div>
+          <div className="mt-[2px] font-mono text-[12px] text-[var(--fg-3)]">{summary.subline}</div>
         </div>
         <StatusChip tone={summary.tone} text={summary.statusText} />
       </div>

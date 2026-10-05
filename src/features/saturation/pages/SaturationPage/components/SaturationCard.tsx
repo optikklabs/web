@@ -16,7 +16,7 @@ function SaturationCardImpl({ title, subtitle, right, children }: Props): JSX.El
             {title}
           </div>
           {subtitle ? (
-            <div className='overflow-hidden text-ellipsis whitespace-nowrap font-["Geist_Mono",monospace] text-[11.5px] text-[var(--fg-3)]'>
+            <div className="overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11.5px] text-[var(--fg-3)]">
               {subtitle}
             </div>
           ) : null}

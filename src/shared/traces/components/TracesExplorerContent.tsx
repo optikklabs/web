@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { ExplorerTableFooter } from "@shared/search/components/chrome/ExplorerTableFooter";
 import { StatPill } from "@shared/search/components/chrome/StatPill";
 import {
   TrendChart,
@@ -60,9 +61,10 @@ export function TracesExplorerContent({ model }: { readonly model: TracesExplore
       </div>
 
       <div className="mt-4 flex flex-col">
-        <TracesTable
-          traces={model.sortedTraces}
-          onRowClick={model.onOpenTrace}
+        <TracesTable traces={model.sortedTraces} onRowClick={model.onOpenTrace} />
+        <ExplorerTableFooter
+          rowCount={model.sortedTraces.length}
+          noun={model.sortedTraces.length === 1 ? "trace" : "traces"}
           onNextPage={model.onNextPage}
           onPrevPage={model.onPrevPage}
           hasNextPage={model.hasNextPage}

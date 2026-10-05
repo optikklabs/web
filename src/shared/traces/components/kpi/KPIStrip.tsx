@@ -32,7 +32,7 @@ function KPIStripComponent({ stats, spans, criticalPathSpanIds, p50Ms, p95Ms }: 
   const services = stats.services.size;
   const okCount = Math.max(0, totalSpans - errors);
 
-  const maxDepth = useMemo(() => computeMaxDepth(spans), [spans]);
+  const maxDepth = computeMaxDepth(spans);
 
   const critical = useMemo(
     () => summarizeCriticalPath(spans, criticalPathSpanIds, duration),

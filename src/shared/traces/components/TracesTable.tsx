@@ -1,108 +1,155 @@
+import type { ColumnDef } from "@tanstack/react-table";
+import { ChevronRight } from "lucide-react";
+
 import type { TraceSummary } from "@shared/api/traces/types";
-import { useMemo } from "react";
+import DataTable from "@shared/components/ui/data-display/DataTable";
+import { formatTimestamp } from "@shared/utils/formatters";
+import { getServiceColor } from "@shared/utils/serviceColor";
 
-import { ExplorerTableFooter } from "@shared/search/components/chrome/ExplorerTableFooter";
-import { TraceRow } from "./TraceRow";
-
-interface Props {
-  traces: readonly TraceSummary[];
-  onRowClick: (trace: TraceSummary) => void;
-  onNextPage: () => void;
-  onPrevPage: () => void;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
+function isErrorTrace(t: TraceSummary): boolean {
+  return t.hasError || t.rootStatus?.toUpperCase() === "ERROR";
 }
 
-export function TracesTable({
-  traces,
-  onRowClick,
-  onNextPage,
-  onPrevPage,
-  hasNextPage,
-  hasPrevPage,
-}: Props) {
-  const maxDur = useMemo(() => {
-    let max = 1;
-    for (let i = 0; i < traces.length; i++) {
-      const dur = traces[i].durationMs;
-      if (dur > max) max = dur;
-    }
-    return max;
-  }, [traces]);
+function durationColor(durMs: number): string {
+  if (durMs > 1000) return "var(--color-error)";
+  if (durMs > 500) return "var(--color-warning)";
+  return "var(--text-secondary)";
+}
 
-  return (
-    <div
-      className="flex flex-col bg-card"
-      style={{ border: "1px solid var(--line)", borderRadius: 8 }}
-    >
-      <div
-        className="flex flex-row items-center justify-between"
-        style={{ padding: "12px 16px", borderBottom: "1px solid var(--line-2)" }}
-      >
-        <div className="font-semibold text-[12px] text-foreground-muted uppercase tracking-[0.06em]">
-          Results
+/** Latency bars are scaled against the slowest trace on the page. */
+function traceColumns(maxDurMs: number): ColumnDef<TraceSummary>[] {
+  return [
+    {
+      header: "Time",
+      accessorKey: "startMs",
+      size: 140,
+      cell: ({ row: { original: t } }) => (
+        <div>
+          <div className="truncate whitespace-nowrap font-mono text-[12.5px] text-foreground-secondary">
+            {formatTimestamp(t.startMs)}
+          </div>
+          <div className="font-mono text-[12px] text-foreground-muted">
+            {t.traceId.slice(0, 10)}…
+          </div>
         </div>
-      </div>
+      ),
+    },
+    {
+      header: "Operation",
+      accessorKey: "rootOperation",
+      cell: ({ row: { original: t } }) => (
+        <div className="flex items-center gap-2">
+          <span
+            className="size-1.5 shrink-0 rounded-full"
+            style={{ backgroundColor: getServiceColor(t.rootService) }}
+          />
+          <div className="min-w-0">
+            <div className="truncate font-medium font-mono text-[13px] text-foreground">
+              {t.rootOperation || "—"}
+            </div>
+            <div className="truncate font-mono text-[12px] text-foreground-muted">
+              {t.rootService}
+              {t.environment ? ` · ${t.environment}` : ""}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Duration",
+      accessorKey: "durationMs",
+      size: 100,
+      meta: { align: "right" },
+      cell: ({ row: { original: t } }) => (
+        <span
+          className="font-mono font-semibold tabular-nums"
+          style={{ color: durationColor(t.durationMs) }}
+        >
+          {t.durationMs >= 1000
+            ? `${(t.durationMs / 1000).toFixed(2)} s`
+            : `${Math.round(t.durationMs)} ms`}
+        </span>
+      ),
+    },
+    {
+      header: "Latency bar",
+      id: "latencyBar",
+      size: 180,
+      cell: ({ row: { original: t } }) => (
+        <div className="h-2 overflow-hidden rounded-[3px] bg-[var(--bg-inset)]">
+          <div
+            className="h-full opacity-85"
+            style={{
+              width: `${Math.min((t.durationMs / maxDurMs) * 100, 100)}%`,
+              backgroundColor: getServiceColor(t.rootService),
+            }}
+          />
+        </div>
+      ),
+    },
+    {
+      header: "Status",
+      id: "status",
+      size: 90,
+      cell: ({ row: { original: t } }) => {
+        const isErr = isErrorTrace(t);
+        return (
+          <span
+            className="inline-flex items-center rounded-full px-2 py-0.5 font-semibold text-[12px]"
+            style={{
+              color: isErr ? "var(--color-error)" : "var(--color-success)",
+              backgroundColor: isErr ? "var(--color-error-subtle)" : "var(--color-success-subtle)",
+            }}
+          >
+            <span className="mr-1.5 size-1.5 rounded-full bg-current" />
+            {t.rootHttpStatus || (isErr ? "ERR" : "OK")}
+          </span>
+        );
+      },
+    },
+    {
+      header: "Spans",
+      accessorKey: "spanCount",
+      size: 80,
+      meta: { align: "right" },
+      cell: ({ row: { original: t } }) => (
+        <>
+          <span className="font-mono text-[13px]">{t.spanCount}</span>
+          {t.errorCount > 0 && (
+            <span className="ml-1 inline-block rounded-sm bg-error/10 px-1 py-px font-medium text-[11px] text-error">
+              {t.errorCount}
+            </span>
+          )}
+        </>
+      ),
+    },
+    {
+      header: "",
+      id: "chevron",
+      size: 36,
+      meta: { align: "right" },
+      cell: () => <ChevronRight size={14} className="text-foreground-muted" />,
+    },
+  ];
+}
 
-      <table className="w-full border-collapse text-left">
-        <thead className="sticky top-0 z-10 bg-card font-semibold text-[11.5px] text-foreground-muted uppercase tracking-[0.06em]">
-          <tr style={{ borderBottom: "1px solid var(--line-2)" }}>
-            <th className="py-2.5 pl-[18px]">
-              <div className="resize-x overflow-hidden whitespace-nowrap" style={{ width: 110 }}>
-                Time
-              </div>
-            </th>
-            <th className="py-2.5">
-              <div className="resize-x overflow-hidden whitespace-nowrap" style={{ minWidth: 150 }}>
-                Operation
-              </div>
-            </th>
-            <th className="py-2.5 text-right">
-              <div
-                className="ml-auto resize-x overflow-hidden whitespace-nowrap"
-                style={{ width: 90 }}
-              >
-                Duration
-              </div>
-            </th>
-            <th className="px-3 py-2.5">
-              <div
-                className="resize-x overflow-hidden whitespace-nowrap"
-                style={{ minWidth: 150, width: "100%" }}
-              >
-                Latency bar
-              </div>
-            </th>
-            <th className="py-2.5">
-              <div className="resize-x overflow-hidden whitespace-nowrap" style={{ width: 80 }}>
-                Status
-              </div>
-            </th>
-            <th className="py-2.5 text-right">
-              <div
-                className="ml-auto resize-x overflow-hidden whitespace-nowrap"
-                style={{ width: 56 }}
-              >
-                Spans
-              </div>
-            </th>
-            <th className="w-[18px] py-2.5" />
-          </tr>
-        </thead>
-        <tbody className="text-[13px]">
-          {traces.map((t) => (
-            <TraceRow key={t.traceId} t={t} maxDur={maxDur} onRowClick={onRowClick} />
-          ))}
-        </tbody>
-      </table>
+interface TracesTableProps {
+  readonly traces: readonly TraceSummary[];
+  readonly onRowClick: (trace: TraceSummary) => void;
+}
 
-      <ExplorerTableFooter
-        rowCount={traces.length}
-        onNextPage={onNextPage}
-        onPrevPage={onPrevPage}
-        hasNextPage={hasNextPage}
-        hasPrevPage={hasPrevPage}
-      />
-    </div>
+export function TracesTable({ traces, onRowClick }: TracesTableProps): JSX.Element {
+  const maxDurMs = traces.reduce((max, t) => Math.max(max, t.durationMs), 1);
+  return (
+    <DataTable
+      data={{ columns: traceColumns(maxDurMs), rows: [...traces] }}
+      config={{
+        emptyText: "No traces match the current filters.",
+        onRow: (trace) => ({
+          onClick: () => onRowClick(trace),
+          style: { cursor: "pointer" },
+        }),
+      }}
+    />
   );
 }

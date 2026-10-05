@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Plus, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { ROUTES } from "@/shared/constants/routes";
 import { useAuthUser } from "@app/store/authStore";
@@ -32,11 +32,12 @@ export function PagesRail({ currentPageId }: PagesRailProps) {
   const listQ = useDashboardPagesList({ q: search || undefined, limit: 100 });
   const pages = listQ.data?.items ?? [];
 
-  const filtered = useMemo(() => {
-    if (tab === "favorites") return pages.filter((p) => p.isFavorite);
-    if (tab === "mine") return pages.filter((p) => p.owner?.name && p.owner.name === user?.name);
-    return pages;
-  }, [pages, tab, user]);
+  const filtered =
+    tab === "favorites"
+      ? pages.filter((p) => p.isFavorite)
+      : tab === "mine"
+        ? pages.filter((p) => p.owner?.name && p.owner.name === user?.name)
+        : pages;
 
   const favorites = filtered.filter((p) => p.isFavorite);
   const rest = filtered.filter((p) => !p.isFavorite);

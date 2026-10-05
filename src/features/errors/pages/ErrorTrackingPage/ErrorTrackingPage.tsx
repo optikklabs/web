@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 
 import { ExplorerHeader } from "@shared/search/components/chrome/ExplorerHeader";
 import { ExplorerLayout } from "@shared/search/components/chrome/ExplorerLayout";
@@ -20,10 +20,7 @@ export default function ErrorTrackingPage() {
     [state.filters, model.startTime, model.endTime]
   );
 
-  const onInclude = useCallback(
-    (field: string, value: string) => state.addFilter({ field, op: "eq", value }),
-    [state]
-  );
+  const onInclude = (field: string, value: string) => state.addFilter({ field, op: "eq", value });
 
   useExplorerKeyboard({ onSearchFocus: () => searchInputRef.current?.focus() });
 

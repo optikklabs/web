@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 import { useAppStore, useResolvedTimeBounds, useTimeRange } from "@app/store/appStore";
 import { useCursorPager } from "@shared/search/hooks/useCursorPager";
@@ -33,19 +33,14 @@ export function useTracesExplorerModel(args: UseTracesExplorerModelArgs = {}) {
   const { startTime, endTime } = useResolvedTimeBounds();
 
   const trendBuckets = useMemo(() => toTrendBuckets(trend), [trend]);
-  const sortedTraces = useMemo(() => sortTraces(traces, "recent"), [traces]);
+  const sortedTraces = sortTraces(traces, "recent");
 
-  const onTimeRangeChange = useCallback(
-    (fromMs: number, toMs: number) => setCustomTimeRange(fromMs, toMs, "Brush"),
-    [setCustomTimeRange]
-  );
+  const onTimeRangeChange = (fromMs: number, toMs: number) =>
+    setCustomTimeRange(fromMs, toMs, "Brush");
 
-  const onOpenTrace = useCallback(
-    (trace: TraceSummary) => {
-      navigate({ to: `/traces/${encodeURIComponent(trace.traceId)}` });
-    },
-    [navigate]
-  );
+  const onOpenTrace = (trace: TraceSummary) => {
+    navigate({ to: `/traces/${encodeURIComponent(trace.traceId)}` });
+  };
 
   const pager = useCursorPager(state, query.data?.nextCursor);
 

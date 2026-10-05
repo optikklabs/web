@@ -1,5 +1,4 @@
 import { RefreshCw, Server } from "lucide-react";
-import { useMemo } from "react";
 
 import { useAppStore } from "@app/store/appStore";
 import { useAuthTenant } from "@app/store/authStore";
@@ -26,7 +25,7 @@ function HubBody() {
   const { rows, summary, comparison } = useCatalogList();
   const aggregate = useCatalogAggregate(rows, summary, comparison);
   const { tab, setTab } = useServiceHubTab();
-  const environment = useMemo(() => pickEnvironment(rows), [rows]);
+  const environment = pickEnvironment(rows);
   const org = useAuthTenant()?.name ?? null;
   const triggerRefresh = useAppStore((state) => state.triggerRefresh);
   const subtitle = [

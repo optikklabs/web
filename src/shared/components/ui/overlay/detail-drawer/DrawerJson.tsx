@@ -1,5 +1,4 @@
 import { Copy } from "lucide-react";
-import { useMemo } from "react";
 
 interface DrawerJsonProps {
   readonly data: unknown;
@@ -25,7 +24,7 @@ function highlight(data: unknown): string {
 }
 
 export function DrawerJson({ data }: DrawerJsonProps) {
-  const html = useMemo(() => highlight(data), [data]);
+  const html = highlight(data);
   return (
     <div className="overflow-hidden rounded-lg border border-[var(--line-2)] bg-[var(--bg-card)]">
       <div className="flex items-center justify-between border-[var(--line-2)] border-b bg-[var(--bg-inset)] px-2.5 py-[7px]">

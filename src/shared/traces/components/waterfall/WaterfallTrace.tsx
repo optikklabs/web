@@ -1,7 +1,7 @@
 import type { TraceRecord } from "@shared/api/traces/schemas";
 import { formatDuration } from "@shared/utils/formatters";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import type { SpanEvent } from "../../types/detail";
 import { type BarEvent, buildFlatTree, eventLevel, matchesQuery, niceStep } from "../../utils/tree";
 import { WaterfallHeader } from "./WaterfallHeader";
@@ -43,14 +43,14 @@ function WaterfallTraceComponent({
   }, [spanEvents]);
 
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set());
-  const toggle = useCallback((id: string) => {
+  const toggle = (id: string) => {
     setCollapsed((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  }, []);
+  };
 
   const { flat, traceStartMs, traceEndMs } = useMemo(
     () => buildFlatTree(spans, collapsed),

@@ -1,7 +1,10 @@
 import { AlertCircle, BarChart3 } from "lucide-react";
 import { useMemo } from "react";
 
+import type { ColumnDef } from "@tanstack/react-table";
+
 import ObservabilityChart from "@shared/components/ui/charts/ObservabilityChart";
+import DataTable from "@shared/components/ui/data-display/DataTable";
 import type { WidgetDisplayOptions, WidgetVizType } from "@shared/dashboards/builder/metricsWidget";
 import { DeltaBadge } from "@shared/metrics/components/DeltaBadge";
 import type {
@@ -54,7 +57,7 @@ export function WidgetVizRenderer({
     case "toplist":
       return <ToplistViz queries={queries} results={data} />;
     case "table":
-      return <TableViz queries={queries} results={data} />;
+      return <TableViz queries={queries} results={data} height={height} />;
     default:
       return (
         <TimeseriesViz
@@ -168,51 +171,58 @@ function ToplistViz({ queries, results }: SingleQueryVizProps) {
   );
 }
 
-// Not DataTable: a cell-sized WYSIWYG fragment; the widget owns chrome/states.
-function TableViz({ queries, results }: SingleQueryVizProps) {
+interface SeriesStatsRow {
+  readonly label: string;
+  readonly stats: ReturnType<typeof computeSeriesStats>;
+}
+
+function statColumn(
+  header: string,
+  key: "min" | "avg" | "max" | "last",
+  className = "text-foreground-secondary"
+): ColumnDef<SeriesStatsRow> {
+  return {
+    header,
+    id: key,
+    size: 80,
+    meta: { align: "right" },
+    cell: ({ row: { original: row } }) => (
+      <span className={`font-mono ${className}`}>{formatStatValue(row.stats[key])}</span>
+    ),
+  };
+}
+
+const SERIES_STATS_COLUMNS: ColumnDef<SeriesStatsRow>[] = [
+  {
+    header: "Series",
+    accessorKey: "label",
+    cell: ({ row: { original: row } }) => (
+      <span className="block truncate font-mono text-foreground">{row.label}</span>
+    ),
+  },
+  statColumn("Min", "min"),
+  statColumn("Avg", "avg"),
+  statColumn("Max", "max"),
+  statColumn("Last", "last", "font-semibold text-foreground"),
+];
+
+const TABLE_ROW_HEIGHT = 36;
+/** Header row height plus the DataTable border, subtracted from the cell height. */
+const TABLE_CHROME_HEIGHT = 38;
+
+function TableViz({ queries, results, height }: SingleQueryVizProps & { readonly height: number }) {
   const primary = queries[0];
-  const rows = useMemo(() => {
-    const series = results[primary.id]?.series ?? [];
-    return series.map((s) => ({
-      label: seriesLabel(s, primary.metricName),
-      stats: computeSeriesStats(s),
-    }));
-  }, [results, primary.id, primary.metricName]);
-  if (rows.length === 0) return <CenteredState icon="empty" message="No data" />;
+  const rows: SeriesStatsRow[] = (results[primary.id]?.series ?? []).map((s) => ({
+    label: seriesLabel(s, primary.metricName),
+    stats: computeSeriesStats(s),
+  }));
+  const maxRows = Math.max(1, Math.floor((height - TABLE_CHROME_HEIGHT) / TABLE_ROW_HEIGHT));
 
   return (
-    <div className="h-full overflow-auto">
-      <table className="w-full text-[11px]">
-        <thead className="sticky top-0 bg-card text-foreground-muted">
-          <tr>
-            <th className="px-2 py-1 text-left font-medium">Series</th>
-            <th className="px-2 py-1 text-right font-medium">Min</th>
-            <th className="px-2 py-1 text-right font-medium">Avg</th>
-            <th className="px-2 py-1 text-right font-medium">Max</th>
-            <th className="px-2 py-1 text-right font-medium">Last</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.label} className="border-border border-t">
-              <td className="max-w-0 truncate px-2 py-1 font-mono text-foreground">{row.label}</td>
-              <td className="px-2 py-1 text-right font-mono text-foreground-secondary">
-                {formatStatValue(row.stats.min)}
-              </td>
-              <td className="px-2 py-1 text-right font-mono text-foreground-secondary">
-                {formatStatValue(row.stats.avg)}
-              </td>
-              <td className="px-2 py-1 text-right font-mono text-foreground-secondary">
-                {formatStatValue(row.stats.max)}
-              </td>
-              <td className="px-2 py-1 text-right font-mono font-semibold text-foreground">
-                {formatStatValue(row.stats.last)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      data={{ columns: SERIES_STATS_COLUMNS, rows }}
+      config={{ emptyText: "No data", maxRows, rowHeight: TABLE_ROW_HEIGHT }}
+    />
   );
 }
 

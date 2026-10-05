@@ -1,5 +1,5 @@
 import { Plus, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Popover } from "@shared/components/primitives/ui/popover";
 import { Select } from "@shared/components/primitives/ui/select";
@@ -48,7 +48,7 @@ export function TagFilter({ metricName, filters, onChange }: TagFilterProps) {
     return vals.map((v) => ({ label: v, value: v }));
   }, [valuesData]);
 
-  const handleAdd = useCallback(() => {
+  const handleAdd = () => {
     if (!selectedKey || !selectedValue) return;
     const newFilter: MetricTagFilter = {
       key: selectedKey,
@@ -60,14 +60,11 @@ export function TagFilter({ metricName, filters, onChange }: TagFilterProps) {
     setSelectedOp("eq");
     setSelectedValue("");
     setAddOpen(false);
-  }, [selectedKey, selectedOp, selectedValue, filters, onChange]);
+  };
 
-  const handleRemove = useCallback(
-    (index: number) => {
-      onChange(filters.filter((_, i) => i !== index));
-    },
-    [filters, onChange]
-  );
+  const handleRemove = (index: number) => {
+    onChange(filters.filter((_, i) => i !== index));
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-1">

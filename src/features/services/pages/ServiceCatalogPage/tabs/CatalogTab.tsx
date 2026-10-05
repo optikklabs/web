@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import ServiceDetailDrawer from "@shared/components/ui/drawers/ServiceDetailDrawer";
 import { ClientExplorerLayout } from "@shared/search/components/chrome/ClientExplorerLayout";
@@ -47,10 +47,7 @@ export function CatalogTab() {
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const explorer = useClientExplorerController({ rows, definition: SERVICE_EXPLORER });
 
-  const selected = useMemo(
-    () => (selectedName ? (rows.find((r) => r.serviceName === selectedName) ?? null) : null),
-    [rows, selectedName]
-  );
+  const selected = selectedName ? (rows.find((r) => r.serviceName === selectedName) ?? null) : null;
 
   return (
     <>

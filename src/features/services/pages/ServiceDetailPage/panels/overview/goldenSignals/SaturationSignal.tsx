@@ -18,7 +18,7 @@ export function SaturationSignal({ serviceName }: { serviceName: string }) {
 
   const activeRows = query.data ?? [];
   const timestamps = useMemo(() => activeRows.map((r) => r.timestampMs / 1000), [activeRows]);
-  const values = useMemo(() => activeRows.map((r) => r.value), [activeRows]);
+  const values = activeRows.map((r) => r.value);
 
   const latest = values.length ? values[values.length - 1] : 0;
   const series: ObservabilityChartSeries[] = [

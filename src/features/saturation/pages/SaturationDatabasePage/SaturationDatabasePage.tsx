@@ -27,7 +27,7 @@ const DATABASE_EXPLORER: ClientExplorerDefinition<DatastoreSystemRow> = {
     errorRate: { label: "Error rate", value: (row) => row.errorRate },
     connections: { label: "Connections", value: (row) => row.activeConnections },
   },
-  searchText: (row) => `${row.system} ${row.category} ${row.serverHint}`,
+  searchText: (row) => `${row.system} ${row.category} ${row.region}`,
 };
 
 export default function SaturationDatabasePage() {

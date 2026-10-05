@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
 import { useAppStore } from "@app/store/appStore";
 import { shiftTimeRange, zoomTimeRange } from "@shared/utils/timeBounds";
@@ -108,7 +108,7 @@ function handleKeyboardShortcut(event: KeyboardEvent): void {
 }
 
 export function useKeyboardShortcuts(): UseKeyboardShortcutsResult {
-  const shortcuts = useMemo(() => BASE_SHORTCUTS, []);
+  const shortcuts = BASE_SHORTCUTS;
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyboardShortcut);

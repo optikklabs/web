@@ -24,8 +24,22 @@ export interface MonitorPrioritySpec {
 
 export const MONITOR_PRIORITIES: readonly MonitorPrioritySpec[] = [
   { id: "P1", label: "P1 · page", color: "text-error border-error", textColor: "text-error" },
-  { id: "P2", label: "P2 · ticket", color: "text-warning border-warning", textColor: "text-warning" },
-  { id: "P3", label: "P3 · notify", color: "text-foreground-secondary border-border", textColor: "text-foreground-secondary" },
-  { id: "P4", label: "P4 · info", color: "text-foreground-secondary border-border", textColor: "text-foreground-muted" },
+  {
+    id: "P2",
+    label: "P2 · ticket",
+    color: "text-warning border-warning",
+    textColor: "text-warning",
+  },
+  {
+    id: "P3",
+    label: "P3 · notify",
+    color: "text-foreground-secondary border-border",
+    textColor: "text-foreground-secondary",
+  },
+  {
+    id: "P4",
+    label: "P4 · info",
+    color: "text-foreground-secondary border-border",
+    textColor: "text-foreground-muted",
+  },
 ];
-

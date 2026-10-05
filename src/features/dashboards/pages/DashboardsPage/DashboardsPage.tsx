@@ -51,7 +51,7 @@ export default function DashboardsPage() {
   );
 
   const listQ = useDashboardPagesList(params);
-  const pages = useMemo(() => sortPages(listQ.data?.items ?? [], sort), [listQ.data, sort]);
+  const pages = sortPages(listQ.data?.items ?? [], sort);
   const tags = useMemo(() => deriveTags(listQ.data?.items ?? []), [listQ.data]);
   const total = listQ.data?.total ?? 0;
 

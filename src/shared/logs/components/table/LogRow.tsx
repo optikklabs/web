@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowRight, ChevronDown, ChevronRight, GitFork } from "lucide-react";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useMemo } from "react";
 
 import { HighlightedText } from "@shared/components/primitives/HighlightedText";
 import { buildTraceDetailHref } from "@shared/observability/deepLinks";
@@ -27,7 +27,7 @@ const SEV_LVL_CLASS: Record<SeveritySlug, string> = {
 };
 
 const LEVEL_BADGE_BASE =
-  "inline-flex h-[19px] items-center gap-[5px] rounded-[4px] border border-current px-[7px] text-[10.5px] font-medium tracking-[0.02em] [font-family:'Geist_Mono',monospace]";
+  "inline-flex h-[19px] items-center gap-[5px] rounded-[4px] border border-current px-[7px] text-[10.5px] font-medium tracking-[0.02em] font-mono";
 
 const LEVEL_DOT = "h-[5px] w-[5px] rounded-full bg-current";
 
@@ -63,36 +63,27 @@ function LogRowComponent({ row, searchTerm, isSelected, onClick, onContextMenu }
     return collapsed.length > 0 ? collapsed : "(empty)";
   }, [row.body]);
 
-  const handleClick = useCallback(() => onClick?.(row), [onClick, row]);
-  const handleContextMenu = useCallback(
-    (e: React.MouseEvent) => {
-      if (onContextMenu) {
-        e.preventDefault();
-        onContextMenu(row, e.clientX, e.clientY);
-      }
-    },
-    [onContextMenu, row]
-  );
-  const handleToggle = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      toggleExpanded(row.id);
-    },
-    [toggleExpanded, row.id]
-  );
+  const handleClick = () => onClick?.(row);
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (onContextMenu) {
+      e.preventDefault();
+      onContextMenu(row, e.clientX, e.clientY);
+    }
+  };
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleExpanded(row.id);
+  };
 
-  const handleTrace = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (!traceId) return;
-      const logMs = row.timestamp ? new Date(row.timestamp).getTime() : Date.now();
-      const validMs = Number.isFinite(logMs) ? logMs : Date.now();
-      const fromMs = validMs - 30 * 60 * 1000;
-      const toMs = validMs + 30 * 60 * 1000;
-      navigate({ to: buildTraceDetailHref(traceId, undefined, fromMs, toMs) as never });
-    },
-    [navigate, traceId, row.timestamp]
-  );
+  const handleTrace = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!traceId) return;
+    const logMs = row.timestamp ? new Date(row.timestamp).getTime() : Date.now();
+    const validMs = Number.isFinite(logMs) ? logMs : Date.now();
+    const fromMs = validMs - 30 * 60 * 1000;
+    const toMs = validMs + 30 * 60 * 1000;
+    navigate({ to: buildTraceDetailHref(traceId, undefined, fromMs, toMs) as never });
+  };
 
   const isError = sev.slug === "error";
 
@@ -100,7 +91,7 @@ function LogRowComponent({ row, searchTerm, isSelected, onClick, onContextMenu }
     <>
       <div
         className={cn(
-          "group grid min-h-7 w-full cursor-pointer grid-cols-[24px_200px_160px_80px_1fr] items-center gap-4 border-b border-b-[oklch(0.26_0.01_270/0.45)] px-[18px] py-[6px] text-left text-[12.5px] [font-family:'Geist_Mono',monospace] hover:bg-[var(--bg-row-h)] [[data-theme=light]_&]:border-b-[oklch(0.88_0.006_270/0.5)]",
+          "group grid min-h-7 w-full cursor-pointer grid-cols-[24px_200px_160px_80px_1fr] items-center gap-4 border-b border-b-[oklch(0.26_0.01_270/0.45)] px-[18px] py-[6px] text-left font-mono text-[12.5px] hover:bg-[var(--bg-row-h)] [[data-theme=light]_&]:border-b-[oklch(0.88_0.006_270/0.5)]",
           isError && !isSelected && "bg-[oklch(0.7_0.2_25/0.05)]",
           isSelected && !isError && "bg-[var(--accent-bg)]",
           isSelected && isError && "bg-[oklch(0.7_0.2_25/0.14)]"
@@ -152,7 +143,7 @@ function LogRowComponent({ row, searchTerm, isSelected, onClick, onContextMenu }
             <button
               type="button"
               onClick={handleTrace}
-              className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-full border border-[var(--accent-ln)] bg-transparent px-[7px] py-px text-[10.5px] text-[var(--accent-2)] [font-family:'Geist_Mono',monospace] group-hover:bg-[var(--accent-bg)]"
+              className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-full border border-[var(--accent-ln)] bg-transparent px-[7px] py-px font-mono text-[10.5px] text-[var(--accent-2)] group-hover:bg-[var(--accent-bg)]"
               title={`Open trace ${traceId}`}
             >
               <GitFork size={10} />

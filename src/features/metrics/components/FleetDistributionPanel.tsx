@@ -20,19 +20,23 @@ function densityColor(count: number, max: number): string {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
+type FleetPoint = ReturnType<typeof buildFleetDistribution>["points"][number];
+
+/** Sorted distinct time buckets plus the densest cell count (at least 1). */
+function bucketExtent(points: readonly FleetPoint[]): { buckets: number[]; max: number } {
+  const seen = new Set<number>();
+  let max = 1;
+  for (const p of points) {
+    seen.add(Number(p.timeBucket));
+    max = Math.max(max, p.spanCount ?? 0);
+  }
+  return { buckets: [...seen].sort((a, b) => a - b), max };
+}
+
 export function FleetDistributionPanel({ result }: FleetDistributionPanelProps) {
   const { points, bandLabels } = useMemo(() => buildFleetDistribution(result), [result]);
 
-  const { buckets, max } = useMemo(() => {
-    const seen: number[] = [];
-    let maxCount = 1;
-    for (const p of points) {
-      const ts = Number(p.timeBucket);
-      if (!seen.includes(ts)) seen.push(ts);
-      if ((p.spanCount ?? 0) > maxCount) maxCount = p.spanCount ?? 0;
-    }
-    return { buckets: seen.sort((a, b) => a - b), max: maxCount };
-  }, [points]);
+  const { buckets, max } = bucketExtent(points);
 
   const countAt = (band: string, bucket: number): number =>
     points.find((p) => p.latencyBucket === band && Number(p.timeBucket) === bucket)?.spanCount ?? 0;

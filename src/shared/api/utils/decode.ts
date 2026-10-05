@@ -198,12 +198,7 @@ function reportSchemaViolation(
     error,
   };
   if (import.meta.env.DEV) console.error(`[decodeApiResponse] ${message}`, details);
-  (
-    window.telemetry ?? {
-      track: (event: string, data: Record<string, unknown>) =>
-        console.log(`[Telemetry Mock] ${event}`, data),
-    }
-  ).track("api_contract_violation", {
+  window.telemetry?.track("api_contract_violation", {
     errors: error.flatten(),
     endpoint: options.context,
     version: "1.0.0",

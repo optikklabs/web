@@ -1,18 +1,9 @@
-import type { ReactNode } from "react";
-
 export interface ServiceDetailDrawerProps {
   open: boolean;
   onClose: () => void;
   serviceName: string;
   title?: string | null;
   initialData?: Record<string, unknown> | null;
-}
-
-export interface Column<Row> {
-  key: string;
-  label: string;
-  render: (row: Row) => ReactNode;
-  align?: "left" | "right" | "center";
 }
 
 export interface ServiceSummarySnapshot {

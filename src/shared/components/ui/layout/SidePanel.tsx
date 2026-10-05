@@ -55,23 +55,20 @@ function SidePanelComponent({
     window.removeEventListener("pointerup", onPointerUp);
   }, [onPointerMove]);
 
-  const onHandlePointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      e.preventDefault();
-      draggingRef.current = true;
-      startXRef.current = e.clientX;
+  const onHandlePointerDown = (e: React.PointerEvent) => {
+    e.preventDefault();
+    draggingRef.current = true;
+    startXRef.current = e.clientX;
 
-      const currentWidth =
-        typeof width === "number" ? width : Number.parseInt(String(width), 10) || 640;
-      startWidthRef.current = currentWidth;
+    const currentWidth =
+      typeof width === "number" ? width : Number.parseInt(String(width), 10) || 640;
+    startWidthRef.current = currentWidth;
 
-      document.body.style.userSelect = "none";
-      document.body.style.cursor = "col-resize";
-      window.addEventListener("pointermove", onPointerMove);
-      window.addEventListener("pointerup", onPointerUp);
-    },
-    [onPointerMove, onPointerUp, width]
-  );
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "col-resize";
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+  };
 
   useEffect(() => {
     return () => {

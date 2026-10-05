@@ -18,10 +18,6 @@ const API_ENDPOINTS = {
     RESET_PASSWORD: "/v1/auth/reset-password",
     CHANGE_PASSWORD: "/v1/auth/change-password",
   },
-  TENANTS: {
-    LIST: "/v1/tenants",
-    SWITCH: "/v1/tenants/switch",
-  },
   V1_BASE: "/v1",
   DASHBOARDS: {
     PAGES: "/v1/dashboard-pages",

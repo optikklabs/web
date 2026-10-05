@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { ExplorerStateApi } from "./useExplorerState";
 
@@ -28,20 +28,20 @@ export function useCursorPager(
     setCursor(null);
   }, [filtersKey, setCursor]);
 
-  const onNextPage = useCallback(() => {
+  const onNextPage = () => {
     if (!nextCursor) return;
     setHistory((prev) => [...prev, cursor ?? ""]);
     setCursor(nextCursor);
-  }, [nextCursor, cursor, setCursor]);
+  };
 
-  const onPrevPage = useCallback(() => {
+  const onPrevPage = () => {
     setHistory((prev) => {
       const next = [...prev];
       const previous = next.pop();
       if (previous !== undefined) setCursor(previous === "" ? null : previous);
       return next;
     });
-  }, [setCursor]);
+  };
 
   return {
     onNextPage,

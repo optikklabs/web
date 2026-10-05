@@ -50,12 +50,10 @@ function buildColumns(sparklines: Map<string, number[]>): ColumnDef<DatastoreSys
     },
     {
       header: "Region",
-      accessorKey: "serverHint",
+      accessorKey: "region",
       size: 150,
       cell: ({ row: { original: row } }) => (
-        <span className="font-mono text-[12px] text-foreground-secondary">
-          {row.serverHint || "—"}
-        </span>
+        <span className="font-mono text-[12px] text-foreground-secondary">{row.region || "—"}</span>
       ),
     },
     {

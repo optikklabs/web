@@ -1,5 +1,5 @@
 import { Copy, ScrollText } from "lucide-react";
-import { memo, useCallback, useState } from "react";
+import { memo, useState } from "react";
 
 import { TraceHeaderBreadcrumbs } from "./TraceHeaderBreadcrumbs";
 
@@ -30,11 +30,11 @@ function TraceHeaderComponent({
 }: Props) {
   const [copied, setCopied] = useState(false);
 
-  const copyTraceId = useCallback(() => {
+  const copyTraceId = () => {
     void navigator.clipboard.writeText(traceId);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
-  }, [traceId]);
+  };
 
   return (
     <header className="flex justify-between gap-6 border-border border-b bg-background px-5 pt-[14px] pb-3">

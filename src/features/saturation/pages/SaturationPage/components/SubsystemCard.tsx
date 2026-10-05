@@ -20,15 +20,11 @@ function SubsystemCardImpl({ spec }: Props): JSX.Element {
         </span>
         <span className="font-semibold text-[14px] text-[var(--fg-0)]">{spec.label}</span>
       </div>
-      <div className="font-['Geist_Mono',monospace] text-[11.5px] text-[var(--fg-3)]">
-        {spec.sub}
-      </div>
-      <div className="mt-[6px] font-['Geist_Mono',monospace] font-semibold text-[18px] text-[var(--fg-0)] tracking-[-0.01em]">
+      <div className="font-mono text-[11.5px] text-[var(--fg-3)]">{spec.sub}</div>
+      <div className="mt-[6px] font-mono font-semibold text-[18px] text-[var(--fg-0)] tracking-[-0.01em]">
         {spec.primary}
       </div>
-      <div className="-mt-[2px] font-['Geist_Mono',monospace] text-[11.5px] text-[var(--fg-3)]">
-        {spec.secondary}
-      </div>
+      <div className="-mt-[2px] font-mono text-[11.5px] text-[var(--fg-3)]">{spec.secondary}</div>
     </a>
   );
 }

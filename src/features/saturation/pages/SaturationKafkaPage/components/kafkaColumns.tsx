@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-import type { ColumnDef } from "@tanstack/react-table";
 import { formatDuration } from "@shared/utils/formatters";
+import type { ColumnDef } from "@tanstack/react-table";
 
 import {
   type ConsumerGroupRow,

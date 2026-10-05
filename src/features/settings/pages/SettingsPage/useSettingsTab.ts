@@ -1,5 +1,4 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useCallback } from "react";
 
 const SETTINGS_TABS = ["profile", "tenant", "instrumentation", "ingestion", "members"] as const;
 
@@ -21,14 +20,11 @@ export function useSettingsTab(): {
   const search = useSearch({ from: "/_app/settings" });
   const navigate = useNavigate();
   const tab = normalize(search.tab);
-  const setTab = useCallback(
-    (next: SettingsTab) => {
-      navigate({
-        to: "/settings",
-        search: (prev) => ({ ...prev, tab: next === DEFAULT_TAB ? undefined : next }),
-      });
-    },
-    [navigate]
-  );
+  const setTab = (next: SettingsTab) => {
+    navigate({
+      to: "/settings",
+      search: (prev) => ({ ...prev, tab: next === DEFAULT_TAB ? undefined : next }),
+    });
+  };
   return { tab, setTab };
 }

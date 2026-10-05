@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 import { useAppStore } from "@app/store/appStore";
 import { useCursorPager } from "@shared/search/hooks/useCursorPager";
@@ -71,14 +71,10 @@ export function useErrorsExplorer(args: UseErrorsExplorerArgs = {}) {
 
   const pager = useCursorPager(state, groupsQuery.data?.nextCursor);
 
-  const onOpenGroup = useCallback(
-    (groupId: string) => navigate({ to: `/errors/${encodeURIComponent(groupId)}` }),
-    [navigate]
-  );
-  const onTimeRangeChange = useCallback(
-    (fromMs: number, toMs: number) => setCustomTimeRange(fromMs, toMs, "Brush"),
-    [setCustomTimeRange]
-  );
+  const onOpenGroup = (groupId: string) =>
+    navigate({ to: `/errors/${encodeURIComponent(groupId)}` });
+  const onTimeRangeChange = (fromMs: number, toMs: number) =>
+    setCustomTimeRange(fromMs, toMs, "Brush");
 
   return {
     state,

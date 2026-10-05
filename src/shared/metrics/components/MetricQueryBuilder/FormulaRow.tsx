@@ -1,5 +1,5 @@
 import { Calculator, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 
 import { cn } from "@shared/lib/utils";
 
@@ -27,18 +27,12 @@ export function FormulaRow({
   // (e.g. into router search params).
   const [draft, setDraft] = useState<string | null>(null);
   const value = draft ?? expression;
-  const error = useMemo(
-    () => validateFormulaExpression(value, activeQueryIds),
-    [value, activeQueryIds]
-  );
+  const error = validateFormulaExpression(value, activeQueryIds);
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setDraft(e.target.value);
-      onExpressionChange(e.target.value);
-    },
-    [onExpressionChange]
-  );
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDraft(e.target.value);
+    onExpressionChange(e.target.value);
+  };
 
   return (
     <div

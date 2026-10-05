@@ -1,6 +1,6 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { HardDrive } from "lucide-react";
-import { Suspense, lazy, useMemo } from "react";
+import { Suspense, lazy } from "react";
 
 import { PageTabs } from "@shared/components/primitives/ui/page-tabs";
 import { Pill } from "@shared/components/primitives/ui/pill";
@@ -38,7 +38,7 @@ export default function InfrastructureHubPage() {
   const navigate = useNavigate();
   const summaryQ = useNodesSummary();
   const summary = summaryQ.data;
-  const activeTab = useMemo(() => parseTab(search[URL_TAB] ?? null), [search]);
+  const activeTab = parseTab(search[URL_TAB] ?? null);
 
   const setTab = (id: InfraTabId) => {
     navigate({

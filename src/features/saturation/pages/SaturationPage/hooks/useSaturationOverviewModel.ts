@@ -54,22 +54,16 @@ export function useSaturationOverviewModel(): SaturationOverviewModel {
   const systems = datastoreSystems.data ?? [];
   const hosts = hostSaturation.data ?? [];
 
-  const cards = useMemo(
-    () => [buildKafkaCardSpec(kafkaSummary.data), buildDatabaseCardSpec(systems)],
-    [kafkaSummary.data, systems]
-  );
-  const topHosts = useMemo(() => hosts.slice(0, HOSTS_LIMIT), [hosts]);
+  const cards = [buildKafkaCardSpec(kafkaSummary.data), buildDatabaseCardSpec(systems)];
+  const topHosts = hosts.slice(0, HOSTS_LIMIT);
   const summary = useMemo(
     () => buildOverviewSummary(datastoreSummary.data, kafkaSummary.data),
     [datastoreSummary.data, kafkaSummary.data]
   );
-  const counts = useMemo(
-    () => ({
-      database: systems.filter((row) => row.category === "database").length,
-      topics: kafkaSummary.data?.topicCount ?? 0,
-    }),
-    [systems, kafkaSummary.data]
-  );
+  const counts = {
+    database: systems.filter((row) => row.category === "database").length,
+    topics: kafkaSummary.data?.topicCount ?? 0,
+  };
 
   const isPending =
     datastoreSummary.isPending ||

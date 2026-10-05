@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { memo, useMemo, useState } from "react";
+import { memo, useState } from "react";
 
 import { ROUTES } from "@/shared/constants/routes";
 import { cn } from "@shared/lib/utils";
@@ -73,14 +73,10 @@ type Props = {
 function FleetMapImpl({ hosts }: Props): JSX.Element {
   const [fill, setFill] = useState<FillBy>("Saturation");
 
-  const groups = useMemo(
-    () =>
-      GROUPS.map((g) => ({
-        ...g,
-        hosts: hosts.filter((h) => h.subsystem === g.key),
-      })).filter((g) => g.hosts.length > 0),
-    [hosts]
-  );
+  const groups = GROUPS.map((g) => ({
+    ...g,
+    hosts: hosts.filter((h) => h.subsystem === g.key),
+  })).filter((g) => g.hosts.length > 0);
 
   return (
     <SaturationCard

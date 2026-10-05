@@ -1,5 +1,4 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useMemo } from "react";
 
 import ServiceDetailDrawer from "@shared/components/ui/drawers/ServiceDetailDrawer";
 import {
@@ -45,46 +44,32 @@ function toFieldValue(value: unknown): string {
   return String(value);
 }
 
+function attrGroups(drawerData: Record<string, unknown>): DrawerAttrGroup[] {
+  const contextRows = Object.keys(drawerData)
+    .filter((key) => key !== "entity" && key !== "identifier")
+    .sort((left, right) => left.localeCompare(right))
+    .map((key) => [toFieldLabel(key), toFieldValue(drawerData[key])] as const);
+
+  return [
+    {
+      label: "Selection",
+      rows: [
+        ["Entity", toFieldValue(drawerData.entity)],
+        ["Identifier", toFieldValue(drawerData.identifier)],
+      ],
+    },
+    ...(contextRows.length > 0 ? [{ label: "Context", rows: contextRows }] : []),
+  ];
+}
+
 export default function DashboardEntityDrawer(): JSX.Element | null {
   const navigate = useNavigate();
   // Rendered by shared dashboard hosts on multiple routes, so the drawer
   // params are read route-agnostically.
   const search = useSearch({ strict: false }) as Record<string, unknown>;
 
-  const drawer = useMemo(() => readDashboardDrawerState(search), [search]);
-  const isOpen = Boolean(drawer.entity && drawer.id);
-
-  const drawerData = useMemo<Record<string, unknown>>(() => {
-    if (!drawer.entity || !drawer.id) {
-      return {};
-    }
-
-    return {
-      entity: ENTITY_LABELS[drawer.entity] ?? drawer.entity,
-      identifier: drawer.id,
-      ...(drawer.data ?? {}),
-    };
-  }, [drawer.data, drawer.entity, drawer.id]);
-
-  const groups = useMemo<DrawerAttrGroup[]>(() => {
-    const contextRows = Object.keys(drawerData)
-      .filter((key) => key !== "entity" && key !== "identifier")
-      .sort((left, right) => left.localeCompare(right))
-      .map((key) => [toFieldLabel(key), toFieldValue(drawerData[key])] as const);
-
-    return [
-      {
-        label: "Selection",
-        rows: [
-          ["Entity", toFieldValue(drawerData.entity)],
-          ["Identifier", toFieldValue(drawerData.identifier)],
-        ],
-      },
-      ...(contextRows.length > 0 ? [{ label: "Context", rows: contextRows }] : []),
-    ];
-  }, [drawerData]);
-
-  if (!isOpen) {
+  const drawer = readDashboardDrawerState(search);
+  if (!drawer.entity || !drawer.id) {
     return null;
   }
 
@@ -101,7 +86,7 @@ export default function DashboardEntityDrawer(): JSX.Element | null {
     return (
       <ServiceDetailDrawer
         open
-        serviceName={drawer.id ?? ""}
+        serviceName={drawer.id}
         title={drawer.title}
         initialData={drawer.data}
         onClose={onClose}
@@ -109,8 +94,12 @@ export default function DashboardEntityDrawer(): JSX.Element | null {
     );
   }
 
-  const title =
-    drawer.title || (drawer.entity ? (ENTITY_LABELS[drawer.entity] ?? "Details") : "Details");
+  const title = drawer.title || (ENTITY_LABELS[drawer.entity] ?? "Details");
+  const groups = attrGroups({
+    entity: ENTITY_LABELS[drawer.entity] ?? drawer.entity,
+    identifier: drawer.id,
+    ...(drawer.data ?? {}),
+  });
 
   return (
     <DrawerShell open onClose={onClose} width={640}>

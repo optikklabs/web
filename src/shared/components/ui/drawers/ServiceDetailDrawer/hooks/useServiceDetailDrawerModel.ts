@@ -1,5 +1,4 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { useMemo } from "react";
 
 import { ROUTES } from "@/shared/constants/routes";
 
@@ -47,50 +46,40 @@ export function useServiceDetailDrawerModel(
       }
     : buildInitialSummary(initialData);
 
-  const requestTrendSeries = useMemo(
-    () => buildRequestTrendSeries(requestTrendQuery.data ?? []),
-    [requestTrendQuery.data]
+  const requestTrendSeries = buildRequestTrendSeries(requestTrendQuery.data ?? []);
+
+  const errorTrendSeries = buildErrorTrendSeries(errorTrendQuery.data ?? []);
+
+  const latencyTrendSeries = buildLatencyTrendSeries(latencyTrendQuery.data ?? []);
+
+  const endpointRows = [...(endpointsQuery.data?.data?.results ?? [])]
+    .sort((left, right) => Number(right.totalCount ?? 0) - Number(left.totalCount ?? 0))
+    .slice(0, 6)
+    .map((row, index) => {
+      const method = endpointMethod(row);
+      return {
+        id: `${method ?? ""}:${row.operationName}:${index}`,
+        serviceName: row.serviceName,
+        operationName: row.operationName,
+        endpointName: row.httpRoute,
+        httpMethod: method ?? "",
+        requestCount: row.totalCount,
+        errorCount: row.errorCount,
+        avgLatency: row.p50Ms,
+        p95Latency: row.p95Ms,
+      };
+    });
+
+  const upstreamRows = buildDependencyRows(
+    dependenciesQuery.data?.edges ?? [],
+    serviceName,
+    "upstream"
   );
 
-  const errorTrendSeries = useMemo(
-    () => buildErrorTrendSeries(errorTrendQuery.data ?? []),
-    [errorTrendQuery.data]
-  );
-
-  const latencyTrendSeries = useMemo(
-    () => buildLatencyTrendSeries(latencyTrendQuery.data ?? []),
-    [latencyTrendQuery.data]
-  );
-
-  const endpointRows = useMemo(() => {
-    const results = endpointsQuery.data?.data?.results ?? [];
-    return [...results]
-      .sort((left, right) => Number(right.totalCount ?? 0) - Number(left.totalCount ?? 0))
-      .slice(0, 6)
-      .map((row, index) => {
-        const method = endpointMethod(row);
-        return {
-          id: `${method ?? ""}:${row.operationName}:${index}`,
-          serviceName: row.serviceName,
-          operationName: row.operationName,
-          endpointName: row.httpRoute,
-          httpMethod: method ?? "",
-          requestCount: row.totalCount,
-          errorCount: row.errorCount,
-          avgLatency: row.p50Ms,
-          p95Latency: row.p95Ms,
-        };
-      });
-  }, [endpointsQuery.data]);
-
-  const upstreamRows = useMemo(
-    () => buildDependencyRows(dependenciesQuery.data?.edges ?? [], serviceName, "upstream"),
-    [dependenciesQuery.data?.edges, serviceName]
-  );
-
-  const downstreamRows = useMemo(
-    () => buildDependencyRows(dependenciesQuery.data?.edges ?? [], serviceName, "downstream"),
-    [dependenciesQuery.data?.edges, serviceName]
+  const downstreamRows = buildDependencyRows(
+    dependenciesQuery.data?.edges ?? [],
+    serviceName,
+    "downstream"
   );
 
   const openTraces = (): void => {

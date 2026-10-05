@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { ChevronsLeft, ChevronsRight, LogOut, Settings } from "lucide-react";
-import { useMemo } from "react";
 import { toast } from "sonner";
 
 import { NAV_GROUPS, getDomainNavigationItems } from "@/app/registry/domainRegistry";
@@ -19,23 +18,14 @@ export default function Sidebar() {
   const sidebarCollapsed = useSidebarCollapsed();
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
 
-  const staticNavEntries = useMemo(
-    () =>
-      getDomainNavigationItems().map((entry) => ({
-        path: entry.path,
-        label: entry.label,
-        group: entry.group,
-        iconNode: <entry.icon size={18} />,
-      })),
-    []
-  );
+  const navEntries = getDomainNavigationItems().map((entry) => ({
+    path: entry.path,
+    label: entry.label,
+    group: entry.group,
+    iconNode: <entry.icon size={18} />,
+  }));
 
-  const navEntries = staticNavEntries;
-
-  const pinnedItems = useMemo(
-    () => navEntries.filter((entry) => entry.group === "pinned"),
-    [navEntries]
-  );
+  const pinnedItems = navEntries.filter((entry) => entry.group === "pinned");
 
   const getSelectedKey = () => {
     const pathname = location.pathname;

@@ -1,6 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronDown, ChevronRight, Copy } from "lucide-react";
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 
 interface Props {
   readonly data: Record<string, unknown> | unknown[];
@@ -98,7 +98,7 @@ function JsonTreeViewComponent({ data }: Props) {
 
   const flatNodes = useMemo(() => flattenTree(data, expandedIds), [data, expandedIds]);
 
-  const toggleExpand = useCallback((id: string) => {
+  const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -108,7 +108,7 @@ function JsonTreeViewComponent({ data }: Props) {
       }
       return next;
     });
-  }, []);
+  };
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -169,11 +169,11 @@ const RenderNode = memo(
     isExpanded,
     onToggle,
   }: { node: FlatNode; isExpanded: boolean; onToggle: () => void }) => {
-    const handleCopy = useCallback(() => {
+    const handleCopy = () => {
       void navigator.clipboard.writeText(
         typeof node.value === "string" ? node.value : JSON.stringify(node.value, null, 2)
       );
-    }, [node.value]);
+    };
 
     if (node.isExpandable) {
       const label = node.isArray ? `[${node.count}]` : `{${node.count}}`;

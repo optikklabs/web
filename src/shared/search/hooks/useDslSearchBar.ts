@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { SuggestionOption } from "../components/chrome/QuerySuggestions";
 import { dslContextAtCaret, matchingFields } from "../dsl/dslContext";
@@ -30,7 +30,7 @@ export function useDslSearchBar({ initial, scope, valueSuggestions }: Args) {
   const [activeIdx, setActiveIdx] = useState(-1);
   const knownFields = useMemo(() => knownFieldsForScope(scope), [scope]);
 
-  const parsed = useMemo(() => parseDsl(input, knownFields), [input, knownFields]);
+  const parsed = parseDsl(input, knownFields);
   const context = useMemo(
     () => dslContextAtCaret(input, caret, knownFields),
     [input, caret, knownFields]
@@ -53,23 +53,19 @@ export function useDslSearchBar({ initial, scope, valueSuggestions }: Args) {
       isSuggestableField(context.field, scope),
   });
 
-  const recents = useMemo(() => (scope ? getRecent(scope) : []), [scope]);
-  const templates = useMemo(() => quickTemplatesForScope(scope), [scope]);
-  const syntax = useMemo(() => syntaxExamplesForScope(scope), [scope]);
+  const recents = scope ? getRecent(scope) : [];
+  const templates = quickTemplatesForScope(scope);
+  const syntax = syntaxExamplesForScope(scope);
 
-  const suggestions = useMemo<readonly SuggestionOption[]>(
-    () =>
-      buildSuggestions({
-        context,
-        values: valueQuery.data ?? [],
-        localValues: localValueSuggestions,
-        knownFields,
-        recents,
-        templates,
-        syntax,
-      }),
-    [context, valueQuery.data, localValueSuggestions, knownFields, recents, templates, syntax]
-  );
+  const suggestions: readonly SuggestionOption[] = buildSuggestions({
+    context,
+    values: valueQuery.data ?? [],
+    localValues: localValueSuggestions,
+    knownFields,
+    recents,
+    templates,
+    syntax,
+  });
 
   const isLoading =
     context.kind === "value" && localValueSuggestions.length === 0 && valueQuery.isFetching;
@@ -80,52 +76,49 @@ export function useDslSearchBar({ initial, scope, valueSuggestions }: Args) {
     setActiveIdx(-1);
   };
 
-  const acceptSuggestion = useCallback(
-    (opt: SuggestionOption) => {
-      switch (opt.kind) {
-        case "recent":
-        case "template": {
-          setInput(opt.query);
-          setCaret(opt.query.length);
-          setActiveIdx(-1);
-          return;
-        }
-        case "bodyHint": {
-          const { head, tail } = splitAroundToken(input, context.tokenStart, caret);
-          const insert = `body:"${opt.token}" `;
-          const nextInput = `${head}${insert}${tail}`;
-          const nextCaret = head.length + insert.length;
-          setInput(nextInput);
-          setCaret(nextCaret);
-          setActiveIdx(-1);
-          return;
-        }
-        case "operator": {
-          const nextInput = applyOperator(input, context.field ?? "", opt.insert);
-          setInput(nextInput);
-          setCaret(nextInput.length);
-          setActiveIdx(-1);
-          return;
-        }
-        case "field":
-        case "value": {
-          const { head, tail } = splitAroundToken(input, context.tokenStart, caret);
-          const insert = renderInsert(context, opt.kind === "field" ? opt.insert : opt.value);
-          const nextInput = `${head}${insert}${tail}`;
-          const nextCaret = head.length + insert.length;
-          setInput(nextInput);
-          setCaret(nextCaret);
-          setActiveIdx(-1);
-          return;
-        }
+  const acceptSuggestion = (opt: SuggestionOption) => {
+    switch (opt.kind) {
+      case "recent":
+      case "template": {
+        setInput(opt.query);
+        setCaret(opt.query.length);
+        setActiveIdx(-1);
+        return;
       }
-    },
-    [input, caret, context]
-  );
+      case "bodyHint": {
+        const { head, tail } = splitAroundToken(input, context.tokenStart, caret);
+        const insert = `body:"${opt.token}" `;
+        const nextInput = `${head}${insert}${tail}`;
+        const nextCaret = head.length + insert.length;
+        setInput(nextInput);
+        setCaret(nextCaret);
+        setActiveIdx(-1);
+        return;
+      }
+      case "operator": {
+        const nextInput = applyOperator(input, context.field ?? "", opt.insert);
+        setInput(nextInput);
+        setCaret(nextInput.length);
+        setActiveIdx(-1);
+        return;
+      }
+      case "field":
+      case "value": {
+        const { head, tail } = splitAroundToken(input, context.tokenStart, caret);
+        const insert = renderInsert(context, opt.kind === "field" ? opt.insert : opt.value);
+        const nextInput = `${head}${insert}${tail}`;
+        const nextCaret = head.length + insert.length;
+        setInput(nextInput);
+        setCaret(nextCaret);
+        setActiveIdx(-1);
+        return;
+      }
+    }
+  };
 
-  const commit = useCallback(() => {
+  const commit = () => {
     if (scope) pushRecent(scope, input);
-  }, [scope, input]);
+  };
 
   return {
     input,

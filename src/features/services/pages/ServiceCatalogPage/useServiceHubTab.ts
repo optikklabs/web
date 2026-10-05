@@ -1,5 +1,4 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useCallback } from "react";
 
 const SERVICE_HUB_TABS = ["catalog", "map"] as const;
 
@@ -21,14 +20,11 @@ export function useServiceHubTab(): {
   const search = useSearch({ from: "/_app/services/" });
   const navigate = useNavigate();
   const tab = normalize(search.tab);
-  const setTab = useCallback(
-    (next: ServiceHubTab) => {
-      navigate({
-        to: "/services",
-        search: (prev) => ({ ...prev, tab: next === DEFAULT_TAB ? undefined : next }),
-      });
-    },
-    [navigate]
-  );
+  const setTab = (next: ServiceHubTab) => {
+    navigate({
+      to: "/services",
+      search: (prev) => ({ ...prev, tab: next === DEFAULT_TAB ? undefined : next }),
+    });
+  };
   return { tab, setTab };
 }

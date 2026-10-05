@@ -1,5 +1,4 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useCallback } from "react";
 
 export const SERVICE_TAB_IDS = ["overview", "errors", "traces", "logs", "dependencies"] as const;
 
@@ -21,16 +20,13 @@ export function useActiveServiceTab(): {
   const search = useSearch({ from: "/_app/services/$serviceName" });
   const navigate = useNavigate();
   const tab = normalizeTab(search.tab);
-  const setTab = useCallback(
-    (next: ServiceTabId) => {
-      navigate({
-        search: ((prev: Record<string, unknown>) => ({
-          ...prev,
-          tab: next === DEFAULT_TAB ? undefined : next,
-        })) as never,
-      });
-    },
-    [navigate]
-  );
+  const setTab = (next: ServiceTabId) => {
+    navigate({
+      search: ((prev: Record<string, unknown>) => ({
+        ...prev,
+        tab: next === DEFAULT_TAB ? undefined : next,
+      })) as never,
+    });
+  };
   return { tab, setTab };
 }

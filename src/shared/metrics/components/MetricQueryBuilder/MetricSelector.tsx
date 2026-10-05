@@ -1,5 +1,5 @@
 import { ChevronDown, Search } from "lucide-react";
-import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useRef, useState } from "react";
 
 import { Popover } from "@shared/components/primitives/ui/popover";
 import { cn } from "@shared/lib/utils";
@@ -33,25 +33,22 @@ export function MetricSelector({ value, onChange }: MetricSelectorProps) {
   const { data } = useMetricNames(deferredSearch);
   const metrics = data?.metrics ?? [];
 
-  const grouped = useMemo(() => groupByPrefix(metrics), [metrics]);
+  const grouped = groupByPrefix(metrics);
 
-  const handleSelect = useCallback(
-    (name: string) => {
-      onChange(name);
-      setOpen(false);
-      setSearch("");
-    },
-    [onChange]
-  );
+  const handleSelect = (name: string) => {
+    onChange(name);
+    setOpen(false);
+    setSearch("");
+  };
 
-  const handleOpenChange = useCallback((next: boolean) => {
+  const handleOpenChange = (next: boolean) => {
     setOpen(next);
     if (next) {
       requestAnimationFrame(() => inputRef.current?.focus());
     } else {
       setSearch("");
     }
-  }, []);
+  };
 
   const displayLabel = value || "Select metric…";
 

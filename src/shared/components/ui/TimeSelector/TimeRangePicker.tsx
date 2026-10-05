@@ -56,30 +56,25 @@ export default function TimeRangePicker() {
   useClickOutside(wrapperRef, closeDropdown);
   useEscapeKey(closeDropdown, open);
 
-  const handleToggle = useCallback(() => {
+  const handleToggle = () => {
     if (!open) {
       setActiveTab(timeRange.kind === "absolute" ? "absolute" : "relative");
     }
     setOpen((v) => !v);
-  }, [open, timeRange]);
+  };
 
-  const selectRange = useCallback(
-    (range: TimeRange) => {
-      setTimeRange(range);
-      setOpen(false);
-    },
-    [setTimeRange]
-  );
+  const selectRange = (range: TimeRange) => {
+    setTimeRange(range);
+    setOpen(false);
+  };
 
   const displayLabel =
     timeRange.kind === "absolute"
       ? `${fmtDatetime(new Date(timeRange.startMs))} to ${fmtDatetime(new Date(timeRange.endMs))}`
       : DISPLAY_MAP[timeRange.preset] || timeRange.label || "Last 30 minutes";
 
-  const isActivePreset = useCallback(
-    (preset: string): boolean => timeRange.kind === "relative" && timeRange.preset === preset,
-    [timeRange]
-  );
+  const isActivePreset = (preset: string): boolean =>
+    timeRange.kind === "relative" && timeRange.preset === preset;
 
   const fromExpr =
     timeRange.kind === "relative"

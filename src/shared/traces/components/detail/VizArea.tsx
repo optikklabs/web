@@ -6,7 +6,7 @@ import {
   topologyEdgeTypes,
   topologyNodeTypes,
 } from "@shared/components/ui/charts/ServiceTopologyGraph/buildGraph";
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import type { SpanEvent, VisualizationTab } from "../../types/detail";
 import { ErrorsTab } from "../errors/ErrorsTab";
 import { RawJsonTab } from "../json/RawJsonTab";
@@ -28,10 +28,7 @@ interface Props {
 }
 
 function VizAreaComponent(props: Props) {
-  const graph = useMemo(
-    () => (props.serviceMap ? buildTopologyGraph({ data: props.serviceMap }) : null),
-    [props.serviceMap]
-  );
+  const graph = props.serviceMap ? buildTopologyGraph({ data: props.serviceMap }) : null;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">

@@ -1,74 +1,72 @@
-import { memo, useMemo } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
 
+import DataTable from "@shared/components/ui/data-display/DataTable";
+import { DrawerSection } from "@shared/components/ui/overlay/detail-drawer/DrawerSection";
 import { formatDuration, formatNumber, formatPercentage } from "@shared/utils/formatters";
 
-import { DrawerSection } from "@shared/components/ui/overlay/detail-drawer/DrawerSection";
-
-import { CompactTable } from "../CompactTable";
-import type { Column, EndpointRow } from "../types";
+import type { EndpointRow } from "../types";
 import { formatEndpointLabel, formatEndpointMeta } from "../utils";
+
+const ENDPOINT_COLUMNS: ColumnDef<EndpointRow>[] = [
+  {
+    header: "Method",
+    accessorKey: "httpMethod",
+    size: 80,
+    cell: ({ row: { original: row } }) => (
+      <span className="font-medium text-foreground-secondary">{row.httpMethod || "—"}</span>
+    ),
+  },
+  {
+    header: "Endpoint Detail",
+    id: "operation",
+    cell: ({ row: { original: row } }) => {
+      const meta = formatEndpointMeta(row);
+      return (
+        <div className="flex flex-col gap-0.5">
+          <span className="break-all">{formatEndpointLabel(row)}</span>
+          {meta ? <span className="text-[11px] text-foreground-muted">{meta}</span> : null}
+        </div>
+      );
+    },
+  },
+  {
+    header: "Requests",
+    accessorKey: "requestCount",
+    size: 90,
+    meta: { align: "right" },
+    cell: ({ row: { original: row } }) => formatNumber(row.requestCount),
+  },
+  {
+    header: "Err %",
+    id: "errorRate",
+    size: 80,
+    meta: { align: "right" },
+    cell: ({ row: { original: row } }) =>
+      formatPercentage(row.requestCount > 0 ? (row.errorCount * 100) / row.requestCount : 0),
+  },
+  {
+    header: "Avg",
+    accessorKey: "avgLatency",
+    size: 80,
+    meta: { align: "right" },
+    cell: ({ row: { original: row } }) => formatDuration(row.avgLatency),
+  },
+  {
+    header: "p95",
+    accessorKey: "p95Latency",
+    size: 80,
+    meta: { align: "right" },
+    cell: ({ row: { original: row } }) => formatDuration(row.p95Latency),
+  },
+];
 
 type Props = {
   isError: boolean;
   isLoading: boolean;
-  endpointRows: (EndpointRow & { id: string })[];
+  endpointRows: EndpointRow[];
 };
 
-function ServiceDrawerEndpointsSectionComponent({ isError, isLoading, endpointRows }: Props) {
-  const columns = useMemo<Column<EndpointRow & { id: string }>[]>(
-    () => [
-      {
-        key: "method",
-        label: "Method",
-        render: (row) => (
-          <span className="font-medium text-foreground-secondary">{row.httpMethod || "—"}</span>
-        ),
-      },
-      {
-        key: "operation",
-        label: "Endpoint Detail",
-        render: (row) => (
-          <div className="flex flex-col gap-0.5">
-            <span className="break-all">{formatEndpointLabel(row)}</span>
-            {formatEndpointMeta(row) ? (
-              <span className="text-[11px] text-foreground-muted">{formatEndpointMeta(row)}</span>
-            ) : null}
-          </div>
-        ),
-      },
-      {
-        key: "requests",
-        label: "Requests",
-        align: "right",
-        render: (row) => formatNumber(row.requestCount),
-      },
-      {
-        key: "errors",
-        label: "Err %",
-        align: "right",
-        render: (row) =>
-          formatPercentage(
-            Number(row.requestCount ?? 0) > 0
-              ? (Number(row.errorCount ?? 0) * 100) / Number(row.requestCount ?? 0)
-              : 0
-          ),
-      },
-      {
-        key: "avg",
-        label: "Avg",
-        align: "right",
-        render: (row) => formatDuration(row.avgLatency),
-      },
-      {
-        key: "latency",
-        label: "p95",
-        align: "right",
-        render: (row) => formatDuration(row.p95Latency),
-      },
-    ],
-    []
-  );
-
+export function ServiceDrawerEndpointsSection({ isError, isLoading, endpointRows }: Props) {
   return (
     <DrawerSection
       title="Top Endpoints"
@@ -76,17 +74,16 @@ function ServiceDrawerEndpointsSectionComponent({ isError, isLoading, endpointRo
     >
       {isError ? (
         <div className="text-[12px] text-foreground-muted">Endpoint breakdown is unavailable.</div>
-      ) : isLoading ? (
-        <div className="text-[12px] text-foreground-muted">Loading endpoints…</div>
       ) : (
-        <CompactTable<EndpointRow & { id: string }>
-          rows={endpointRows}
-          emptyText="No endpoint activity for this service."
-          columns={columns}
+        <DataTable
+          data={{ columns: ENDPOINT_COLUMNS, rows: endpointRows, loading: isLoading }}
+          config={{
+            emptyText: "No endpoint activity for this service.",
+            maxRows: 8,
+            rowHeight: 52,
+          }}
         />
       )}
     </DrawerSection>
   );
 }
-
-export const ServiceDrawerEndpointsSection = memo(ServiceDrawerEndpointsSectionComponent);

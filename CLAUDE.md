@@ -1,7 +1,7 @@
 # CLAUDE.md — web
 
-Workspace-wide standards live in `../CLAUDE.md` and apply in full here.
-This file covers only what is specific to web.
+Conventions for the web repo. The query and ingest services are separate
+repositories; this file covers only web.
 
 ## What This Repo Owns
 

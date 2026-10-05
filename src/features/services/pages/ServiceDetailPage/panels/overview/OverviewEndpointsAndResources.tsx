@@ -1,5 +1,5 @@
 import { endpointMethod } from "@shared/utils/endpointMethod";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useServiceHosts } from "../../hooks/useServiceHosts";
 import { useTopEndpoints } from "../../hooks/useTopEndpoints";
 import { type TopOpRow, TopOpsTable } from "./TopOpsTable";
@@ -36,22 +36,13 @@ export function OverviewEndpointsAndResources({ serviceName }: { serviceName: st
     }
   };
 
-  // Compute maximum resource utilization across the fleet of hosts/pods
-  const resourceMetrics = useMemo(() => {
-    const list = hostsQ.data ?? [];
-    if (list.length === 0) {
-      return { maxCpu: 0, maxMem: 0, totalPods: 0 };
-    }
-
-    const cpuPcts = list.map((h) => h.cpu);
-    const memPcts = list.map((h) => h.mem);
-
-    return {
-      maxCpu: Math.max(...cpuPcts),
-      maxMem: Math.max(...memPcts),
-      totalPods: list.length,
-    };
-  }, [hostsQ.data]);
+  // Peak resource utilization across the service's hosts/pods.
+  const hosts = hostsQ.data ?? [];
+  const resourceMetrics = {
+    maxCpu: Math.max(0, ...hosts.map((h) => h.cpu)),
+    maxMem: Math.max(0, ...hosts.map((h) => h.mem)),
+    totalPods: hosts.length,
+  };
 
   if (loading) {
     return (

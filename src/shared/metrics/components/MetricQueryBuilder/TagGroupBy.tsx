@@ -1,5 +1,5 @@
 import { Plus, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Popover } from "@shared/components/primitives/ui/popover";
 import { Select } from "@shared/components/primitives/ui/select";
@@ -25,19 +25,16 @@ export function TagGroupBy({ metricName, groupBy, onChange }: TagGroupByProps) {
     return tags.filter((t) => !used.has(t.key)).map((t) => ({ label: t.key, value: t.key }));
   }, [tags, groupBy]);
 
-  const handleAdd = useCallback(() => {
+  const handleAdd = () => {
     if (!selectedKey) return;
     onChange([...groupBy, selectedKey]);
     setSelectedKey("");
     setAddOpen(false);
-  }, [selectedKey, groupBy, onChange]);
+  };
 
-  const handleRemove = useCallback(
-    (key: string) => {
-      onChange(groupBy.filter((k) => k !== key));
-    },
-    [groupBy, onChange]
-  );
+  const handleRemove = (key: string) => {
+    onChange(groupBy.filter((k) => k !== key));
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-1">

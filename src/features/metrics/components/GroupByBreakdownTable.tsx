@@ -32,7 +32,7 @@ function lastWindow(values: ReadonlyArray<number | null>): number[] {
 /** Per-series breakdown table. One row per group-by combination, with min/avg/
  * p95/p99/max computed over each series' own value array across the window. */
 export function GroupByBreakdownTable({ primaryQuery, result }: GroupByBreakdownTableProps) {
-  const tagKeys = useMemo(() => collectTagKeys(result), [result]);
+  const tagKeys = collectTagKeys(result);
 
   const rows = useMemo(() => {
     if (!result) return [];

@@ -1,7 +1,14 @@
 import { KpiCard, type KpiTone } from "@shared/components/ui/cards/StatCard";
 import { fmtMs, fmtPct, formatNumber } from "@shared/utils/formatters";
+import { type HealthVariant, healthVariantForErrorRate } from "@shared/utils/statusUtils";
 
 import type { PodOverview } from "../../api/podDetailApi";
+
+const ERROR_RATE_TONE: Record<HealthVariant, KpiTone> = {
+  success: "ok",
+  warning: "warn",
+  error: "err",
+};
 
 interface ContainerDetailKpiCardsProps {
   readonly overview: PodOverview | null;
@@ -29,8 +36,7 @@ function buildTiles(overview: PodOverview | null): Tile[] {
       { label: "p95 latency", ...NO_TRAFFIC },
     ];
   }
-  const errTone: KpiTone =
-    overview.errorRate >= 5 ? "err" : overview.errorRate >= 1 ? "warn" : "ok";
+  const errTone = ERROR_RATE_TONE[healthVariantForErrorRate(overview.errorRate)];
   return [
     { label: "Requests", value: formatNumber(overview.requestCount), tone: "ok" },
     { label: "Error rate", value: fmtPct(overview.errorRate), tone: errTone },

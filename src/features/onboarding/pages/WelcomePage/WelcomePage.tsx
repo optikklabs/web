@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowRight, KeyRound } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { rotateApiKey } from "@shared/api/tenantApiKey";
@@ -22,10 +22,7 @@ export function WelcomePage() {
   const navigate = useNavigate();
   const [apiKey, setApiKey] = useState<string | null>(() => takeSignupApiKey());
   const endpoints = useIngestionEndpoints();
-  const snippets = useMemo(
-    () => (endpoints ? buildQuickstartSnippets(endpoints, apiKey) : []),
-    [endpoints, apiKey]
-  );
+  const snippets = endpoints ? buildQuickstartSnippets(endpoints, apiKey) : [];
   const [activeTab, setActiveTab] = useState("env");
 
   const active = snippets.find((s) => s.id === activeTab) ?? snippets[0];

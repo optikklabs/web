@@ -1,13 +1,13 @@
 import { Share2 } from "lucide-react";
-import { memo, useCallback } from "react";
+import { memo } from "react";
 import { toast } from "sonner";
 
 /** Action buttons: Share (copy link). */
 function LogsActionsComponent() {
-  const onShare = useCallback(() => {
+  const onShare = () => {
     void navigator.clipboard.writeText(window.location.href);
     toast.success("Link copied to clipboard", { duration: 2000 });
-  }, []);
+  };
 
   return (
     <button

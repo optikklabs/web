@@ -1,4 +1,4 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 
 interface Props {
   readonly text: string;
@@ -13,7 +13,7 @@ interface Props {
  * unchanged if `match` is empty or absent.
  */
 export const HighlightedText = memo(function HighlightedText({ text, match, className }: Props) {
-  const parts = useMemo(() => splitOnMatch(text, match), [text, match]);
+  const parts = splitOnMatch(text, match);
   if (!match || parts.length === 1) {
     return <span className={className}>{text}</span>;
   }

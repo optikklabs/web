@@ -1,5 +1,5 @@
-import { CHART_COLORS } from "@config/constants";
 import type { ObservabilityChartSeries } from "@shared/components/ui/charts/ObservabilityChart";
+import { getChartColor } from "@shared/utils/charting";
 
 import type {
   QueryPerformanceResponse,
@@ -12,8 +12,7 @@ export function queryDisplayLabel(query: { queryHash: string; queryLabel: string
 }
 
 function colorForQuery(queryHash: string): string {
-  const hashValue = Number.parseInt(queryHash.slice(-8), 16);
-  return CHART_COLORS[hashValue % CHART_COLORS.length];
+  return getChartColor(Number.parseInt(queryHash.slice(-8), 16));
 }
 
 function visibleSeries(

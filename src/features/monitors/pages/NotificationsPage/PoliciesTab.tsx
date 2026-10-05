@@ -31,7 +31,6 @@ function formFromPolicy(p: Policy): PolicyForm {
 
 import { getErrorMessage } from "@shared/utils/errorUtils";
 
-
 function parseActions(json: string): unknown[] {
   const trimmed = json.trim();
   if (trimmed === "") return [];

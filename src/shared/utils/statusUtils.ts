@@ -1,15 +1,15 @@
+import { SERVICE_HEALTH_THRESHOLDS } from "@shared/constants/healthThresholds";
+
 export type HealthVariant = "success" | "warning" | "error";
 
 /**
- * Returns health status variant ("success", "warning", "error") based on error rate percentage thresholds.
- * Thresholds: >= 5% = error, >= 1% = warning, < 1% = success.
+ * Returns health status variant ("success", "warning", "error") for an error-rate
+ * percentage against SERVICE_HEALTH_THRESHOLDS (boundaries inclusive).
  */
-export function healthVariantForErrorRate(
-  errorRate: number | undefined
-): HealthVariant {
+export function healthVariantForErrorRate(errorRate: number | undefined): HealthVariant {
   if (errorRate === undefined || errorRate === null) return "success";
-  if (errorRate >= 5) return "error";
-  if (errorRate >= 1) return "warning";
+  if (errorRate >= SERVICE_HEALTH_THRESHOLDS.unhealthy) return "error";
+  if (errorRate >= SERVICE_HEALTH_THRESHOLDS.degraded) return "warning";
   return "success";
 }
 

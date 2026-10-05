@@ -1,24 +1,23 @@
-// Request & validation errors (4xx)
+// Codes the query API returns in `error.code` (query internal/shared/errorcode
+// plus the tenant middleware's MISSING_TENANT / FORBIDDEN_TENANT).
 const BAD_REQUEST = "BAD_REQUEST" as const;
 const VALIDATION_ERROR = "VALIDATION_ERROR" as const;
 const UNAUTHORIZED = "UNAUTHORIZED" as const;
 const FORBIDDEN = "FORBIDDEN" as const;
 const NOT_FOUND = "NOT_FOUND" as const;
 const CONFLICT = "CONFLICT" as const;
-const PAYLOAD_TOO_LARGE = "PAYLOAD_TOO_LARGE" as const;
+const RATE_LIMITED = "RATE_LIMITED" as const;
+const TRIAL_EXPIRED = "TRIAL_EXPIRED" as const;
+const QUERY_BUDGET_EXCEEDED = "QUERY_BUDGET_EXCEEDED" as const;
+const MISSING_TENANT = "MISSING_TENANT" as const;
+const FORBIDDEN_TENANT = "FORBIDDEN_TENANT" as const;
 
 const INTERNAL_ERROR = "INTERNAL_ERROR" as const;
 const QUERY_FAILED = "QUERY_FAILED" as const;
-const QUERY_TIMEOUT = "QUERY_TIMEOUT" as const;
-const CONNECTION_ERROR = "CONNECTION_ERROR" as const;
 const SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE" as const;
-const CIRCUIT_OPEN = "CIRCUIT_OPEN" as const;
 
-const NO_DATA = "NO_DATA" as const;
-const PARTIAL_DATA = "PARTIAL_DATA" as const;
-
+// Client-side codes for failures that never produced an API error body.
 export const NETWORK_ERROR = "NETWORK_ERROR" as const;
-const REQUEST_CANCELLED = "REQUEST_CANCELLED" as const;
 export const UNKNOWN_ERROR = "UNKNOWN_ERROR" as const;
 
 export type ErrorCode =
@@ -28,17 +27,15 @@ export type ErrorCode =
   | typeof FORBIDDEN
   | typeof NOT_FOUND
   | typeof CONFLICT
-  | typeof PAYLOAD_TOO_LARGE
+  | typeof RATE_LIMITED
+  | typeof TRIAL_EXPIRED
+  | typeof QUERY_BUDGET_EXCEEDED
+  | typeof MISSING_TENANT
+  | typeof FORBIDDEN_TENANT
   | typeof INTERNAL_ERROR
   | typeof QUERY_FAILED
-  | typeof QUERY_TIMEOUT
-  | typeof CONNECTION_ERROR
   | typeof SERVICE_UNAVAILABLE
-  | typeof CIRCUIT_OPEN
-  | typeof NO_DATA
-  | typeof PARTIAL_DATA
   | typeof NETWORK_ERROR
-  | typeof REQUEST_CANCELLED
   | typeof UNKNOWN_ERROR;
 
 export const ERROR_CODE_LABELS: Record<ErrorCode, string> = {
@@ -48,16 +45,14 @@ export const ERROR_CODE_LABELS: Record<ErrorCode, string> = {
   FORBIDDEN: "Access denied",
   NOT_FOUND: "Not found",
   CONFLICT: "Resource conflict",
-  PAYLOAD_TOO_LARGE: "Payload too large",
+  RATE_LIMITED: "Too many requests",
+  TRIAL_EXPIRED: "Trial expired",
+  QUERY_BUDGET_EXCEEDED: "Query too expensive",
+  MISSING_TENANT: "No tenant selected",
+  FORBIDDEN_TENANT: "Tenant access denied",
   INTERNAL_ERROR: "Server error",
   QUERY_FAILED: "Query failed",
-  QUERY_TIMEOUT: "Query timed out",
-  CONNECTION_ERROR: "Database unreachable",
   SERVICE_UNAVAILABLE: "Service unavailable",
-  CIRCUIT_OPEN: "Service temporarily disabled",
-  NO_DATA: "No data available",
-  PARTIAL_DATA: "Partial data loaded",
   NETWORK_ERROR: "Network error",
-  REQUEST_CANCELLED: "Request cancelled",
   UNKNOWN_ERROR: "An unexpected error occurred",
 };

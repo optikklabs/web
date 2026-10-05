@@ -1,5 +1,6 @@
 import type { KafkaSummary } from "@/features/saturation/api/kafkaExplorerSchemas";
 import type { KafkaTopology } from "@/features/saturation/api/kafkaTopologySchemas";
+import { type HealthVariant, healthVariantForErrorRate } from "@shared/utils/statusUtils";
 
 export type Health = "healthy" | "warning" | "critical";
 
@@ -78,10 +79,14 @@ export function resolveKafkaService(
   return services[0] ?? null;
 }
 
+const HEALTH_BY_VARIANT: Record<HealthVariant, Health> = {
+  success: "healthy",
+  warning: "warning",
+  error: "critical",
+};
+
 export function healthFromError(errorRate: number): Health {
-  if (errorRate >= 5) return "critical";
-  if (errorRate >= 1) return "warning";
-  return "healthy";
+  return HEALTH_BY_VARIANT[healthVariantForErrorRate(errorRate)];
 }
 
 export function formatRate(value: number): string {
@@ -89,7 +94,6 @@ export function formatRate(value: number): string {
   if (value >= 1_000) return `${(value / 1_000).toFixed(value >= 10_000 ? 0 : 1)}k`;
   return Math.round(value).toLocaleString();
 }
-
 
 export function buildKafkaPageModel(topo: KafkaTopology, service: string): KafkaPageModel {
   const topicsByName = new Map(topo.topics.map((topic) => [topic.topic, topic]));

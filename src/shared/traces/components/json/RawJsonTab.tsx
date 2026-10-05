@@ -1,6 +1,6 @@
 import type { TraceRecord } from "@shared/api/traces/schemas";
 import { Copy, Download } from "lucide-react";
-import { memo, useCallback, useMemo } from "react";
+import { memo } from "react";
 
 interface Props {
   readonly traceId: string;
@@ -11,9 +11,9 @@ const btnSmGhost =
   "px-2.5 py-[5px] text-[11.5px] rounded-[5px] bg-transparent text-foreground-muted border border-transparent cursor-pointer hover:bg-muted hover:text-foreground";
 
 function RawJsonTabComponent({ traceId, spans }: Props) {
-  const json = useMemo(() => JSON.stringify({ traceId, spans }, null, 2), [traceId, spans]);
+  const json = JSON.stringify({ traceId, spans }, null, 2);
 
-  const onDownload = useCallback(() => {
+  const onDownload = () => {
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -23,11 +23,11 @@ function RawJsonTabComponent({ traceId, spans }: Props) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [json, traceId]);
+  };
 
-  const onCopy = useCallback(() => {
+  const onCopy = () => {
     void navigator.clipboard?.writeText(json);
-  }, [json]);
+  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2 p-4">

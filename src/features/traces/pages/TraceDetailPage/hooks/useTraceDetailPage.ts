@@ -38,32 +38,29 @@ export function useTraceDetailPage() {
     onSetViz: setVisualizationTab,
   });
 
-  const layoutProps: Omit<TraceDetailLayoutProps, "traceId" | "errorCount"> = useMemo(
-    () => ({
-      activeTab: state.activeTab,
-      onActiveTabChange: state.setActiveTab,
-      spans: state.data.spans,
-      selectedSpanId: state.data.selectedSpanId,
-      selectedSpan: state.data.selectedSpan ?? null,
-      onSpanClick: actions.handleSpanClick,
-      onCloseSpan: actions.closeSpan,
-      criticalPathSpanIds: state.data.criticalPathSpanIds,
-      errorPathSpanIds: state.data.errorPathSpanIds,
-      serviceMap: state.serviceMap.data ?? null,
-      errorGroups: state.data.errorGroups,
-      spanAttributes: state.data.spanAttributes,
-      spanAttributesLoading: state.data.spanAttributesLoading,
-      spanEvents: state.data.spanEvents,
-      traceLogs: state.data.traceLogs,
-      relatedTraces: state.data.relatedTraces,
-      relatedTracesRequested: state.data.relatedTracesRequested,
-      relatedTracesLoading: state.data.relatedTracesLoading,
-      onLoadRelatedTraces: state.data.loadRelatedTraces,
-      onAddFilter: actions.addFilter,
-      onOpenSpanInLogs: actions.openInLogs,
-    }),
-    [state, actions]
-  );
+  const layoutProps: Omit<TraceDetailLayoutProps, "traceId" | "errorCount"> = {
+    activeTab: state.activeTab,
+    onActiveTabChange: state.setActiveTab,
+    spans: state.data.spans,
+    selectedSpanId: state.data.selectedSpanId,
+    selectedSpan: state.data.selectedSpan ?? null,
+    onSpanClick: actions.handleSpanClick,
+    onCloseSpan: actions.closeSpan,
+    criticalPathSpanIds: state.data.criticalPathSpanIds,
+    errorPathSpanIds: state.data.errorPathSpanIds,
+    serviceMap: state.serviceMap.data ?? null,
+    errorGroups: state.data.errorGroups,
+    spanAttributes: state.data.spanAttributes,
+    spanAttributesLoading: state.data.spanAttributesLoading,
+    spanEvents: state.data.spanEvents,
+    traceLogs: state.data.traceLogs,
+    relatedTraces: state.data.relatedTraces,
+    relatedTracesRequested: state.data.relatedTracesRequested,
+    relatedTracesLoading: state.data.relatedTracesLoading,
+    onLoadRelatedTraces: state.data.loadRelatedTraces,
+    onAddFilter: actions.addFilter,
+    onOpenSpanInLogs: actions.openInLogs,
+  };
 
   return {
     traceIdParam: state.traceIdParam,

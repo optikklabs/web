@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Bell, Download, Plus } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@shared/components/primitives/ui/button";
@@ -34,14 +34,14 @@ export function MetricsHeaderActions({
 }: MetricsHeaderActionsProps) {
   const [saveOpen, setSaveOpen] = useState(false);
 
-  const handleExport = useCallback(() => {
+  const handleExport = () => {
     const csv = buildBreakdownCsv(primaryResult);
     if (!csv) {
       toast.error("Nothing to export yet");
       return;
     }
     downloadCsv(`${primaryQuery?.metricName || "metrics"}-breakdown.csv`, csv);
-  }, [primaryQuery, primaryResult]);
+  };
 
   const monitorSearch = {
     from: "metrics" as const,

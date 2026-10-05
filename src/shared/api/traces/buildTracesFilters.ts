@@ -33,7 +33,6 @@ interface TracesFiltersBody {
   maxDurationNs?: number;
   hasError?: boolean;
   search?: string;
-  searchMode?: string;
   attributes?: Array<{ key: string; op?: string; value: string }>;
 }
 

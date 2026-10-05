@@ -34,28 +34,22 @@ function ExplorerSearchBarDslComponent(props: Props, ref: React.Ref<HTMLInputEle
   });
   useSyncSeedOnExternalChange(seed, s.input, s.setInput, s.setCaret, innerRef);
   const activeOpt = s.activeIdx >= 0 ? s.suggestions[s.activeIdx] : undefined;
-  const onSelect = useCallback(
-    (opt: SuggestionOption) => {
-      s.acceptSuggestion(opt);
-      setShowPopover(true);
-      innerRef.current?.focus();
-    },
-    [s]
-  );
-  const onKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      handleKeyDown(
-        e,
-        showPopover,
-        setShowPopover,
-        s,
-        props.onApply,
-        activeOpt,
-        props.disableBareFreeTextFallback
-      );
-    },
-    [showPopover, s, props.onApply, activeOpt, props.disableBareFreeTextFallback]
-  );
+  const onSelect = (opt: SuggestionOption) => {
+    s.acceptSuggestion(opt);
+    setShowPopover(true);
+    innerRef.current?.focus();
+  };
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    handleKeyDown(
+      e,
+      showPopover,
+      setShowPopover,
+      s,
+      props.onApply,
+      activeOpt,
+      props.disableBareFreeTextFallback
+    );
+  };
   return (
     <DslBarLayout
       inputRef={mergedRef}

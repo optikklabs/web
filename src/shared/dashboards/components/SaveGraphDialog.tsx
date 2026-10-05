@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { FolderPlus, LayoutDashboard } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@shared/components/primitives/ui/button";
@@ -45,7 +45,7 @@ export function SaveGraphDialog({
   const [newPageName, setNewPageName] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     setSaving(true);
     try {
       let targetPageId: number;
@@ -86,7 +86,7 @@ export function SaveGraphDialog({
     } finally {
       setSaving(false);
     }
-  }, [selectedPageId, newPageName, queries, formulas, step, spaceAgg, onClose, navigate]);
+  };
 
   return (
     <Modal

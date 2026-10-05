@@ -59,4 +59,3 @@ export function useWizardSubmit(editId: number | undefined) {
 
   return { saving, error, save, testing, testResult, testError, test };
 }
-

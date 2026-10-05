@@ -5,7 +5,7 @@ import { useTimeRangeURL } from "@shared/hooks/useTimeRangeURL";
 import { isRelativeRange, resolveTimeRangeBounds, timeRangeDurationMs } from "@shared/types";
 import { formatRelativeTime } from "@shared/utils/formatters";
 import { ChevronDown, ChevronLeft, ChevronRight, Moon, RefreshCw, Sun } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useVisibilityInterval } from "./useVisibilityInterval";
 
 import { useAppStore, useLastRefreshAt, useTheme } from "@app/store/appStore";
@@ -36,36 +36,33 @@ export default function Header() {
     triggerRefresh();
   };
 
-  const toggleTheme = useCallback(() => {
+  const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
-  }, [theme, setTheme]);
+  };
 
-  const shiftTimeRange = useCallback(
-    (direction: "back" | "forward") => {
-      const durationMs = timeRangeDurationMs(timeRange);
-      const shiftMs = Math.round(durationMs / 2);
-      const { startTime, endTime } = resolveTimeRangeBounds(timeRange);
-      const now = Date.now();
+  const shiftTimeRange = (direction: "back" | "forward") => {
+    const durationMs = timeRangeDurationMs(timeRange);
+    const shiftMs = Math.round(durationMs / 2);
+    const { startTime, endTime } = resolveTimeRangeBounds(timeRange);
+    const now = Date.now();
 
-      let newStart: number;
-      let newEnd: number;
-      if (direction === "back") {
-        newStart = startTime - shiftMs;
-        newEnd = endTime - shiftMs;
-      } else {
-        newStart = startTime + shiftMs;
-        newEnd = Math.min(endTime + shiftMs, now);
+    let newStart: number;
+    let newEnd: number;
+    if (direction === "back") {
+      newStart = startTime - shiftMs;
+      newEnd = endTime - shiftMs;
+    } else {
+      newStart = startTime + shiftMs;
+      newEnd = Math.min(endTime + shiftMs, now);
 
-        if (newStart >= now) {
-          newStart = now - durationMs;
-          newEnd = now;
-        }
+      if (newStart >= now) {
+        newStart = now - durationMs;
+        newEnd = now;
       }
-      setCustomTimeRange(newStart, newEnd);
-    },
-    [timeRange, setCustomTimeRange]
-  );
+    }
+    setCustomTimeRange(newStart, newEnd);
+  };
 
   useEffect(() => {
     if (!intervalPickerOpen) return;

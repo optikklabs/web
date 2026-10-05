@@ -47,49 +47,34 @@ export function useExplorerState(): ExplorerStateApi {
     [navigate]
   );
 
-  const setFilters = useCallback(
-    (next: readonly ExplorerFilter[]) => {
-      patchSearch({ filters: next.length > 0 ? encodeFilters(next) : undefined });
-    },
-    [patchSearch]
-  );
-  const addFilter = useCallback(
-    (filter: ExplorerFilter) => {
-      setFilters([...filters, filter]);
-    },
-    [filters, setFilters]
-  );
-  const removeFilter = useCallback(
-    (filter: ExplorerFilter) => {
-      setFilters(
-        filters.filter(
-          (f) => f.field !== filter.field || f.op !== filter.op || f.value !== filter.value
-        )
-      );
-    },
-    [filters, setFilters]
-  );
-  const setMode = useCallback(
-    (next: ExplorerMode) =>
-      patchSearch({ mode: (next as string) === "analytics" ? "analytics" : undefined }),
-    [patchSearch]
-  );
+  const setFilters = (next: readonly ExplorerFilter[]) => {
+    patchSearch({ filters: next.length > 0 ? encodeFilters(next) : undefined });
+  };
+  const addFilter = (filter: ExplorerFilter) => {
+    setFilters([...filters, filter]);
+  };
+  const removeFilter = (filter: ExplorerFilter) => {
+    setFilters(
+      filters.filter(
+        (f) => f.field !== filter.field || f.op !== filter.op || f.value !== filter.value
+      )
+    );
+  };
+  const setMode = (next: ExplorerMode) =>
+    patchSearch({ mode: (next as string) === "analytics" ? "analytics" : undefined });
   const setCursor = useCallback(
     (next: string | null) => patchSearch({ cursor: next ?? undefined }),
     [patchSearch]
   );
-  const setDetail = useCallback(
-    (next: string | null) => patchSearch({ detail: next ?? undefined }),
-    [patchSearch]
-  );
-  const clearAll = useCallback(() => {
+  const setDetail = (next: string | null) => patchSearch({ detail: next ?? undefined });
+  const clearAll = () => {
     patchSearch({
       filters: undefined,
       mode: undefined,
       cursor: undefined,
       detail: undefined,
     });
-  }, [patchSearch]);
+  };
 
   return {
     filters,

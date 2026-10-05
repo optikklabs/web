@@ -1,5 +1,4 @@
 import { ChevronRight } from "lucide-react";
-import { useMemo } from "react";
 
 import SparklineChart from "@shared/components/ui/charts/micro/SparklineChart";
 import { PageSurface } from "@shared/components/ui/layout/PageShell";
@@ -32,11 +31,9 @@ export function RecentMetricsPanel({
   const recentMetrics = useMetricsStore((s) => s.recentMetrics);
   const { data } = useMetricNames("");
 
-  const metaByName = useMemo(() => {
-    const map = new Map<string, MetricNameEntry>();
-    for (const entry of data?.metrics ?? []) map.set(entry.name, entry);
-    return map;
-  }, [data]);
+  const metaByName = new Map<string, MetricNameEntry>(
+    (data?.metrics ?? []).map((entry) => [entry.name, entry])
+  );
 
   return (
     <PageSurface padding="lg">

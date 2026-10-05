@@ -1,5 +1,4 @@
 import { useParams } from "@tanstack/react-router";
-import { useMemo } from "react";
 
 import { useAppStore } from "@app/store/appStore";
 
@@ -25,10 +24,8 @@ export function useTraceDetailState() {
 
   const data = useTraceDetailData(selectedTenantId, traceIdParam);
 
-  const resolvedTraceId = useMemo(
-    () => (data.spans.length > 0 ? data.spans[0].traceId || traceIdParam : traceIdParam),
-    [data.spans, traceIdParam]
-  );
+  const resolvedTraceId =
+    data.spans.length > 0 ? data.spans[0].traceId || traceIdParam : traceIdParam;
 
   const serviceMap = useTraceServiceMap(
     selectedTenantId,

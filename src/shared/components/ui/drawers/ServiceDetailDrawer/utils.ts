@@ -3,7 +3,6 @@ import type { LatencyPercentilesPoint, StatusTimeseriesPoint } from "@shared/api
 import type { ServiceTopologyEdge } from "@shared/api/topology";
 import type { DependencyRow, EndpointRow, ServiceSummarySnapshot } from "./types";
 
-
 function normalizeServiceKey(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -100,7 +99,6 @@ export function buildErrorTrendSeries(points: readonly ErrorTimeSeriesPoint[]) {
 }
 
 export { healthVariantForErrorRate, healthLabelForErrorRate } from "@shared/utils/statusUtils";
-
 
 export function formatEndpointLabel(
   row: Pick<EndpointRow, "endpointName" | "operationName">

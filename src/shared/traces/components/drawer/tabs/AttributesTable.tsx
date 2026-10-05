@@ -1,53 +1,61 @@
-import { memo } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+
+import DataTable from "@shared/components/ui/data-display/DataTable";
+
+interface Attribute {
+  readonly key: string;
+  readonly value: string;
+}
 
 interface Props {
   readonly attributes: Record<string, string>;
   readonly onAddFilter?: (key: string, value: string) => void;
 }
 
-function AttributesTableComponent({ attributes, onAddFilter }: Props) {
-  const keys = Object.keys(attributes).sort();
+function attributeColumns(onAddFilter: Props["onAddFilter"]): ColumnDef<Attribute>[] {
+  return [
+    {
+      header: "Attribute Key",
+      accessorKey: "key",
+      cell: ({ row: { original: attr } }) => (
+        <span className="break-all font-medium font-mono text-[11.5px] text-foreground-secondary">
+          {attr.key}
+        </span>
+      ),
+    },
+    {
+      header: "Value",
+      accessorKey: "value",
+      cell: ({ row: { original: attr } }) =>
+        onAddFilter ? (
+          <button
+            type="button"
+            onClick={() => onAddFilter(attr.key, attr.value)}
+            className="cursor-pointer break-all text-left font-mono text-[11.5px] text-foreground hover:text-primary hover:underline"
+            title="Click to filter by attribute"
+          >
+            {attr.value}
+          </button>
+        ) : (
+          <span className="break-all font-mono text-[11.5px] text-foreground">{attr.value}</span>
+        ),
+    },
+  ];
+}
 
-  if (keys.length === 0) {
+export function AttributesTable({ attributes, onAddFilter }: Props): JSX.Element {
+  const rows = Object.keys(attributes)
+    .sort()
+    .map((key) => ({ key, value: attributes[key] }));
+
+  if (rows.length === 0) {
     return <div className="text-[12px] text-foreground-muted italic">No attributes recorded</div>;
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border border-border">
-      <table className="w-full text-left font-mono text-[11.5px]">
-        <thead>
-          <tr className="border-border border-b bg-muted text-[10.5px] text-foreground-caption uppercase">
-            <th className="px-3 py-1.5 font-medium">Attribute Key</th>
-            <th className="px-3 py-1.5 font-medium">Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {keys.map((k) => {
-            const val = attributes[k];
-            return (
-              <tr key={k} className="border-border/50 border-b last:border-b-0 hover:bg-secondary">
-                <td className="px-3 py-1.5 font-medium text-foreground-secondary">{k}</td>
-                <td className="break-all px-3 py-1.5 text-foreground">
-                  {onAddFilter ? (
-                    <button
-                      type="button"
-                      onClick={() => onAddFilter(k, val)}
-                      className="cursor-pointer text-left hover:text-primary hover:underline"
-                      title="Click to filter by attribute"
-                    >
-                      {val}
-                    </button>
-                  ) : (
-                    val
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      data={{ columns: attributeColumns(onAddFilter), rows }}
+      config={{ maxRows: 12, rowHeight: 34 }}
+    />
   );
 }
-
-export const AttributesTable = memo(AttributesTableComponent);

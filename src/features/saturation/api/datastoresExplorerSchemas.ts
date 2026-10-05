@@ -20,7 +20,7 @@ export const datastoreSystemRowSchema = z.object({
   p95LatencyMs: numericValue,
   errorRate: numericValue,
   activeConnections: numericValue,
-  serverHint: stringValue,
+  region: stringValue,
   lastSeen: stringValue,
 });
 export type DatastoreSummary = z.infer<typeof datastoreSummarySchema>;

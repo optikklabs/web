@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 import { KpiCard } from "@shared/components/ui/cards/StatCard";
 import { DeltaBadge } from "@shared/metrics/components/DeltaBadge";
 import type {
@@ -25,24 +23,24 @@ interface KpiCell {
 }
 
 export function MetricsKpiStrip({ primaryQuery, results, spaceAgg, unit }: MetricsKpiStripProps) {
-  const cells = useMemo<KpiCell[]>(() => {
-    const result = primaryQuery ? results[primaryQuery.id] : undefined;
-    const summary = computeQuerySummary(result, spaceAgg);
-    const valueUnit = unit ?? "";
-    return [
-      {
-        label: "current",
-        value: formatStatValue(summary.current),
-        unit: valueUnit,
-        delta: summary.delta,
-      },
-      { label: "1h avg", value: formatStatValue(summary.avg), unit: valueUnit },
-      { label: "1h min", value: formatStatValue(summary.min), unit: valueUnit },
-      { label: "1h max", value: formatStatValue(summary.max), unit: valueUnit },
-      { label: "samples", value: formatStatValue(summary.samples), unit: "pts" },
-      { label: "cardinality", value: String(summary.cardinality), unit: "series" },
-    ];
-  }, [primaryQuery, results, spaceAgg, unit]);
+  const summary = computeQuerySummary(
+    primaryQuery ? results[primaryQuery.id] : undefined,
+    spaceAgg
+  );
+  const valueUnit = unit ?? "";
+  const cells: KpiCell[] = [
+    {
+      label: "current",
+      value: formatStatValue(summary.current),
+      unit: valueUnit,
+      delta: summary.delta,
+    },
+    { label: "1h avg", value: formatStatValue(summary.avg), unit: valueUnit },
+    { label: "1h min", value: formatStatValue(summary.min), unit: valueUnit },
+    { label: "1h max", value: formatStatValue(summary.max), unit: valueUnit },
+    { label: "samples", value: formatStatValue(summary.samples), unit: "pts" },
+    { label: "cardinality", value: String(summary.cardinality), unit: "series" },
+  ];
 
   return (
     <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

@@ -1,5 +1,5 @@
 import type { ColumnSizingState, OnChangeFn } from "@tanstack/react-table";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 const STORAGE_PREFIX = "optikk.table.columnSizing.";
 
@@ -32,16 +32,13 @@ export function useColumnSizing(storageKey?: string): {
 } {
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(() => read(storageKey));
 
-  const onColumnSizingChange = useCallback<OnChangeFn<ColumnSizingState>>(
-    (updater) => {
-      setColumnSizing((prev) => {
-        const next = typeof updater === "function" ? updater(prev) : updater;
-        write(storageKey, next);
-        return next;
-      });
-    },
-    [storageKey]
-  );
+  const onColumnSizingChange: OnChangeFn<ColumnSizingState> = (updater) => {
+    setColumnSizing((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      write(storageKey, next);
+      return next;
+    });
+  };
 
   return { columnSizing, onColumnSizingChange };
 }

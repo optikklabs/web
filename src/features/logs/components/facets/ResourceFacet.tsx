@@ -45,7 +45,7 @@ function ResourceFacetComponent({ field, label, values, onInclude, onExclude }: 
               <Plus size={10} className="text-success" />
               <Minus size={10} className="text-error" />
             </span>
-            <span className="ml-2 text-[11px] text-[var(--fg-3)] [font-family:'Geist_Mono',monospace]">
+            <span className="ml-2 font-mono text-[11px] text-[var(--fg-3)]">
               {item.count.toLocaleString()}
             </span>
           </span>

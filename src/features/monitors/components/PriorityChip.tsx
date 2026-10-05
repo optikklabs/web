@@ -11,11 +11,7 @@ function PriorityChip({ priority }: Props) {
   const spec = MONITOR_PRIORITIES.find((p) => p.id === priority);
   const colorClass = spec?.textColor ?? "text-foreground-muted";
 
-  return (
-    <span className={`font-bold font-mono text-[11px] ${colorClass}`}>
-      {priority}
-    </span>
-  );
+  return <span className={`font-bold font-mono text-[11px] ${colorClass}`}>{priority}</span>;
 }
 
 export default memo(PriorityChip);

@@ -1,7 +1,7 @@
 import type { TraceRecord } from "@shared/api/traces/schemas";
 import { cn } from "@shared/lib/utils";
 import { formatDuration } from "@shared/utils/formatters";
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { svcHue } from "../../utils/color";
 
 interface ServiceStat {
@@ -19,39 +19,42 @@ interface Props {
   readonly onActiveServiceChange: (service: string | null) => void;
 }
 
-function ServiceStripComponent({ spans, activeService, onActiveServiceChange }: Props) {
-  const stats = useMemo(() => {
-    const map = new Map<string, { count: number; totalMs: number; hasError: boolean }>();
-    let traceTotal = 0;
-    for (const s of spans) {
-      const name = s.serviceName || "unknown";
-      const dur = s.durationMs ?? 0;
-      traceTotal += dur;
-      const isErr = (s.status ?? "").toUpperCase() === "ERROR";
-      const cur = map.get(name);
-      if (cur) {
-        cur.count += 1;
-        cur.totalMs += dur;
-        if (isErr) cur.hasError = true;
-      } else {
-        map.set(name, { count: 1, totalMs: dur, hasError: isErr });
-      }
+/** Per-service span totals, heaviest first, plus the summed trace time (at least 1ms). */
+function serviceStats(spans: readonly TraceRecord[]): { list: ServiceStat[]; traceTotal: number } {
+  const map = new Map<string, { count: number; totalMs: number; hasError: boolean }>();
+  let traceTotal = 0;
+  for (const s of spans) {
+    const name = s.serviceName || "unknown";
+    const dur = s.durationMs ?? 0;
+    traceTotal += dur;
+    const isErr = (s.status ?? "").toUpperCase() === "ERROR";
+    const cur = map.get(name);
+    if (cur) {
+      cur.count += 1;
+      cur.totalMs += dur;
+      if (isErr) cur.hasError = true;
+    } else {
+      map.set(name, { count: 1, totalMs: dur, hasError: isErr });
     }
+  }
 
-    const list: ServiceStat[] = [];
-    for (const [name, st] of map.entries()) {
-      list.push({
-        name,
-        count: st.count,
-        totalMs: st.totalMs,
-        selfMs: st.totalMs,
-        hasError: st.hasError,
-        hue: svcHue(name),
-      });
-    }
-    list.sort((a, b) => b.totalMs - a.totalMs);
-    return { list, traceTotal: Math.max(1, traceTotal) };
-  }, [spans]);
+  const list: ServiceStat[] = [];
+  for (const [name, st] of map.entries()) {
+    list.push({
+      name,
+      count: st.count,
+      totalMs: st.totalMs,
+      selfMs: st.totalMs,
+      hasError: st.hasError,
+      hue: svcHue(name),
+    });
+  }
+  list.sort((a, b) => b.totalMs - a.totalMs);
+  return { list, traceTotal: Math.max(1, traceTotal) };
+}
+
+function ServiceStripComponent({ spans, activeService, onActiveServiceChange }: Props) {
+  const stats = serviceStats(spans);
 
   if (stats.list.length <= 1) return null;
 

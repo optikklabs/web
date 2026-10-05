@@ -1,7 +1,7 @@
 import { svcHue } from "@shared/traces/utils/color";
 import { formatDuration } from "@shared/utils/formatters";
 import { AlertCircle, Copy, Zap } from "lucide-react";
-import { memo, useCallback, useState } from "react";
+import { memo, useState } from "react";
 
 export interface SelectedSpan {
   readonly spanId?: string;
@@ -30,11 +30,11 @@ const btnGhost =
 function SpanDrawerHeaderComponent({ span, spanId, isCritical }: Props) {
   const [copied, setCopied] = useState(false);
 
-  const copySpanId = useCallback(() => {
+  const copySpanId = () => {
     void navigator.clipboard.writeText(spanId);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
-  }, [spanId]);
+  };
 
   const service = span.serviceName || "—";
   const hue = svcHue(service);

@@ -1,7 +1,7 @@
 import type { TraceErrorGroup, TraceRecord } from "@shared/api/traces/schemas";
 import { formatDuration } from "@shared/utils/formatters";
 import { AlertCircle } from "lucide-react";
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { TraceErrorSummary } from "./TraceErrorSummary";
 
 interface Props {
@@ -11,10 +11,7 @@ interface Props {
 }
 
 function ErrorsTabComponent({ spans, onSelect, errorGroups }: Props) {
-  const errs = useMemo(
-    () => spans.filter((s) => (s.status ?? "").toUpperCase() === "ERROR"),
-    [spans]
-  );
+  const errs = spans.filter((s) => (s.status ?? "").toUpperCase() === "ERROR");
   const groups = errorGroups ?? [];
 
   if (errs.length === 0 && groups.length === 0) {

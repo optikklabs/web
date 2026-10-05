@@ -12,10 +12,7 @@ import { useMemo, useState } from "react";
 export default function SettingsInstrumentationTab(): JSX.Element {
   const endpoints = useIngestionEndpoints();
   const guides = useMemo(() => (endpoints ? buildLanguageGuides(endpoints) : []), [endpoints]);
-  const collector = useMemo(
-    () => (endpoints ? buildCollectorSnippets(endpoints) : []),
-    [endpoints]
-  );
+  const collector = endpoints ? buildCollectorSnippets(endpoints) : [];
 
   const [activeLang, setActiveLang] = useState<LanguageGuide["id"]>(guides[0]?.id ?? "java");
   const active = guides.find((g) => g.id === activeLang) ?? guides[0];

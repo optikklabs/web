@@ -144,17 +144,13 @@ export function useClientExplorer<T>({ rows, filters, definition }: UseClientExp
     return out;
   }, [rows, definition]);
 
-  const facetGroups = useMemo<FacetGroupModel[]>(
-    () =>
-      Object.entries(definition.fields)
-        .filter(([, field]) => field.facet)
-        .map(([key, field]) => ({
-          field: key,
-          label: field.label,
-          buckets: fieldCounts.get(key) ?? [],
-        })),
-    [definition, fieldCounts]
-  );
+  const facetGroups: FacetGroupModel[] = Object.entries(definition.fields)
+    .filter(([, field]) => field.facet)
+    .map(([key, field]) => ({
+      field: key,
+      label: field.label,
+      buckets: fieldCounts.get(key) ?? [],
+    }));
 
   const valueSuggestions = useMemo<Readonly<Record<string, readonly SuggestionOption[]>>>(() => {
     const out: Record<string, readonly SuggestionOption[]> = {};
