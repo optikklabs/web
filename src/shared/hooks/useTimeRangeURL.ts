@@ -18,10 +18,9 @@ function presetToUrlValue(preset: string): string {
 }
 
 function urlValueToPreset(val: string): RelativeTimeRange | null {
-  const m = RELATIVE_RE.exec(val);
-  if (!m) return null;
-  const num = Number.parseInt(m[1], 10);
-  const unit = m[2];
+  const [, digits = "", unit] = RELATIVE_RE.exec(val) ?? [];
+  if (!unit) return null;
+  const num = Number.parseInt(digits, 10);
   let minutes: number;
   let presetStr: string;
   switch (unit) {

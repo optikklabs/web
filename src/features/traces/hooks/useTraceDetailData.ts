@@ -4,6 +4,7 @@ import { toApiErrorShape } from "@shared/api/utils/errorNormalization";
 import { useTimeRange } from "@shared/hooks/useTimeRangeQuery";
 import { nsToIso } from "@shared/logs/api/logsQueryApi";
 import { getTraceLogs } from "@shared/logs/api/traceLogsApi";
+import { skipToken } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { computeTraceTimeBounds } from "../pages/TraceDetailPage/utils";
@@ -61,9 +62,10 @@ function useSpanQueries(
   });
   const attributes = useImmutableQuery({
     queryKey: ["span-attributes", traceID, spanID, startMs, endMs],
-    queryFn: ({ signal }) =>
-      tracesService.getSpanAttributes(traceID, spanID!, startMs, endMs, signal),
-    enabled: queryEnabled,
+    queryFn:
+      queryEnabled && spanID !== null
+        ? ({ signal }) => tracesService.getSpanAttributes(traceID, spanID, startMs, endMs, signal)
+        : skipToken,
   });
   return { events, attributes };
 }

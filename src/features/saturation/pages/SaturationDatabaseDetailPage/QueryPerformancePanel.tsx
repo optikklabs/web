@@ -12,7 +12,12 @@ import {
   useQueryPerformanceCatalogue,
   useQueryPerformanceSeries,
 } from "./hooks/useQueryPerformance";
-import { buildQueryPerformanceCharts, queryDisplayLabel } from "./queryPerformanceModel";
+import {
+  buildQueryPerformanceCharts,
+  queryDisplayLabel,
+  resolveCatalogueSelection,
+  selectedQueryHashes,
+} from "./queryPerformanceModel";
 
 function latencyTone(value: number): KpiTone {
   if (value >= 2000) return "err";
@@ -20,22 +25,15 @@ function latencyTone(value: number): KpiTone {
   return "ok";
 }
 
-export function QueryPerformancePanel({ system }: { readonly system: string }) {
+/**
+ * Rewrites the URL so it names exactly the selection on screen (the resolved
+ * collection or query, never both), keeping links and reloads stable.
+ */
+function useCanonicalSelectionURL(ready: boolean, mode: "collection" | "query", value: string) {
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const mode = search.scope ?? "collection";
-  const catalogueQuery = useQueryPerformanceCatalogue(system);
-  const catalogue = catalogueQuery.data;
-  const collection = catalogue?.collections.some((item) => item.name === search.collection)
-    ? search.collection
-    : catalogue?.collections[0]?.name;
-  const queryHash = catalogue?.queries.some((item) => item.queryHash === search.queryHash)
-    ? search.queryHash
-    : catalogue?.queries[0]?.queryHash;
-  const value = mode === "collection" ? (collection ?? "") : (queryHash ?? "");
-
   useEffect(() => {
-    if (!catalogue || !value) return;
+    if (!ready || !value) return;
     const isCanonical =
       mode === "collection"
         ? search.collection === value && search.queryHash === undefined
@@ -51,7 +49,61 @@ export function QueryPerformancePanel({ system }: { readonly system: string }) {
         queries: undefined,
       })) as never,
     });
-  }, [catalogue, mode, navigate, search.collection, search.queryHash, value]);
+  }, [ready, mode, navigate, search.collection, search.queryHash, value]);
+}
+
+function SelectionKpis({
+  selection,
+  windowSeconds,
+  label,
+}: {
+  readonly selection: {
+    readonly callCount: number;
+    readonly p95Ms: number | null;
+    readonly p99Ms: number | null;
+  };
+  readonly windowSeconds: number;
+  readonly label: string | undefined;
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <KpiCard
+        label="Queries /s"
+        value={fmtNum(selection.callCount / windowSeconds)}
+        secondary="avg"
+        subtext={label}
+      />
+      <LatencyKpi label="p95 latency" valueMs={selection.p95Ms} subtext={label} />
+      <LatencyKpi label="p99 latency" valueMs={selection.p99Ms} subtext={label} />
+    </div>
+  );
+}
+
+function LatencyKpi({
+  label,
+  valueMs,
+  subtext,
+}: {
+  readonly label: string;
+  readonly valueMs: number | null;
+  readonly subtext: string | undefined;
+}) {
+  if (valueMs === null) return <KpiCard label={label} value="—" subtext={subtext} />;
+  return (
+    <KpiCard label={label} value={fmtMs(valueMs)} tone={latencyTone(valueMs)} subtext={subtext} />
+  );
+}
+
+export function QueryPerformancePanel({ system }: { readonly system: string }) {
+  const navigate = useNavigate();
+  const search = Route.useSearch();
+  const mode = search.scope ?? "collection";
+  const catalogueQuery = useQueryPerformanceCatalogue(system);
+  const catalogue = catalogueQuery.data;
+  const { collection, queryHash } = resolveCatalogueSelection(catalogue, search);
+  const value = mode === "collection" ? (collection ?? "") : (queryHash ?? "");
+
+  useCanonicalSelectionURL(catalogue !== undefined, mode, value);
 
   const seriesQuery = useQueryPerformanceSeries(system, {
     mode,
@@ -64,15 +116,10 @@ export function QueryPerformancePanel({ system }: { readonly system: string }) {
     () => new Set(response?.series.map((series) => series.queryHash) ?? []),
     [response]
   );
-  const selectedHashes = useMemo(() => {
-    if (!response) return new Set<string>();
-    if (!search.queries) return new Set(availableHashes);
-    return new Set(
-      search.queries
-        .split(",")
-        .filter((hash) => /^[0-9a-f]{16}$/.test(hash) && availableHashes.has(hash))
-    );
-  }, [availableHashes, response, search.queries]);
+  const selectedHashes = useMemo(
+    () => (response ? selectedQueryHashes(search.queries, availableHashes) : new Set<string>()),
+    [availableHashes, response, search.queries]
+  );
   const chartModel = useMemo(
     () =>
       response
@@ -87,8 +134,6 @@ export function QueryPerformancePanel({ system }: { readonly system: string }) {
   const { getTimeRange } = useTimeRange();
   const { startTime, endTime } = getTimeRange();
   const windowSeconds = Math.max((Number(endTime) - Number(startTime)) / 1000, 1);
-  const averageOps = selection ? selection.callCount / windowSeconds : 0;
-  const selectionLabel = mode === "collection" ? collection : queryHash?.slice(0, 8);
 
   const updateSearch = (changes: Record<string, unknown>) =>
     navigate({
@@ -174,26 +219,13 @@ export function QueryPerformancePanel({ system }: { readonly system: string }) {
           queries.
         </div>
       ) : null}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <KpiCard
-          label="Queries /s"
-          value={fmtNum(averageOps)}
-          secondary="avg"
-          subtext={selectionLabel}
+      {selection ? (
+        <SelectionKpis
+          selection={selection}
+          windowSeconds={windowSeconds}
+          label={mode === "collection" ? collection : queryHash?.slice(0, 8)}
         />
-        <KpiCard
-          label="p95 latency"
-          value={fmtMs(selection?.p95Ms ?? 0)}
-          tone={latencyTone(selection?.p95Ms ?? 0)}
-          subtext={selectionLabel}
-        />
-        <KpiCard
-          label="p99 latency"
-          value={fmtMs(selection?.p99Ms ?? 0)}
-          tone={latencyTone(selection?.p99Ms ?? 0)}
-          subtext={selectionLabel}
-        />
-      </div>
+      ) : null}
       {seriesQuery.isError ? (
         <div className="rounded-md border border-error bg-error-subtle px-3 py-2 text-error text-sm">
           Could not load the selected query series.

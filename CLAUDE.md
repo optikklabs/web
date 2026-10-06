@@ -50,5 +50,54 @@ API; no business logic lives here.
   scrolls inside its own viewport instead of stretching the surface.
 - Charts render through `ObservabilityChart`, with `Loading` while pending and
   `ChartNoDataOverlay` when empty — no per-feature loading/empty markup, and
-  no per-feature chart heights. Chart colors come from `getChartColor`, never
-  `CHART_COLORS` directly, so legends and lines cannot drift apart.
+  no per-feature chart heights. Chart colors come from `getChartColor`
+  (`src/shared/utils/chartTheme.ts`), never hard-coded hex values, so legends
+  and lines cannot drift apart.
+
+## TypeScript Standards
+
+`tsconfig.json` and `biome.json` enforce most of these; `yarn ci` runs
+type-check, biome, the boundary check, knip and the build.
+
+### Compiler
+
+- `strict` plus `noUncheckedIndexedAccess`, `noImplicitReturns`,
+  `noImplicitOverride`, `noFallthroughCasesInSwitch` and
+  `verbatimModuleSyntax`. An indexed read is `T | undefined`: handle the
+  missing case (`rows[0]?.value ?? …`, `.at(-1)`, destructuring with a
+  default, an early return) instead of asserting it away.
+- No `any`, no `!` non-null assertions, and no `as` casts that a type guard,
+  `satisfies` or a narrower declaration could replace. Make constant tables
+  `as const` so lookups are typed exactly.
+- Type-only imports use `import type` / `type` specifiers.
+
+### Data and lookups
+
+- Every API response is parsed with its zod schema through
+  `validateResponse`. Types are `z.infer` of the schema, never a parallel
+  hand-written interface.
+- A value the API could not compute arrives as `null` and renders as "—".
+  Never substitute `0`, `""` or a placeholder label for a missing value.
+- Look up untrusted string keys (URL params, query DSL fields, API map keys)
+  with `ownEntry` or `Object.hasOwn`, never `obj[key]` or `key in obj`,
+  which also match inherited keys such as `toString`.
+- Palette and hash-based styling go through `pickCyclic` / `pickByHash`
+  (`src/shared/utils/cyclic.ts`); do not hand-roll `arr[i % arr.length]` or
+  another string hash.
+- A query whose input is missing passes `skipToken` as its `queryFn`,
+  never an `enabled: false` plus a non-null assertion inside the function.
+
+### Code shape
+
+- Keep functions within biome's cognitive-complexity limit (20). Split a
+  large component into named sub-components and move derivations into pure
+  functions beside it (`*Model.ts`) rather than nesting ternaries.
+- Optional handlers are optional props: hide the control when the handler
+  is absent. Never pass `() => {}` to fill a required prop.
+- An empty `catch` holds a comment saying why the failure is safe to ignore.
+- Use `console.error` / `console.warn` only for failures a developer must
+  see; never leave `console.log` in `src/`.
+- Array-index keys only for static lists that never reorder (skeletons,
+  fixed segments). Anything with identity keys by that identity.
+- Prefer modern built-ins over hand-rolled loops: `Array.prototype.at`,
+  `findLast`, `toSorted`, `Map.groupBy`, `Object.hasOwn`.

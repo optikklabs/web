@@ -56,7 +56,7 @@ const BREADCRUMB_RULES: BreadcrumbRule[] = [
     build: (segments, navLookup) => [
       { label: navLookup.get(ROUTES.database) ?? "Database", path: ROUTES.database },
       { label: "Queries", path: ROUTES.databaseQueries },
-      { label: `Query #${segments[2].slice(0, 6)}` },
+      { label: `Query #${(segments[2] ?? "").slice(0, 6)}` },
     ],
   },
   {

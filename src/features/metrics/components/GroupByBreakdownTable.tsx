@@ -59,11 +59,9 @@ export function GroupByBreakdownTable({ primaryQuery, result }: GroupByBreakdown
   });
 
   const virtualItems = virtualizer.getVirtualItems();
-  const paddingTop = virtualItems.length > 0 ? virtualItems[0]?.start || 0 : 0;
-  const paddingBottom =
-    virtualItems.length > 0
-      ? virtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1]?.end || 0)
-      : 0;
+  const lastItem = virtualItems.at(-1);
+  const paddingTop = virtualItems[0]?.start ?? 0;
+  const paddingBottom = lastItem ? virtualizer.getTotalSize() - lastItem.end : 0;
 
   return (
     <PageSurface padding="lg" className="overflow-hidden">
@@ -113,6 +111,7 @@ export function GroupByBreakdownTable({ primaryQuery, result }: GroupByBreakdown
               )}
               {virtualItems.map((virtualRow) => {
                 const row = rows[virtualRow.index];
+                if (!row) return null;
                 return (
                   <TableRow key={virtualRow.index}>
                     {tagKeys.map((key) => (

@@ -42,7 +42,7 @@ export function OverviewPodFleet({ serviceName }: { serviceName: string }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-          {pods.map((pod, i) => {
+          {pods.map((pod) => {
             const accent =
               pod.status === "error"
                 ? "var(--err)"
@@ -56,7 +56,7 @@ export function OverviewPodFleet({ serviceName }: { serviceName: string }) {
             return (
               <button
                 type="button"
-                key={i}
+                key={pod.host}
                 onClick={() => handlePodClick(pod.host)}
                 className="flex cursor-pointer flex-col justify-between rounded border border-border bg-muted/20 p-3.5 text-left transition-colors hover:bg-muted/40"
               >

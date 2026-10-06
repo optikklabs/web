@@ -1,5 +1,6 @@
 import {
   type QueryFunction,
+  type SkipToken,
   type UseQueryOptions,
   keepPreviousData,
   useQuery,
@@ -31,7 +32,8 @@ export function retryUnlessClientError(failureCount: number, error: unknown): bo
 export function useStandardQuery<T>(
   options: Omit<UseQueryOptions<T, ApiErrorShape, T>, "queryKey" | "queryFn"> & {
     queryKey: readonly unknown[];
-    queryFn: QueryFunction<T, readonly unknown[]>;
+    /** `skipToken` while a required input is missing; the query then stays idle. */
+    queryFn: QueryFunction<T, readonly unknown[]> | SkipToken;
   }
 ) {
   const tenantId = useTenantId();

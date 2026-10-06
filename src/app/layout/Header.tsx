@@ -80,7 +80,7 @@ export default function Header() {
   }, [intervalPickerOpen]);
 
   const activeInterval =
-    AUTO_REFRESH_INTERVALS.find((o) => o.value === autoRefreshInterval) ||
+    AUTO_REFRESH_INTERVALS.find((o) => o.value === autoRefreshInterval) ??
     AUTO_REFRESH_INTERVALS[0];
 
   const isLive = autoRefreshInterval > 0 && isRelativeRange(timeRange);

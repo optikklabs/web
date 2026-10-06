@@ -167,7 +167,10 @@ export const session = {
   async logout(): Promise<void> {
     try {
       await authApi.logout(accessToken);
-    } catch {}
+    } catch {
+      // The local session ends regardless; a failed server revoke only means
+      // the refresh token expires on its own.
+    }
     endSession();
   },
 

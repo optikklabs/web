@@ -8,7 +8,7 @@ import Loading from "@shared/components/ui/feedback/Loading";
 
 import { useTimeRangeQuery } from "@shared/hooks/useTimeRangeQuery";
 import { tsMs } from "@shared/utils/chartDataUtils";
-import { getChartColor } from "@shared/utils/charting";
+import { getChartColor } from "@shared/utils/chartTheme";
 
 import { type SeriesPoint, getSeries } from "../api/infrastructureApi";
 import InfraSeriesList, { type InfraSeriesListItem } from "./InfraSeriesList";
@@ -65,14 +65,7 @@ function buildSeries(rows: readonly SeriesPoint[]): {
   const series = [...pointsByKey.entries()]
     .map(([key, points]) => {
       const values = timestamps.map((ts) => points.get(ts) ?? null);
-      let latest = 0;
-      for (let i = values.length - 1; i >= 0; i--) {
-        const value = values[i];
-        if (value !== null) {
-          latest = value;
-          break;
-        }
-      }
+      const latest = values.findLast((value) => value !== null) ?? 0;
       return { key, values, latest };
     })
     .sort((a, b) => Math.abs(b.latest) - Math.abs(a.latest) || a.key.localeCompare(b.key))

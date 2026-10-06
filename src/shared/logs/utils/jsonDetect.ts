@@ -14,7 +14,9 @@ export function tryParseJson(text: string): Record<string, unknown> | unknown[] 
       if (typeof parsed === "object" && parsed !== null) {
         return parsed as Record<string, unknown> | unknown[];
       }
-    } catch {}
+    } catch {
+      // Looks like JSON but is not; render the body as plain text.
+    }
   }
   return null;
 }

@@ -4,20 +4,19 @@ import type {
   MetricSpaceAggregation,
 } from "@shared/metrics/types";
 
-/** Per-series summary statistics computed over a single series' value array. */
+/**
+ * Per-series summary statistics computed over a single series' value array.
+ * Every statistic is null when the series has no samples.
+ */
 export interface SeriesStats {
-  readonly min: number;
-  readonly avg: number;
-  readonly max: number;
-  readonly p95: number;
-  readonly p99: number;
-
+  readonly min: number | null;
+  readonly avg: number | null;
+  readonly max: number | null;
+  readonly p95: number | null;
+  readonly p99: number | null;
   readonly first: number | null;
-
   readonly last: number | null;
-
   readonly samples: number;
-
   readonly delta: number | null;
 }
 
@@ -26,66 +25,49 @@ export interface QuerySummary {
   readonly avg: number | null;
   readonly min: number | null;
   readonly max: number | null;
-
   readonly samples: number;
-
   readonly cardinality: number;
-
   readonly delta: number | null;
 }
 
-function nonNull(values: ReadonlyArray<number | null>): number[] {
-  const out: number[] = [];
-  for (const v of values) {
-    if (v != null && !Number.isNaN(v)) out.push(v);
-  }
-  return out;
+/** The finite values of `values`, in order. */
+function samplesOf(values: ReadonlyArray<number | null | undefined>): number[] {
+  return values.filter((v): v is number => v != null && !Number.isNaN(v));
 }
 
-function percentile(values: ReadonlyArray<number | null>, p: number): number {
-  const clean = nonNull(values).sort((a, b) => a - b);
-  if (clean.length === 0) return 0;
-  if (clean.length === 1) return clean[0];
-  const rank = (p / 100) * (clean.length - 1);
-  const low = Math.floor(rank);
-  const high = Math.ceil(rank);
-  if (low === high) return clean[low];
-  return clean[low] + (clean[high] - clean[low]) * (rank - low);
+/** Linear-interpolated percentile of an ascending list; null when empty. */
+function percentile(sorted: readonly number[], p: number): number | null {
+  const rank = (p / 100) * (sorted.length - 1);
+  const low = sorted[Math.floor(rank)];
+  const high = sorted[Math.ceil(rank)];
+  if (low === undefined || high === undefined) return null;
+  return low + (high - low) * (rank - Math.floor(rank));
 }
 
-function firstNonNull(values: ReadonlyArray<number | null>): number | null {
-  for (const v of values) {
-    if (v != null && !Number.isNaN(v)) return v;
-  }
-  return null;
+function mean(samples: readonly number[]): number | null {
+  return samples.length > 0 ? samples.reduce((acc, v) => acc + v, 0) / samples.length : null;
 }
 
-function lastNonNull(values: ReadonlyArray<number | null>): number | null {
-  for (let i = values.length - 1; i >= 0; i--) {
-    const v = values[i];
-    if (v != null && !Number.isNaN(v)) return v;
-  }
-  return null;
+/** First-to-last change across samples; null without at least one sample. */
+function change(samples: readonly number[]): number | null {
+  const first = samples[0];
+  const last = samples.at(-1);
+  return first !== undefined && last !== undefined ? last - first : null;
 }
 
 export function computeSeriesStats(series: MetricSeriesData): SeriesStats {
-  const clean = nonNull(series.values);
-  const first = firstNonNull(series.values);
-  const last = lastNonNull(series.values);
-  if (clean.length === 0) {
-    return { min: 0, avg: 0, max: 0, p95: 0, p99: 0, first, last, samples: 0, delta: null };
-  }
-  const sum = clean.reduce((acc, v) => acc + v, 0);
+  const samples = samplesOf(series.values);
+  const sorted = samples.toSorted((a, b) => a - b);
   return {
-    min: Math.min(...clean),
-    avg: sum / clean.length,
-    max: Math.max(...clean),
-    p95: percentile(series.values, 95),
-    p99: percentile(series.values, 99),
-    first,
-    last,
-    samples: clean.length,
-    delta: first != null && last != null ? last - first : null,
+    min: sorted[0] ?? null,
+    avg: mean(samples),
+    max: sorted.at(-1) ?? null,
+    p95: percentile(sorted, 95),
+    p99: percentile(sorted, 99),
+    first: samples[0] ?? null,
+    last: samples.at(-1) ?? null,
+    samples: samples.length,
+    delta: change(samples),
   };
 }
 
@@ -110,12 +92,9 @@ function aggregatedTimeline(
   const length = result.timestamps.length;
   const timeline: Array<number | null> = [];
   for (let i = 0; i < length; i++) {
-    const column: number[] = [];
-    for (const series of result.series) {
-      const v = series.values[i];
-      if (v != null && !Number.isNaN(v)) column.push(v);
-    }
-    timeline.push(aggregateAcross(column, spaceAgg));
+    timeline.push(
+      aggregateAcross(samplesOf(result.series.map((series) => series.values[i])), spaceAgg)
+    );
   }
   return timeline;
 }
@@ -124,29 +103,15 @@ export function computeQuerySummary(
   result: MetricQueryResult | undefined,
   spaceAgg: MetricSpaceAggregation
 ): QuerySummary {
-  if (!result || result.series.length === 0) {
-    return {
-      current: null,
-      avg: null,
-      min: null,
-      max: null,
-      samples: 0,
-      cardinality: 0,
-      delta: null,
-    };
-  }
-  const timeline = aggregatedTimeline(result, spaceAgg);
-  const clean = nonNull(timeline);
-  const current = lastNonNull(timeline);
-  const first = firstNonNull(timeline);
-  const samples = result.series.reduce((acc, s) => acc + nonNull(s.values).length, 0);
+  const samples = result ? samplesOf(aggregatedTimeline(result, spaceAgg)) : [];
+  const sorted = samples.toSorted((a, b) => a - b);
   return {
-    current,
-    avg: clean.length > 0 ? clean.reduce((a, v) => a + v, 0) / clean.length : null,
-    min: clean.length > 0 ? Math.min(...clean) : null,
-    max: clean.length > 0 ? Math.max(...clean) : null,
-    samples,
-    cardinality: result.series.length,
-    delta: current != null && first != null ? current - first : null,
+    current: samples.at(-1) ?? null,
+    avg: mean(samples),
+    min: sorted[0] ?? null,
+    max: sorted.at(-1) ?? null,
+    samples: result?.series.reduce((acc, s) => acc + samplesOf(s.values).length, 0) ?? 0,
+    cardinality: result?.series.length ?? 0,
+    delta: change(samples),
   };
 }

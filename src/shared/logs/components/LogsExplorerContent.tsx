@@ -41,6 +41,8 @@ export function LogsExplorerContent({ explorer }: LogsExplorerContentProps) {
   const results = list.results;
   // Drives the drawer's prev/next arrows within the loaded page.
   const detailIndex = state.detail ? results.findIndex((r) => r.id === state.detail) : -1;
+  const prevId = detailIndex > 0 ? results[detailIndex - 1]?.id : undefined;
+  const nextId = detailIndex >= 0 ? results[detailIndex + 1]?.id : undefined;
   const closeDetail = useCallback(() => state.setDetail(null), [state]);
 
   return (
@@ -98,12 +100,8 @@ export function LogsExplorerContent({ explorer }: LogsExplorerContentProps) {
         endTime={endTime}
         open={Boolean(state.detail)}
         onClose={closeDetail}
-        onPrev={detailIndex > 0 ? () => state.setDetail(results[detailIndex - 1].id) : undefined}
-        onNext={
-          detailIndex >= 0 && detailIndex < results.length - 1
-            ? () => state.setDetail(results[detailIndex + 1].id)
-            : undefined
-        }
+        onPrev={prevId ? () => state.setDetail(prevId) : undefined}
+        onNext={nextId ? () => state.setDetail(nextId) : undefined}
       />
     </>
   );

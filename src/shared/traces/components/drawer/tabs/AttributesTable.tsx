@@ -44,9 +44,9 @@ function attributeColumns(onAddFilter: Props["onAddFilter"]): ColumnDef<Attribut
 }
 
 export function AttributesTable({ attributes, onAddFilter }: Props): JSX.Element {
-  const rows = Object.keys(attributes)
-    .sort()
-    .map((key) => ({ key, value: attributes[key] }));
+  const rows = Object.entries(attributes)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => ({ key, value }));
 
   if (rows.length === 0) {
     return <div className="text-[12px] text-foreground-muted italic">No attributes recorded</div>;

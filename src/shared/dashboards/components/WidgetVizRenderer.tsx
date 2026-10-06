@@ -42,22 +42,22 @@ export function WidgetVizRenderer({
   isError,
   height = 220,
 }: WidgetVizRendererProps) {
-  const hasActiveQuery = queries.some((q) => q.metricName);
+  const primary = queries.find((q) => q.metricName);
   const hasResults = !!results && Object.keys(results).length > 0;
   const data = results ?? {};
 
-  if (!hasActiveQuery) return <CenteredState icon="empty" message="Select a metric to preview" />;
+  if (!primary) return <CenteredState icon="empty" message="Select a metric to preview" />;
   if (isError) return <CenteredState icon="error" message="Failed to load data" />;
   if (isLoading && !hasResults) return <CenteredState icon="spinner" />;
   if (!hasResults) return <CenteredState icon="empty" message="No data for this query" />;
 
   switch (viz) {
     case "value":
-      return <ValueViz queries={queries} results={data} height={height} />;
+      return <ValueViz query={primary} results={data} height={height} />;
     case "toplist":
-      return <ToplistViz queries={queries} results={data} />;
+      return <ToplistViz query={primary} results={data} />;
     case "table":
-      return <TableViz queries={queries} results={data} height={height} />;
+      return <TableViz query={primary} results={data} height={height} />;
     default:
       return (
         <TimeseriesViz
@@ -99,13 +99,17 @@ function TimeseriesViz({ queries, formulas, results, display, height }: Timeseri
   );
 }
 
+/** Value, toplist and table cells render the panel's first query with a metric. */
 interface SingleQueryVizProps {
-  readonly queries: MetricQueryDefinition[];
+  readonly query: MetricQueryDefinition;
   readonly results: MetricExplorerResults;
 }
 
-function ValueViz({ queries, results, height }: SingleQueryVizProps & { readonly height: number }) {
-  const primary = queries[0];
+function ValueViz({
+  query: primary,
+  results,
+  height,
+}: SingleQueryVizProps & { readonly height: number }) {
   const result = results[primary.id];
   const summary = computeQuerySummary(result, primary.spaceAggregation);
   const spark = useMemo(() => buildSeries([primary], [], results, "area"), [primary, results]);
@@ -136,14 +140,14 @@ function ValueViz({ queries, results, height }: SingleQueryVizProps & { readonly
   );
 }
 
-function ToplistViz({ queries, results }: SingleQueryVizProps) {
-  const primary = queries[0];
+function ToplistViz({ query: primary, results }: SingleQueryVizProps) {
   const rows = useMemo(
     () => buildRankedRows(results[primary.id], primary.metricName),
     [results, primary.id, primary.metricName]
   );
-  if (rows.length === 0) return <CenteredState icon="empty" message="No series to rank" />;
-  const max = rows[0].value;
+  const top = rows[0];
+  if (!top) return <CenteredState icon="empty" message="No series to rank" />;
+  const max = top.value;
 
   return (
     <div className="flex h-full flex-col gap-1.5 overflow-y-auto px-1 py-1">
@@ -210,8 +214,11 @@ const TABLE_ROW_HEIGHT = 36;
 /** Header row height plus the DataTable border, subtracted from the cell height. */
 const TABLE_CHROME_HEIGHT = 38;
 
-function TableViz({ queries, results, height }: SingleQueryVizProps & { readonly height: number }) {
-  const primary = queries[0];
+function TableViz({
+  query: primary,
+  results,
+  height,
+}: SingleQueryVizProps & { readonly height: number }) {
   const rows: SeriesStatsRow[] = (results[primary.id]?.series ?? []).map((s) => ({
     label: seriesLabel(s, primary.metricName),
     stats: computeSeriesStats(s),

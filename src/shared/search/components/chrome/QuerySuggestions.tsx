@@ -119,7 +119,7 @@ function QuerySuggestionsComponent(p: Props) {
 }
 
 function sectionHeader(opt: SuggestionOption, i: number, all: readonly SuggestionOption[]) {
-  const prev = i === 0 ? null : (all[i - 1].category ?? null);
+  const prev = all[i - 1]?.category ?? null;
   const cur = opt.category ?? null;
   if (cur === null) return null;
   if (cur === prev) return null;

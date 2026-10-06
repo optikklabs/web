@@ -46,8 +46,8 @@ export interface TraceDetailLayoutProps {
   readonly traceEndMs?: number;
   readonly search?: string;
   readonly onSearchChange?: (s: string) => void;
-  readonly onAddFilter: (key: string, value: string) => void;
-  readonly onOpenSpanInLogs: () => void;
+  readonly onAddFilter?: (key: string, value: string) => void;
+  readonly onOpenSpanInLogs?: () => void;
 }
 
 function TraceDetailLayoutComponent(props: TraceDetailLayoutProps) {

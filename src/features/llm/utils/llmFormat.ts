@@ -1,3 +1,6 @@
+import { pickByHash } from "@shared/utils/cyclic";
+import { ownEntry } from "@shared/utils/ownEntry";
+
 // Vendor identity: fixed gen_ai.system -> label + chart token assignment.
 // Hues follow the entity, never its rank (dataviz rule).
 const VENDOR_META: Record<string, { label: string; color: string }> = {
@@ -7,18 +10,15 @@ const VENDOR_META: Record<string, { label: string; color: string }> = {
   "aws.bedrock": { label: "Bedrock", color: "var(--chart-4)" },
   azure_openai: { label: "Azure OpenAI", color: "var(--chart-6)" },
 };
-const VENDOR_FALLBACK_COLORS = ["var(--chart-5)", "var(--chart-7)", "var(--chart-8)"];
+const VENDOR_FALLBACK_COLORS = ["var(--chart-5)", "var(--chart-7)", "var(--chart-8)"] as const;
 
 export function vendorLabel(vendor: string): string {
-  return VENDOR_META[vendor]?.label ?? (vendor || "unknown");
+  return ownEntry(VENDOR_META, vendor)?.label ?? (vendor || "unknown");
 }
 
 export function vendorColor(vendor: string): string {
-  if (VENDOR_META[vendor]) return VENDOR_META[vendor].color;
   // Stable fallback: hash the name so the hue follows the vendor.
-  let h = 0;
-  for (const c of vendor) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return VENDOR_FALLBACK_COLORS[h % VENDOR_FALLBACK_COLORS.length];
+  return ownEntry(VENDOR_META, vendor)?.color ?? pickByHash(VENDOR_FALLBACK_COLORS, vendor);
 }
 
 // Span-kind identity chips (LLM / tool / retrieval / embedding / agent).

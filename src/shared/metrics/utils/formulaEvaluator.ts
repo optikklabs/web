@@ -50,7 +50,7 @@ function tokenizeFormula(expression: string): LexToken[] | string {
       index += identifier.length;
       continue;
     }
-    const char = source[0];
+    const char = source.charAt(0);
     if (char === "(" || char === ")") {
       tokens.push({ type: "parenthesis", value: char });
       index++;
@@ -172,7 +172,9 @@ function evaluateTokens(tokens: readonly FormulaToken[], scope: Readonly<Record<
       continue;
     }
     if (token.type === "symbol") {
-      stack.push(scope[token.value]);
+      const value = scope[token.value];
+      if (value === undefined) return null;
+      stack.push(value);
       continue;
     }
 
@@ -194,7 +196,8 @@ function evaluateTokens(tokens: readonly FormulaToken[], scope: Readonly<Record<
         break;
     }
   }
-  return stack.length === 1 && Number.isFinite(stack[0]) ? stack[0] : null;
+  const [result] = stack;
+  return stack.length === 1 && result !== undefined && Number.isFinite(result) ? result : null;
 }
 
 /** Evaluates a formula against the first series of each metric query. */
@@ -206,26 +209,24 @@ export function evaluateFormula(
   const formula = parseFormula(expression, Object.keys(results));
   if (formula.error) return timestamps.map(() => null);
 
-  const queryLookups: Record<string, Map<number, number>> = {};
+  const queryLookups = new Map<string, Map<number, number>>();
   for (const symbol of formula.symbols) {
     const lookup = new Map<number, number>();
     const result = results[symbol];
     const series = result?.series[0];
     if (result && series) {
-      for (let index = 0; index < result.timestamps.length; index++) {
+      result.timestamps.forEach((timestamp, index) => {
         const value = series.values[index];
-        if (value !== null && value !== undefined) {
-          lookup.set(result.timestamps[index], value);
-        }
-      }
+        if (value != null) lookup.set(timestamp, value);
+      });
     }
-    queryLookups[symbol] = lookup;
+    queryLookups.set(symbol, lookup);
   }
 
   return timestamps.map((timestamp) => {
     const scope: Record<string, number> = {};
     for (const symbol of formula.symbols) {
-      const value = queryLookups[symbol].get(timestamp);
+      const value = queryLookups.get(symbol)?.get(timestamp);
       if (value === undefined) return null;
       scope[symbol] = value;
     }

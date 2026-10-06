@@ -71,7 +71,7 @@ function collectUnknownKeys(schema: z.ZodTypeAny, value: unknown, path: string):
     const shape = def.shape;
     const out: string[] = [];
     for (const key of Object.keys(value)) {
-      if (key in shape) {
+      if (Object.hasOwn(shape, key)) {
         out.push(...collectUnknownKeys(shape[key] as z.ZodTypeAny, value[key], join(path, key)));
       } else {
         out.push(join(path, key));

@@ -13,13 +13,13 @@ import {
 
 import type { PaletteAction, PaletteActionContext } from "./types";
 
-function ActionHotkey({ action }: { action: PaletteAction }) {
+function ActionHotkey({ action, hotkey }: { action: PaletteAction; hotkey: string }) {
   const navigate = useNavigate();
   const context: PaletteActionContext = {
     navigate: (path: string) => navigate({ to: path as string & {} }),
   };
 
-  useHotkeys(action.hotkey!, (e) => {
+  useHotkeys(hotkey, (e) => {
     e.preventDefault();
     if (action.enabled && !action.enabled()) {
       return;
@@ -71,11 +71,9 @@ export function CommandPalette() {
 
   return (
     <>
-      {allActions
-        .filter((a) => a.hotkey)
-        .map((a) => (
-          <ActionHotkey key={a.id} action={a} />
-        ))}
+      {allActions.map((a) =>
+        a.hotkey ? <ActionHotkey key={a.id} action={a} hotkey={a.hotkey} /> : null
+      )}
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 pt-[20vh] backdrop-blur-sm">

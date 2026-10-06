@@ -12,7 +12,7 @@ export interface ServiceIdentity {
  */
 export function useServiceDetailIdentity(): ServiceIdentity {
   const location = useLocation();
-  const match = location.pathname.match(/^\/services\/([^/?#]+)/);
-  const raw = match ? decodeURIComponent(match[1]) : "";
+  const encoded = /^\/services\/([^/?#]+)/.exec(location.pathname)?.[1];
+  const raw = encoded ? decodeURIComponent(encoded) : "";
   return { serviceName: raw, isValid: Boolean(raw) };
 }

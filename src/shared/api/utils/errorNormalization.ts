@@ -55,7 +55,9 @@ export function formatErrorForDisplay(error: unknown): string {
     try {
       const extra = JSON.stringify(shape.data, null, 2);
       lines.push(extra.length > 2000 ? `${extra.slice(0, 2000)}…` : extra);
-    } catch {}
+    } catch {
+      // Unserializable detail (a cycle, a BigInt): show the message alone.
+    }
   }
   return lines.join("\n\n");
 }

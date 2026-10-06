@@ -30,8 +30,8 @@ interface Props {
   readonly traceEndMs?: number;
   readonly isCritical: boolean;
   readonly onSpanClick: (span: { spanId: string }) => void;
-  readonly onAddFilter: (key: string, value: string) => void;
-  readonly onOpenInLogs: () => void;
+  readonly onAddFilter?: (key: string, value: string) => void;
+  readonly onOpenInLogs?: () => void;
 }
 
 type SpanTab = "info" | "json" | "logs";
@@ -74,7 +74,7 @@ function SpanDetailDrawerComponent(props: Props) {
 
   if (!span || !spanId) return null;
 
-  const footer = (
+  const footer = props.onOpenInLogs ? (
     <>
       <span className="flex-1" />
       <button
@@ -85,7 +85,7 @@ function SpanDetailDrawerComponent(props: Props) {
         <ScrollText size={13} /> View span logs
       </button>
     </>
-  );
+  ) : undefined;
 
   return (
     <DrawerShell

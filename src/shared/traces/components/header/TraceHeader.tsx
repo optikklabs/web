@@ -10,7 +10,7 @@ interface Props {
   readonly rootOperation?: string;
   readonly httpMethod?: string;
   readonly httpStatus?: number;
-  readonly onOpenInLogs: () => void;
+  readonly onOpenInLogs?: () => void;
   readonly onBack: () => void;
 }
 
@@ -62,9 +62,11 @@ function TraceHeaderComponent({
       </div>
 
       <div className="flex flex-none items-center gap-2">
-        <button type="button" className={btnSmGhost} onClick={onOpenInLogs}>
-          <ScrollText size={13} className="mr-1 inline" /> Logs for trace
-        </button>
+        {onOpenInLogs ? (
+          <button type="button" className={btnSmGhost} onClick={onOpenInLogs}>
+            <ScrollText size={13} className="mr-1 inline" /> Logs for trace
+          </button>
+        ) : null}
         <button type="button" className={btnSmPrimary} onClick={copyTraceId}>
           {copied ? "Copied ID" : "Share trace"}
         </button>

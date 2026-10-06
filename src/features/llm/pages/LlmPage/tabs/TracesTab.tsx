@@ -77,7 +77,7 @@ function buildLlmRequest(
     services: listValues(filters, "service"),
     vendors: listValues(filters, "vendor"),
     models: listValues(filters, "model"),
-    status: statuses.length === 1 ? statuses[0].toLowerCase() : undefined,
+    status: statuses.length === 1 ? statuses[0]?.toLowerCase() : undefined,
     minDurationMs: durationFloor || undefined,
   };
 }

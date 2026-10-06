@@ -2,7 +2,7 @@ import { ChevronRight } from "lucide-react";
 
 import SparklineChart from "@shared/components/ui/charts/micro/SparklineChart";
 import { PageSurface } from "@shared/components/ui/layout/PageShell";
-import { getChartColor } from "@shared/utils/charting";
+import { getChartColor } from "@shared/utils/chartTheme";
 
 import { useMetricNames } from "@shared/metrics/hooks/useMetricNames";
 import type { MetricNameEntry, MetricQueryResult } from "@shared/metrics/types";

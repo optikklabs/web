@@ -32,14 +32,7 @@ export function LatencySignal({ serviceName }: { serviceName: string }) {
     const ts = points.map((p) => p.timestampMs / 1000);
     const values = points.map((p) => p.p99Ms);
 
-    // Find the latest non-null p99 value
-    let val = 0;
-    for (let i = values.length - 1; i >= 0; i--) {
-      if (values[i] != null) {
-        val = values[i];
-        break;
-      }
-    }
+    const val = values.findLast((v) => v != null) ?? 0;
 
     const chartSeries: ObservabilityChartSeries[] = [
       { label: "p99", values, color: "var(--chart-3)", fill: false },

@@ -3,7 +3,7 @@ import ObservabilityChart, {
 } from "@shared/components/ui/charts/ObservabilityChart";
 
 import { PanelCard } from "@shared/components/ui/PanelCard";
-import { getChartColor } from "@shared/utils/charting";
+import { getChartColor } from "@shared/utils/chartTheme";
 import { fmtNum } from "@shared/utils/formatters";
 import { SIGNAL_CHART_HEIGHT, SignalLegend } from "./SignalCardShell";
 import { useEndpointRED } from "./useEndpointRED";
@@ -49,8 +49,9 @@ export function RequestCountSignal({ serviceName }: { serviceName: string }) {
 
 // Bucket width read off the axis; the server picks the grain, not the client.
 function bucketLabel(timestampsSec: number[]): string {
-  if (timestampsSec.length < 2) return "bucket";
-  const seconds = timestampsSec[1] - timestampsSec[0];
+  const [first, second] = timestampsSec;
+  if (first === undefined || second === undefined) return "bucket";
+  const seconds = second - first;
   if (seconds >= 86400) return `${seconds / 86400}d`;
   if (seconds >= 3600) return `${seconds / 3600}h`;
   if (seconds >= 60) return `${seconds / 60}m`;

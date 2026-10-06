@@ -15,19 +15,6 @@ export const TIME_RANGES: import("@shared/types").RelativeTimeRange[] = [
   { kind: "relative", label: "Last 7 days", preset: "7d", minutes: 10080 },
   { kind: "relative", label: "Last 30 days", preset: "30d", minutes: 43200 },
 ];
-export const CHART_COLORS = [
-  "#5ea9ff",
-  "#f38b6b",
-  "#34d399",
-  "#facc15",
-  "#c084fc",
-  "#22d3ee",
-  "#f472b6",
-  "#a3e635",
-  "#fb923c",
-  "#818cf8",
-];
-
 export const STORAGE_KEYS = {
   APP_STATE: "optikk_app_state",
 };
@@ -42,4 +29,4 @@ export const AUTO_REFRESH_INTERVALS = [
   { label: "15m", value: 900_000 },
   { label: "30m", value: 1_800_000 },
   { label: "1h", value: 3_600_000 },
-];
+] as const;

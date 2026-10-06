@@ -10,6 +10,7 @@ import {
   pushUnknownField,
   pushUnsupportedOp,
 } from "@shared/search/utils/buildFilters";
+import { ownEntry } from "@shared/utils/ownEntry";
 
 interface ErrorsFiltersBody {
   startTime: number;
@@ -63,8 +64,10 @@ export function buildErrorsFilters(
 
     const { field, op, value } = filter;
 
-    if (field in LIST_FIELDS) {
-      handleListField(field, op, value, body, warnings, LIST_FIELDS[field]);
+    const listMapping = ownEntry(LIST_FIELDS, field);
+
+    if (listMapping) {
+      handleListField(field, op, value, body, warnings, listMapping);
       continue;
     }
 

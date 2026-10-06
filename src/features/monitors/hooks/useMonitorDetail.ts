@@ -1,3 +1,5 @@
+import { skipToken } from "@tanstack/react-query";
+
 import { useStandardQuery } from "@/shared/hooks/useStandardQuery";
 
 import {
@@ -14,31 +16,27 @@ import {
 export function useMonitorDetail(id: number | undefined) {
   return useStandardQuery<Monitor>({
     queryKey: ["monitors", "detail", id],
-    queryFn: () => getMonitor(id!),
-    enabled: id !== undefined,
+    queryFn: id === undefined ? skipToken : () => getMonitor(id),
   });
 }
 
 export function useMonitorSeriesQuery(id: number | undefined, windowMs: number) {
   return useStandardQuery<MonitorSeriesResponse>({
     queryKey: ["monitors", "series", id, windowMs],
-    queryFn: () => getMonitorSeries(id!, windowMs),
-    enabled: id !== undefined,
+    queryFn: id === undefined ? skipToken : () => getMonitorSeries(id, windowMs),
   });
 }
 
 export function useMonitorEventsQuery(id: number | undefined, limit = 10) {
   return useStandardQuery<MonitorEvent[]>({
     queryKey: ["monitors", "events", id, limit],
-    queryFn: () => getMonitorEvents(id!, limit),
-    enabled: id !== undefined,
+    queryFn: id === undefined ? skipToken : () => getMonitorEvents(id, limit),
   });
 }
 
 export function useStatusTimelineQuery(id: number | undefined, windowMs: number) {
   return useStandardQuery<StatusTimelineResponse>({
     queryKey: ["monitors", "status-timeline", id, windowMs],
-    queryFn: () => getMonitorStatusTimeline(id!, windowMs),
-    enabled: id !== undefined,
+    queryFn: id === undefined ? skipToken : () => getMonitorStatusTimeline(id, windowMs),
   });
 }

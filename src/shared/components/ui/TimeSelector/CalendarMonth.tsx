@@ -24,8 +24,9 @@ export function CalendarMonth({
 }: CalendarMonthProps) {
   const daysInMonth = daysOfMonth(currentMonth);
 
-  let startDow = daysInMonth[0].getDay();
-  startDow = startDow === 0 ? 6 : startDow - 1;
+  // Weeks start on Monday: shift getDay()'s Sunday-first index by one.
+  const startDow =
+    (new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() + 6) % 7;
 
   const padStart = Array(startDow).fill(null);
   const totalCells = padStart.concat(daysInMonth);

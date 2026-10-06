@@ -7,7 +7,7 @@ import { memo, useMemo } from "react";
 
 interface Props {
   readonly spanLogs: readonly TraceLog[];
-  readonly onOpenInLogs: () => void;
+  readonly onOpenInLogs?: () => void;
 }
 
 function SpanDrawerLogsComponent({ spanLogs, onOpenInLogs }: Props) {
@@ -29,13 +29,15 @@ function SpanDrawerLogsComponent({ spanLogs, onOpenInLogs }: Props) {
         <span className="text-[12px] text-foreground-caption">
           {spanLogs.length} log record{spanLogs.length === 1 ? "" : "s"} tied to this span ID
         </span>
-        <button
-          type="button"
-          onClick={onOpenInLogs}
-          className="inline-flex cursor-pointer items-center gap-1 font-mono text-[11px] text-primary hover:underline"
-        >
-          <ScrollText size={11} /> Open in Logs Explorer →
-        </button>
+        {onOpenInLogs ? (
+          <button
+            type="button"
+            onClick={onOpenInLogs}
+            className="inline-flex cursor-pointer items-center gap-1 font-mono text-[11px] text-primary hover:underline"
+          >
+            <ScrollText size={11} /> Open in Logs Explorer →
+          </button>
+        ) : null}
       </div>
 
       <div className="overflow-x-auto rounded-md border border-border">

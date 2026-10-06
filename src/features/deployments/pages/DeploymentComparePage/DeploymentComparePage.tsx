@@ -14,6 +14,7 @@ import {
   buildDeploymentTracesHref,
 } from "@shared/observability/deepLinks";
 import { encodeFilters } from "@shared/search/utils/urlState";
+import { pickCyclic } from "@shared/utils/cyclic";
 import { formatNumber, formatTimestamp } from "@shared/utils/formatters";
 
 import {
@@ -50,7 +51,7 @@ export default function DeploymentComparePage() {
       (traffic.data?.series ?? []).map((entry, index) => ({
         label: entry.version,
         values: entry.requests,
-        color: SERIES_COLORS[index % SERIES_COLORS.length],
+        color: pickCyclic(SERIES_COLORS, index),
         fill: entry.version === version,
         width: entry.version === version ? 2.5 : 1.5,
       })),

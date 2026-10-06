@@ -1,4 +1,5 @@
 import { PanelCard } from "@shared/components/ui/PanelCard";
+import { ownEntry } from "@shared/utils/ownEntry";
 
 import type { IngestionSummary } from "@shared/api/ingestion";
 import { Bar } from "./Bar";
@@ -33,7 +34,7 @@ export function TelemetryTypeBreakdown({ summary, unit }: Props) {
               </div>
               <Bar
                 pct={share}
-                color={SIGNAL_COLORS[row.type] ?? "var(--color-info,#3b82f6)"}
+                color={ownEntry(SIGNAL_COLORS, row.type) ?? SIGNAL_COLORS.logs}
                 label={`${row.label} ${Math.round(share)}%`}
               />
             </div>

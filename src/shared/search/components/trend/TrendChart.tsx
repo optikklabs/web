@@ -40,34 +40,22 @@ function TrendChartComponent({
   const { timestamps, series } = useMemo(() => {
     if (!data || data.length === 0) return { timestamps: null, series: [] };
 
-    // Build cumulative series based on segment order (bottom to top).
-    // The series that encompasses all counts must be drawn first (in the background).
-    const tsArray: number[] = [];
-    const seriesValues: number[][] = segments.map(() => []);
-
-    for (const b of data) {
-      tsArray.push(b.ts / 1000);
-      let cumulative = 0;
-      for (let i = 0; i < segments.length; i++) {
-        const seg = segments[i];
-        cumulative += b.counts[seg.key] ?? 0;
-        seriesValues[i].push(cumulative);
-      }
-    }
-
-    const outSeries: ObservabilityChartSeries[] = [];
-    for (let i = segments.length - 1; i >= 0; i--) {
-      const seg = segments[i];
-      outSeries.push({
+    // Stack the segments bottom to top, then draw the outermost band (which
+    // encompasses all counts) first so the inner bands paint over it.
+    let below = data.map(() => 0);
+    const stacked = segments.map((seg): ObservabilityChartSeries => {
+      const counts = data.map((b) => b.counts[seg.key] ?? 0);
+      below = below.map((v, i) => v + (counts[i] ?? 0));
+      return {
         label: seg.label,
-        values: seriesValues[i],
-        tooltipValues: data.map((b) => b.counts[seg.key] ?? 0),
+        values: below,
+        tooltipValues: counts,
         color: seg.color,
         fill: true,
-      });
-    }
+      };
+    });
 
-    return { timestamps: tsArray, series: outSeries };
+    return { timestamps: data.map((b) => b.ts / 1000), series: stacked.reverse() };
   }, [data, segments]);
 
   return (

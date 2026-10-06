@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Card as Surface } from "@shared/components/primitives/ui/card";
 import PageHeader from "@shared/components/ui/layout/PageHeader";
 import { PageShell, PageSurface } from "@shared/components/ui/layout/PageShell";
-import { useTimeRangeQuery } from "@shared/hooks/useTimeRangeQuery";
+import { useTimeRange, useTimeRangeQuery } from "@shared/hooks/useTimeRangeQuery";
 import { formatNumber, formatTimestamp } from "@shared/utils/formatters";
 
 import {
@@ -65,6 +65,7 @@ function OccurrenceTimeline({ counts }: { counts: number[] }) {
 
 export default function ErrorGroupDetailPage(): JSX.Element {
   const params = useParams({ strict: false });
+  const { getTimeRange } = useTimeRange();
   const groupId = decodeURIComponent(typeof params.groupId === "string" ? params.groupId : "");
 
   const detailQ = useTimeRangeQuery(
@@ -113,7 +114,9 @@ export default function ErrorGroupDetailPage(): JSX.Element {
   // The API answers 404 when the group has no errors in the selected window.
   const absent = detailQ.error?.status === 404;
 
-  const cutoff = Date.now() - 3_600_000;
+  // Errors in the final hour of the selected window, not of wall-clock time,
+  // so a historical window reports its own last hour.
+  const cutoff = Number(getTimeRange().endTime) - 3_600_000;
   const lastHour = points.reduce((a, p) => (p.timestampMs >= cutoff ? a + p.errorCount : a), 0);
 
   const title = detail?.exceptionType || detail?.operationName || groupId;
@@ -155,7 +158,7 @@ export default function ErrorGroupDetailPage(): JSX.Element {
           <MetaStat
             label="Occurrences"
             value={detail ? formatNumber(detail.errorCount) : "—"}
-            sub={`${formatNumber(lastHour)} in 1h`}
+            sub={`${formatNumber(lastHour)} in the last hour`}
           />
         </div>
       </Surface>

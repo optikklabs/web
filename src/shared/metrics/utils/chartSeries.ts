@@ -7,7 +7,7 @@ import type {
   MetricExplorerResults,
   MetricQueryDefinition,
 } from "@shared/metrics/types";
-import { getChartColor } from "@shared/utils/charting";
+import { getChartColor } from "@shared/utils/chartTheme";
 import { evaluateFormula } from "./formulaEvaluator";
 
 const FORMULA_COLOR = "#f59e0b";

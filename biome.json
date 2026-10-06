@@ -32,27 +32,45 @@
         "noDefaultExport": "off",
         "useImportType": "error",
         "useNodejsImportProtocol": "error",
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "error",
+        "noParameterAssign": "error",
+        "useNumberNamespace": "error"
       },
       "complexity": {
-        "noForEach": "off"
+        "noForEach": "off",
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": {
+            "maxAllowedComplexity": 20
+          }
+        }
       },
       "suspicious": {
-        "noAssignInExpressions": "off",
-        "noImplicitAnyLet": "off",
-        "noRedeclare": "off",
+        "noAssignInExpressions": "error",
+        "noImplicitAnyLet": "error",
+        "noRedeclare": "error",
         "noArrayIndexKey": "off",
-        "noExplicitAny": "error"
+        "noExplicitAny": "error",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["error", "warn"]
+          }
+        },
+        "noEmptyBlockStatements": "error",
+        "noEvolvingTypes": "error"
       },
       "a11y": {
-        "noLabelWithoutControl": "warn",
-        "useValidAnchor": "warn",
-        "useKeyWithClickEvents": "warn",
-        "useSemanticElements": "warn"
+        "noLabelWithoutControl": "error",
+        "useValidAnchor": "error",
+        "useKeyWithClickEvents": "error",
+        "useSemanticElements": "error"
       },
       "correctness": {
-        "useExhaustiveDependencies": "warn",
-        "useHookAtTopLevel": "error"
+        "useExhaustiveDependencies": "error",
+        "useHookAtTopLevel": "error",
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
       },
       "nursery": {
         "useSortedClasses": {
@@ -94,6 +112,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "include": ["vite.config.ts", "scripts/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
           }
         }
       }

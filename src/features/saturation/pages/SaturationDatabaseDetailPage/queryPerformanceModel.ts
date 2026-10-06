@@ -1,10 +1,45 @@
 import type { ObservabilityChartSeries } from "@shared/components/ui/charts/ObservabilityChart";
-import { getChartColor } from "@shared/utils/charting";
+import { getChartColor } from "@shared/utils/chartTheme";
 
 import type {
+  QueryPerformanceCatalogue,
   QueryPerformanceResponse,
   QueryPerformanceSeries,
 } from "@/features/saturation/api/databaseQueryPerformanceApi";
+
+/**
+ * The collection and query the URL asks for when the catalogue still has
+ * them, otherwise the catalogue's first entry of each.
+ */
+export function resolveCatalogueSelection(
+  catalogue: QueryPerformanceCatalogue | undefined,
+  requested: { readonly collection?: string; readonly queryHash?: string }
+): { collection: string | undefined; queryHash: string | undefined } {
+  const collections = catalogue?.collections ?? [];
+  const queries = catalogue?.queries ?? [];
+  return {
+    collection: collections.some((item) => item.name === requested.collection)
+      ? requested.collection
+      : collections[0]?.name,
+    queryHash: queries.some((item) => item.queryHash === requested.queryHash)
+      ? requested.queryHash
+      : queries[0]?.queryHash,
+  };
+}
+
+/**
+ * Series hashes chosen in the URL's comma-separated `queries` param, keeping
+ * only well-formed hashes that are present; every hash when unset.
+ */
+export function selectedQueryHashes(
+  raw: string | undefined,
+  available: ReadonlySet<string>
+): Set<string> {
+  if (!raw) return new Set(available);
+  return new Set(
+    raw.split(",").filter((hash) => /^[0-9a-f]{16}$/.test(hash) && available.has(hash))
+  );
+}
 
 export function queryDisplayLabel(query: { queryHash: string; queryLabel: string }): string {
   const label = query.queryLabel.trim() || "Database query";

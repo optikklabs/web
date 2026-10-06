@@ -136,6 +136,7 @@ function JsonTreeViewComponent({ data }: Props) {
       >
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
           const node = flatNodes[virtualRow.index];
+          if (!node) return null;
           return (
             <div
               key={node.id}

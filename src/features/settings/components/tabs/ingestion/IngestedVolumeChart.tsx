@@ -6,6 +6,8 @@ import ObservabilityChart, {
 
 import { PanelCard } from "@shared/components/ui/PanelCard";
 import { MetricSegmentedControl } from "@shared/metrics/components/MetricSegmentedControl";
+import { pickCyclic } from "@shared/utils/cyclic";
+import { ownEntry } from "@shared/utils/ownEntry";
 
 import type { IngestionTimeseries, TimeseriesSeries } from "@shared/api/ingestion";
 import { type IngestionUnit, SERVICE_PALETTE, SIGNAL_COLORS, fmtValue } from "./format";
@@ -17,7 +19,7 @@ function dateToSeconds(date: string): number {
 }
 
 function colorFor(series: TimeseriesSeries, index: number): string {
-  return SIGNAL_COLORS[series.id] ?? SERVICE_PALETTE[index % SERVICE_PALETTE.length];
+  return ownEntry(SIGNAL_COLORS, series.id) ?? pickCyclic(SERVICE_PALETTE, index);
 }
 
 function bandValues(s: TimeseriesSeries, unit: IngestionUnit): readonly number[] {
@@ -30,23 +32,13 @@ function stackSeries(
   series: readonly TimeseriesSeries[],
   unit: IngestionUnit
 ): ObservabilityChartSeries[] {
-  const length = bandValues(series[0] ?? ({ data: [], byteData: [] } as never), unit).length;
-  const cumulative: number[][] = [];
-  series.forEach((s, idx) => {
-    const vals = bandValues(s, unit);
-    cumulative[idx] = Array.from(
-      { length },
-      (_v, i) => (vals[i] ?? 0) + (idx > 0 ? cumulative[idx - 1][i] : 0)
-    );
+  let below: readonly number[] = [];
+  const stacked = series.map((s, idx) => {
+    const values = bandValues(s, unit).map((v, i) => v + (below[i] ?? 0));
+    below = values;
+    return { label: s.label, values, color: colorFor(s, idx), fill: true };
   });
-  return series
-    .map((s, idx) => ({
-      label: s.label,
-      values: cumulative[idx],
-      color: colorFor(s, idx),
-      fill: true,
-    }))
-    .reverse();
+  return stacked.reverse();
 }
 
 const GROUP_BY_OPTIONS = [

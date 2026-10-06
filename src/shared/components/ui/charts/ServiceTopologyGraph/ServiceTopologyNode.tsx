@@ -7,15 +7,15 @@ import { Handle, type NodeProps, Position } from "@xyflow/react";
 
 import { Tooltip } from "@shared/components/primitives/ui/tooltip";
 
-import type { ServiceTopologyNode } from "@shared/api/topology";
+import type { ServiceTopologyNode as TopologyNode } from "@shared/api/topology";
 import { NODE_HEIGHT, NODE_WIDTH } from "./layout";
 
-export type TopologyNodeData = ServiceTopologyNode & {
+export type TopologyNodeData = TopologyNode & {
   dimmed: boolean;
   onOpen: (name: string) => void;
 };
 
-const healthRingColor: Record<ServiceTopologyNode["health"], string> = {
+const healthRingColor: Record<TopologyNode["health"], string> = {
   healthy: "var(--color-success)",
   degraded: "var(--color-warning)",
   unhealthy: "var(--color-error)",

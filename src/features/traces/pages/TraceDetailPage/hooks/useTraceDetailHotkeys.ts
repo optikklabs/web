@@ -88,7 +88,9 @@ function focusSearch(e: KeyboardEvent) {
 
 function copyTraceId(e: KeyboardEvent, traceId: string) {
   e.preventDefault();
-  void navigator.clipboard?.writeText(traceId).catch(() => {});
+  void navigator.clipboard?.writeText(traceId).catch(() => {
+    // Clipboard access can be denied; copying is a convenience, not a requirement.
+  });
 }
 
 function cycleErrorSpans(
@@ -97,10 +99,10 @@ function cycleErrorSpans(
   selectedSpanId: string | null,
   onSelectSpan: (spanId: string) => void
 ) {
-  if (errorSpanIds.length === 0) return;
-  e.preventDefault();
   const idx = selectedSpanId ? errorSpanIds.indexOf(selectedSpanId) : -1;
   const next = errorSpanIds[(idx + 1) % errorSpanIds.length];
+  if (next === undefined) return;
+  e.preventDefault();
   onSelectSpan(next);
 }
 

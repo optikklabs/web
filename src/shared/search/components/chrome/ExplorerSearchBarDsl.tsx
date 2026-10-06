@@ -112,7 +112,7 @@ function DslBarLayout(p: LayoutProps) {
           />
         </div>
       ) : null}
-      {s.parsed.errors.length > 0 ? (
+      {s.parsed.errors[0] ? (
         <div className="mt-1 text-[10px] text-error">{s.parsed.errors[0].message}</div>
       ) : null}
     </div>
@@ -163,9 +163,10 @@ function handleKeyDown(
     s.setActiveIdx(s.activeIdx <= 0 ? s.suggestions.length - 1 : s.activeIdx - 1);
     return;
   }
-  if (e.key === "Tab" && showPopover && s.suggestions.length > 0) {
+  const tabTarget = activeOpt ?? s.suggestions[0];
+  if (e.key === "Tab" && showPopover && tabTarget) {
     e.preventDefault();
-    s.acceptSuggestion(activeOpt ?? s.suggestions[0]);
+    s.acceptSuggestion(tabTarget);
     return;
   }
   if (e.key === "Enter") {

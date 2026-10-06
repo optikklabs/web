@@ -40,11 +40,11 @@ export function fmtMoney(currency: string, n: number | null | undefined): string
 }
 
 // Per-signal colors, reused by the chart, breakdown bars and pillar cards.
-export const SIGNAL_COLORS: Record<string, string> = {
+export const SIGNAL_COLORS = {
   logs: "var(--color-info,#3b82f6)",
   spans: "#6366f1",
   metrics: "var(--color-success,#10b981)",
-};
+} as const;
 
 // Cyclic palette for "by service" series and table dots.
 export const SERVICE_PALETTE = [
@@ -55,4 +55,4 @@ export const SERVICE_PALETTE = [
   "var(--color-error,#ef4444)",
   "#f97316",
   "#818cf8",
-];
+] as const;

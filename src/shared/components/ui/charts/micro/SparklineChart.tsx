@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { getChartColor } from "@shared/utils/charting";
+import { getChartColor } from "@shared/utils/chartTheme";
 
 import UPlotChart from "../UPlotChart";
 import { uLine } from "../uplotHelpers";

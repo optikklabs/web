@@ -50,7 +50,7 @@ function PageFallback({
           <Button variant="primary" onClick={handleReset}>
             Try Again
           </Button>
-          <Button variant="secondary" onClick={() => (window.location.href = "/")}>
+          <Button variant="secondary" onClick={() => window.location.assign("/")}>
             Go Home
           </Button>
         </div>

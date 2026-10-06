@@ -86,6 +86,7 @@ function WaterfallTraceComponent({
         <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
           {virtualizer.getVirtualItems().map((virtualRow) => {
             const row = flat[virtualRow.index];
+            if (!row) return null;
             return (
               <div
                 key={row.span.spanId}

@@ -30,7 +30,7 @@ export function TopSeriesPanel({ result, unit }: TopSeriesPanelProps) {
   const [expanded, setExpanded] = useState(false);
 
   const rows = useMemo(() => buildTopSeriesRows(result, groupBy), [result, groupBy]);
-  const maxValue = rows.length > 0 ? rows[0].current : 1;
+  const maxValue = rows[0]?.current ?? 1;
   const shown = expanded ? rows : rows.slice(0, VISIBLE_ROWS);
   const hidden = rows.length - VISIBLE_ROWS;
 

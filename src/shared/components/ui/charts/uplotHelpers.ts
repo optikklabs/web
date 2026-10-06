@@ -16,8 +16,8 @@ export function defaultAxes(config?: { yAxisSize?: number }): uPlot.Axis[] {
       font,
       gap: 8,
       values: (u: uPlot, splits: number[]) => {
-        const minTs = u.scales.x.min ?? splits[0] ?? 0;
-        const maxTs = u.scales.x.max ?? splits[splits.length - 1] ?? 0;
+        const minTs = u.scales.x?.min ?? splits[0] ?? 0;
+        const maxTs = u.scales.x?.max ?? splits.at(-1) ?? 0;
         const rangeS = maxTs - minTs;
 
         return splits.map((ts, idx) => {

@@ -27,11 +27,11 @@ export function TracesExplorerContent({ model }: { readonly model: TracesExplore
   const trendData = useMemo<TrendChartBucket[] | undefined>(() => {
     if (model.trendBuckets.length === 0) return undefined;
     return model.trendBuckets.map((b) => {
-      const errors = b.counts.errors || 0;
+      const errors = b.counts.errors ?? 0;
       return {
         ts: b.ts,
         counts: {
-          ok: Math.max(0, b.counts.total - errors),
+          ok: Math.max(0, (b.counts.total ?? 0) - errors),
           errors,
         },
       };

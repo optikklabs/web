@@ -95,8 +95,8 @@ export function TopologySVG({
         DOWNSTREAM
       </text>
 
-      {edges.map((e, idx) => (
-        <g key={idx}>
+      {edges.map((e) => (
+        <g key={e.path}>
           <path
             d={e.path}
             stroke={e.color}

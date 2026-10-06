@@ -15,11 +15,7 @@ export default function ShortcutHelpOverlay({
   onClose,
   shortcuts,
 }: ShortcutHelpOverlayProps): JSX.Element {
-  const groups = shortcuts.reduce<Record<string, KeyboardShortcut[]>>((accumulator, shortcut) => {
-    accumulator[shortcut.section] ??= [];
-    accumulator[shortcut.section].push(shortcut);
-    return accumulator;
-  }, {});
+  const groups = Map.groupBy(shortcuts, (shortcut) => shortcut.section);
 
   return (
     <Modal open={open} onClose={onClose} title="Keyboard Shortcuts" width={640} footer={null}>
@@ -32,7 +28,7 @@ export default function ShortcutHelpOverlay({
           </span>
         </div>
 
-        {Object.entries(groups).map(([section, sectionShortcuts]) => (
+        {[...groups].map(([section, sectionShortcuts]) => (
           <div key={section} className="space-y-2">
             <h3 className="font-semibold text-foreground-muted text-xs uppercase tracking-[0.08em]">
               {section}

@@ -18,6 +18,11 @@ function escapeCsv(field: string): string {
   return field;
 }
 
+/** A two-decimal CSV cell; an absent statistic is an empty cell. */
+function csvNumber(value: number | null): string {
+  return value == null ? "" : value.toFixed(2);
+}
+
 /** Serialize the group-by breakdown (one row per series) to CSV text. */
 export function buildBreakdownCsv(result: MetricQueryResult | undefined): string {
   if (!result || result.series.length === 0) return "";
@@ -29,12 +34,7 @@ export function buildBreakdownCsv(result: MetricQueryResult | undefined): string
     const stats = computeSeriesStats(series);
     const row = [
       ...tagKeys.map((k) => series.tags[k] ?? ""),
-      String(stats.min.toFixed(2)),
-      String(stats.avg.toFixed(2)),
-      String(stats.p95.toFixed(2)),
-      String(stats.p99.toFixed(2)),
-      String(stats.max.toFixed(2)),
-      stats.delta != null ? String(stats.delta.toFixed(2)) : "",
+      ...[stats.min, stats.avg, stats.p95, stats.p99, stats.max, stats.delta].map(csvNumber),
     ];
     lines.push(row.map(escapeCsv).join(","));
   }

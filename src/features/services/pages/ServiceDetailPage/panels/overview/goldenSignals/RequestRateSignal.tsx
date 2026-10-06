@@ -3,7 +3,7 @@ import ObservabilityChart, {
 } from "@shared/components/ui/charts/ObservabilityChart";
 
 import { PanelCard } from "@shared/components/ui/PanelCard";
-import { getChartColor } from "@shared/utils/charting";
+import { getChartColor } from "@shared/utils/chartTheme";
 import { fmtNum } from "@shared/utils/formatters";
 import { SIGNAL_CHART_HEIGHT, SignalLegend } from "./SignalCardShell";
 import { useEndpointRED } from "./useEndpointRED";

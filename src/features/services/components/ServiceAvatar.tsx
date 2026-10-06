@@ -1,3 +1,5 @@
+import { pickByHash } from "@shared/utils/cyclic";
+
 const PALETTE = [
   "var(--color-primary-subtle-25)",
   "var(--color-warning-subtle)",
@@ -6,20 +8,12 @@ const PALETTE = [
   "var(--color-info-subtle)",
 ] as const;
 
-function hashIndex(input: string, modulo: number): number {
-  let hash = 0;
-  for (let i = 0; i < input.length; i++) {
-    hash = (hash * 31 + input.charCodeAt(i)) | 0;
-  }
-  return Math.abs(hash) % modulo;
-}
-
 function getInitials(name: string): string {
   const cleaned = name.replace(/[^A-Za-z0-9]+/g, " ").trim();
   if (!cleaned) return "?";
-  const parts = cleaned.split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
+  const [first = "", second] = cleaned.split(/\s+/);
+  if (!second) return first.slice(0, 2).toUpperCase();
+  return (first.charAt(0) + second.charAt(0)).toUpperCase();
 }
 
 interface ServiceAvatarProps {
@@ -28,7 +22,7 @@ interface ServiceAvatarProps {
 }
 
 export function ServiceAvatar({ serviceName, size = 44 }: ServiceAvatarProps) {
-  const bg = PALETTE[hashIndex(serviceName, PALETTE.length)];
+  const bg = pickByHash(PALETTE, serviceName);
   const fontSize = Math.max(9, Math.round(size * 0.32));
   return (
     <div

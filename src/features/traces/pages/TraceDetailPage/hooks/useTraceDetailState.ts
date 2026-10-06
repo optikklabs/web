@@ -21,8 +21,7 @@ export function useTraceDetailState() {
 
   const data = useTraceDetailData(traceIdParam);
 
-  const resolvedTraceId =
-    data.spans.length > 0 ? data.spans[0].traceId || traceIdParam : traceIdParam;
+  const resolvedTraceId = data.spans[0]?.traceId || traceIdParam;
 
   const serviceMap = useTraceServiceMap(
     data.serviceMap,

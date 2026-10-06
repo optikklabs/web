@@ -1,3 +1,5 @@
+import { pickCyclic } from "./cyclic";
+
 const CHART_THEME_FALLBACKS = {
   textPrimary: "#e7eaf1",
   textSecondary: "#b9c0cf",
@@ -49,16 +51,18 @@ export function resolveThemeColor(token: string, fallback: string): string {
     return readCssVariable(trimmed, fallback);
   }
 
-  const cssVarMatch = trimmed.match(/^var\((--[^),\s]+)(?:,\s*([^)]+))?\)$/);
-  if (cssVarMatch) {
-    return readCssVariable(cssVarMatch[1], cssVarMatch[2]?.trim() || fallback);
+  const cssVar = /^var\((?<name>--[^),\s]+)(?:,\s*(?<inner>[^)]+))?\)$/.exec(trimmed)?.groups;
+  if (cssVar?.name) {
+    return readCssVariable(cssVar.name, cssVar.inner?.trim() || fallback);
   }
 
   return trimmed;
 }
 
-export function getResolvedChartPalette(): string[] {
-  return CHART_PALETTE_TOKENS.map(([token, fallback]) => resolveThemeColor(token, fallback));
+/** The themed chart color for series `index`, cycling through the palette. */
+export function getChartColor(index: number): string {
+  const [token, fallback] = pickCyclic(CHART_PALETTE_TOKENS, index);
+  return resolveThemeColor(token, fallback);
 }
 
 export const CHART_THEME_DEFAULTS = {

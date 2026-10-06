@@ -18,14 +18,14 @@ export interface SeverityStyle {
   readonly slug: SeveritySlug;
 }
 
-const STYLES: readonly SeverityStyle[] = [
+const STYLES = [
   { bucket: 0, label: "Trace", shortLabel: "TRC", color: "#7e8ea0", slug: "trace" },
   { bucket: 1, label: "Debug", shortLabel: "DBG", color: "#4e9fdd", slug: "debug" },
   { bucket: 2, label: "Info", shortLabel: "INF", color: "#73bf69", slug: "info" },
   { bucket: 3, label: "Warn", shortLabel: "WRN", color: "#e0b400", slug: "warn" },
   { bucket: 4, label: "Error", shortLabel: "ERR", color: "#e8494d", slug: "error" },
   { bucket: 5, label: "Fatal", shortLabel: "FTL", color: "#c00021", slug: "fatal" },
-];
+] as const satisfies readonly SeverityStyle[];
 
 export const SEVERITY_STYLES: readonly SeverityStyle[] = STYLES;
 

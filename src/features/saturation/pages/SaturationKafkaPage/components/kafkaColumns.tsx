@@ -72,7 +72,7 @@ export const groupColumns: ColumnDef<ConsumerGroupRow>[] = [
   },
   ...(["consumer", "topic"] as const).map(
     (key): ColumnDef<ConsumerGroupRow> => ({
-      header: key[0].toUpperCase() + key.slice(1),
+      header: key.charAt(0).toUpperCase() + key.slice(1),
       accessorKey: key,
       cell: ({ row }) => (
         <span className="font-mono text-foreground-muted">{row.original[key]}</span>

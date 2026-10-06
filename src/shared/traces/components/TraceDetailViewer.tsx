@@ -1,9 +1,9 @@
-import type { TraceLog, TraceRecord } from "@shared/api/traces/schemas";
+import type { TraceRecord } from "@shared/api/traces/schemas";
 import { PageShell } from "@shared/components/ui/layout/PageShell";
 import { memo } from "react";
 
 import { useTraceDetailViewerState } from "../hooks/useTraceDetailViewerState";
-import type { RelatedTrace, SpanAttributes, SpanEvent } from "../types/detail";
+import type { SpanAttributes } from "../types/detail";
 import { TraceDetailEmptySpans } from "./detail/TraceDetailEmptyStates";
 import { TraceDetailLayout } from "./detail/TraceDetailLayout";
 import { TraceHeader } from "./header/TraceHeader";
@@ -25,12 +25,13 @@ export interface TraceDetailViewerProps {
     readonly endMs: number;
   };
   readonly getSpanAttributes?: (spanId: string) => SpanAttributes | null;
-  readonly traceLogs?: readonly TraceLog[];
-  readonly spanEvents?: readonly SpanEvent[];
-  readonly relatedTraces?: readonly RelatedTrace[];
   readonly onBack: () => void;
-  readonly onOpenInLogs?: () => void;
 }
+
+/**
+ * Read-only trace view for pages that have a trace's spans but none of the
+ * explorer context (logs, related traces, filters), such as LLM traces.
+ */
 
 function TraceDetailViewerComponent({
   traceId,
@@ -38,11 +39,7 @@ function TraceDetailViewerComponent({
   stats,
   traceTimeBounds,
   getSpanAttributes,
-  traceLogs = [],
-  spanEvents = [],
-  relatedTraces = [],
   onBack,
-  onOpenInLogs = () => {},
 }: TraceDetailViewerProps) {
   const {
     selectedSpanId,
@@ -62,7 +59,7 @@ function TraceDetailViewerComponent({
   if (spans.length === 0) {
     return (
       <PageShell>
-        <TraceDetailEmptySpans hasLogs={traceLogs.length > 0} />
+        <TraceDetailEmptySpans hasLogs={false} />
       </PageShell>
     );
   }
@@ -76,7 +73,6 @@ function TraceDetailViewerComponent({
         rootOperation={rootSpan?.operationName}
         httpMethod={rootSpan?.httpMethod}
         httpStatus={httpStatus}
-        onOpenInLogs={onOpenInLogs}
         onBack={onBack}
       />
 
@@ -105,15 +101,13 @@ function TraceDetailViewerComponent({
           errorGroups={[]}
           spanAttributes={currentAttributes}
           spanAttributesLoading={false}
-          spanEvents={spanEvents}
-          relatedTraces={relatedTraces}
-          relatedTracesRequested={relatedTraces.length > 0}
+          spanEvents={[]}
+          relatedTraces={[]}
+          relatedTracesRequested={false}
           relatedTracesLoading={false}
-          traceLogs={traceLogs}
+          traceLogs={[]}
           traceStartMs={traceTimeBounds.startMs}
           traceEndMs={traceTimeBounds.endMs}
-          onAddFilter={() => {}}
-          onOpenSpanInLogs={onOpenInLogs}
         />
       </div>
 

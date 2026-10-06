@@ -3,6 +3,7 @@ import DataTable from "@shared/components/ui/data-display/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { PanelCard } from "@shared/components/ui/PanelCard";
+import { pickCyclic } from "@shared/utils/cyclic";
 
 import type { IngestionServiceRow, IngestionServices } from "@shared/api/ingestion";
 import { type IngestionUnit, SERVICE_PALETTE, SIGNAL_COLORS, fmtCount, fmtValue } from "./format";
@@ -25,9 +26,9 @@ function MixBar({ row }: { row: IngestionServiceRow }) {
       className="flex h-2 w-full gap-0.5"
       title={parts.map((p) => `${p.label}: ${fmtCount(p.v)}`).join(" · ")}
     >
-      {parts.map((p, i) => (
+      {parts.map((p) => (
         <div
-          key={i}
+          key={p.label}
           className="h-full rounded-sm"
           style={{ width: `${(p.v / total) * 100}%`, background: p.color }}
         />
@@ -49,7 +50,7 @@ function Delta({ pct }: { pct: number }) {
 }
 
 function paletteColor(index: number): string {
-  return SERVICE_PALETTE[index % SERVICE_PALETTE.length];
+  return pickCyclic(SERVICE_PALETTE, index);
 }
 
 function buildColumns(unit: IngestionUnit): ColumnDef<IngestionServiceRow>[] {

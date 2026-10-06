@@ -17,6 +17,9 @@ import { severityStyle } from "../../utils/severity";
 import { getTraceId } from "../../utils/traceCorrelation";
 import { ExpandedLogRow } from "./ExpandedLogRow";
 
+/** Half-width of the time window a log opens its trace in. */
+const TRACE_WINDOW_MS = 30 * 60 * 1000;
+
 const SEV_LVL_CLASS: Record<SeveritySlug, string> = {
   trace: "text-[var(--trace-c)] bg-[oklch(0.66_0.1_245/0.1)]",
   debug: "text-[var(--debug-c)] bg-[oklch(0.72_0.16_235/0.1)]",
@@ -78,11 +81,13 @@ function LogRowComponent({ row, searchTerm, isSelected, onClick, onContextMenu }
   const handleTrace = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!traceId) return;
-    const logMs = row.timestamp ? new Date(row.timestamp).getTime() : Date.now();
-    const validMs = Number.isFinite(logMs) ? logMs : Date.now();
-    const fromMs = validMs - 30 * 60 * 1000;
-    const toMs = validMs + 30 * 60 * 1000;
-    navigate({ to: buildTraceDetailHref(traceId, undefined, fromMs, toMs) as never });
+    // Open the trace in a window around the log; without a parseable time the
+    // trace page keeps the current window rather than one invented from "now".
+    const logMs = Date.parse(row.timestamp);
+    const href = Number.isFinite(logMs)
+      ? buildTraceDetailHref(traceId, undefined, logMs - TRACE_WINDOW_MS, logMs + TRACE_WINDOW_MS)
+      : buildTraceDetailHref(traceId);
+    navigate({ to: href as never });
   };
 
   const isError = sev.slug === "error";
