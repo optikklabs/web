@@ -28,6 +28,6 @@ function djb2(str: string): number {
 }
 
 export function getServiceColor(serviceName: string): string {
-  const idx = djb2(serviceName ?? "") % SERVICE_PALETTE.length;
+  const idx = djb2(serviceName) % SERVICE_PALETTE.length;
   return SERVICE_PALETTE[idx] ?? SERVICE_PALETTE[0];
 }

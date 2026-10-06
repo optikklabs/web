@@ -7,7 +7,7 @@ export type HealthVariant = "success" | "warning" | "error";
  * percentage against SERVICE_HEALTH_THRESHOLDS (boundaries inclusive).
  */
 export function healthVariantForErrorRate(errorRate: number | undefined): HealthVariant {
-  if (errorRate === undefined || errorRate === null) return "success";
+  if (errorRate === undefined) return "success";
   if (errorRate >= SERVICE_HEALTH_THRESHOLDS.unhealthy) return "error";
   if (errorRate >= SERVICE_HEALTH_THRESHOLDS.degraded) return "warning";
   return "success";

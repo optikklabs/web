@@ -9,26 +9,26 @@ const promptSummarySchema = z.object({
   id: z.number(),
   name: z.string(),
   type: z.string(),
-  description: z.string().nullish(),
-  tags: z.array(z.string()).nullish(),
+  description: z.string().optional(),
+  tags: z.array(z.string()),
   versionCount: z.number(),
-  productionVersion: z.number().nullish(),
+  productionVersion: z.number().optional(),
   updatedAt: z.string(),
 });
 export type LlmPromptSummary = z.infer<typeof promptSummarySchema>;
-const listSchema = z.object({ items: z.array(promptSummarySchema).nullish() });
+const listSchema = z.object({ items: z.array(promptSummarySchema) });
 
 const versionSchema = z.object({
   version: z.number(),
   template: z.unknown(),
-  variables: z.array(z.string()).nullish(),
-  notes: z.string().nullish(),
+  variables: z.array(z.string()),
+  notes: z.string().optional(),
   status: z.string(),
   createdAt: z.string(),
 });
 
 const detailSchema = promptSummarySchema.extend({
-  versions: z.array(versionSchema).nullish(),
+  versions: z.array(versionSchema),
 });
 export type LlmPromptDetail = z.infer<typeof detailSchema>;
 
@@ -51,7 +51,7 @@ export interface CreateVersionRequest {
 
 export async function listPrompts(): Promise<LlmPromptSummary[]> {
   const res = await api.get<unknown>(`${BASE}/llm/prompts`);
-  return validateResponse(listSchema, res).items ?? [];
+  return validateResponse(listSchema, res).items;
 }
 
 export async function getPrompt(name: string): Promise<LlmPromptDetail> {

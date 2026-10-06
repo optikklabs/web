@@ -1,26 +1,33 @@
 import api from "@/shared/api/http/client";
 import type { RequestTime } from "@/shared/api/service-types";
+import { validateResponse } from "@/shared/api/utils/validate";
 import { API_CONFIG } from "@config/apiConfig";
 import { useTimeRangeQuery } from "@shared/hooks/useTimeRangeQuery";
+import { z } from "zod";
 
-const V1 = API_CONFIG.ENDPOINTS.V1_BASE;
+const operationBaselineSchema = z.object({
+  serviceName: z.string(),
+  operationName: z.string(),
+  p50Ms: z.number(),
+  p95Ms: z.number(),
+  p99Ms: z.number(),
+  spanCount: z.number(),
+});
 
-export interface OperationBaseline {
-  readonly p50Ms: number;
-  readonly p95Ms: number;
-  readonly p99Ms: number;
-  readonly spanCount: number;
-}
+type OperationBaseline = z.infer<typeof operationBaselineSchema>;
 
-async function fetchOperationBaseline(
-  s: RequestTime,
-  e: RequestTime,
+async function getOperationBaseline(
+  startTime: RequestTime,
+  endTime: RequestTime,
   service: string,
   operation: string
 ): Promise<OperationBaseline> {
-  return api.get<OperationBaseline>(`${V1}/spans/red/operation-baseline`, {
-    params: { startTime: s, endTime: e, service, operation },
-  });
+  return validateResponse(
+    operationBaselineSchema,
+    await api.get<unknown>(`${API_CONFIG.ENDPOINTS.V1_BASE}/spans/red/operation-baseline`, {
+      params: { startTime, endTime, service, operation },
+    })
+  );
 }
 
 /**
@@ -33,7 +40,7 @@ export function useTraceOperationBaseline(
 ) {
   return useTimeRangeQuery<OperationBaseline>(
     "trace-detail.operation-baseline",
-    (_tenant, start, end) => fetchOperationBaseline(start, end, service ?? "", operation ?? ""),
+    (start, end) => getOperationBaseline(start, end, service ?? "", operation ?? ""),
     { extraKeys: [service ?? "", operation ?? ""], enabled: Boolean(service && operation) }
   );
 }

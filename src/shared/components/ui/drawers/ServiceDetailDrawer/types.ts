@@ -3,14 +3,13 @@ export interface ServiceDetailDrawerProps {
   onClose: () => void;
   serviceName: string;
   title?: string | null;
-  initialData?: Record<string, unknown> | null;
 }
 
 export interface ServiceSummarySnapshot {
   requestCount: number;
   errorCount: number;
   errorRate: number;
-  avgLatency: number;
+  p50Latency: number;
   p95Latency: number;
   p99Latency: number;
 }
@@ -30,6 +29,6 @@ export interface EndpointRow {
   httpMethod: string;
   requestCount: number;
   errorCount: number;
-  avgLatency: number;
+  p50Latency: number;
   p95Latency: number;
 }

@@ -1,4 +1,4 @@
-import type { TopologyResponse } from "@shared/api/red/redApi";
+import type { ServiceTopologyResponse } from "@shared/api/topology";
 import { CHART_THEME_DEFAULTS } from "@shared/utils/chartTheme";
 import { fmtNum } from "@shared/utils/formatters";
 import { useMemo } from "react";
@@ -11,14 +11,16 @@ export interface ServiceMapListItem {
   status: "ok" | "warn" | "err";
 }
 
-export function useTopologyData(topologyData: TopologyResponse | undefined, selectedFocus: string) {
+export function useTopologyData(
+  topologyData: ServiceTopologyResponse | undefined,
+  selectedFocus: string
+) {
   return useMemo(() => {
     if (!topologyData) {
       return { nodes: [], edges: [], upstreamList: [], downstreamList: [] };
     }
 
-    const rawNodes = topologyData.nodes ?? [];
-    const rawEdges = topologyData.edges ?? [];
+    const { nodes: rawNodes, edges: rawEdges } = topologyData;
 
     const focusNode = rawNodes.find((n) => n.name === selectedFocus);
     const upEdges = rawEdges.filter((e) => e.target === selectedFocus);

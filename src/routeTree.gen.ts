@@ -35,7 +35,6 @@ import { Route as AppServicesServiceNameRouteImport } from './routes/_app/servic
 import { Route as AppLogsTransactionsRouteImport } from './routes/_app/logs/transactions'
 import { Route as AppLogsPatternsRouteImport } from './routes/_app/logs/patterns'
 import { Route as AppDatabaseQueriesRouteImport } from './routes/_app/database/queries'
-import { Route as AppAlertsNewRouteImport } from './routes/_app/alerts.new'
 import { Route as AppInfrastructureHostsHostRouteImport } from './routes/_app/infrastructure/hosts/$host'
 import { Route as AppInfrastructureContainersContainerRouteImport } from './routes/_app/infrastructure/containers/$container'
 import { Route as AppDeploymentsServiceVersionRouteImport } from './routes/_app/deployments/$service.$version'
@@ -299,11 +298,6 @@ const AppDatabaseQueriesRoute = AppDatabaseQueriesRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_app/database/queries.lazy').then((d) => d.Route),
 )
-const AppAlertsNewRoute = AppAlertsNewRouteImport.update({
-  id: '/alerts/new',
-  path: '/alerts/new',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppMonitorsMonitorIdEditLazyRoute =
   AppMonitorsMonitorIdEditLazyRouteImport.update({
     id: '/edit',
@@ -400,7 +394,6 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AppSettingsRoute
   '/device': typeof AppDeviceLazyRoute
   '/overview': typeof AppOverviewLazyRoute
-  '/alerts/new': typeof AppAlertsNewRoute
   '/database/queries': typeof AppDatabaseQueriesRoute
   '/logs/patterns': typeof AppLogsPatternsRoute
   '/logs/transactions': typeof AppLogsTransactionsRoute
@@ -447,7 +440,6 @@ export interface FileRoutesByTo {
   '/settings': typeof AppSettingsRoute
   '/device': typeof AppDeviceLazyRoute
   '/overview': typeof AppOverviewLazyRoute
-  '/alerts/new': typeof AppAlertsNewRoute
   '/database/queries': typeof AppDatabaseQueriesRoute
   '/logs/patterns': typeof AppLogsPatternsRoute
   '/logs/transactions': typeof AppLogsTransactionsRoute
@@ -496,7 +488,6 @@ export interface FileRoutesById {
   '/_app/settings': typeof AppSettingsRoute
   '/_app/device': typeof AppDeviceLazyRoute
   '/_app/overview': typeof AppOverviewLazyRoute
-  '/_app/alerts/new': typeof AppAlertsNewRoute
   '/_app/database/queries': typeof AppDatabaseQueriesRoute
   '/_app/logs/patterns': typeof AppLogsPatternsRoute
   '/_app/logs/transactions': typeof AppLogsTransactionsRoute
@@ -545,7 +536,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/device'
     | '/overview'
-    | '/alerts/new'
     | '/database/queries'
     | '/logs/patterns'
     | '/logs/transactions'
@@ -592,7 +582,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/device'
     | '/overview'
-    | '/alerts/new'
     | '/database/queries'
     | '/logs/patterns'
     | '/logs/transactions'
@@ -640,7 +629,6 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/_app/device'
     | '/_app/overview'
-    | '/_app/alerts/new'
     | '/_app/database/queries'
     | '/_app/logs/patterns'
     | '/_app/logs/transactions'
@@ -934,13 +922,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDatabaseQueriesRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/alerts/new': {
-      id: '/_app/alerts/new'
-      path: '/alerts/new'
-      fullPath: '/alerts/new'
-      preLoaderRoute: typeof AppAlertsNewRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/monitors/$monitorId/edit': {
       id: '/_app/monitors/$monitorId/edit'
       path: '/edit'
@@ -1033,7 +1014,6 @@ interface AppRouteChildren {
   AppSettingsRoute: typeof AppSettingsRoute
   AppDeviceLazyRoute: typeof AppDeviceLazyRoute
   AppOverviewLazyRoute: typeof AppOverviewLazyRoute
-  AppAlertsNewRoute: typeof AppAlertsNewRoute
   AppDatabaseQueriesRoute: typeof AppDatabaseQueriesRoute
   AppLogsPatternsRoute: typeof AppLogsPatternsRoute
   AppLogsTransactionsRoute: typeof AppLogsTransactionsRoute
@@ -1073,7 +1053,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsRoute: AppSettingsRoute,
   AppDeviceLazyRoute: AppDeviceLazyRoute,
   AppOverviewLazyRoute: AppOverviewLazyRoute,
-  AppAlertsNewRoute: AppAlertsNewRoute,
   AppDatabaseQueriesRoute: AppDatabaseQueriesRoute,
   AppLogsPatternsRoute: AppLogsPatternsRoute,
   AppLogsTransactionsRoute: AppLogsTransactionsRoute,

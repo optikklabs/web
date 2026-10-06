@@ -1,6 +1,8 @@
 import { type ServiceHealth, classifyServiceHealth } from "@/features/services/utils/serviceHealth";
-import type { ServiceSummary } from "./useServiceSummary";
-import { useServiceSummary } from "./useServiceSummary";
+import {
+  type ServiceSummary,
+  useServiceSummaryQuery,
+} from "@shared/metrics/hooks/useServiceSummaryQuery";
 
 export interface HeroData {
   readonly summary: ServiceSummary | null;
@@ -13,8 +15,8 @@ function statusForSummary(summary: ServiceSummary | null): ServiceHealth {
   return classifyServiceHealth(summary.errorRate, summary.p99Ms);
 }
 
-export function useServiceHeroData(serviceName: string, windowMs: number): HeroData {
-  const summaryQ = useServiceSummary(serviceName, windowMs);
+export function useServiceHeroData(serviceName: string): HeroData {
+  const summaryQ = useServiceSummaryQuery(serviceName);
   return {
     summary: summaryQ.summary,
     status: statusForSummary(summaryQ.summary),

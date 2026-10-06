@@ -14,19 +14,19 @@ const evaluatorSchema = z.object({
   id: z.number(),
   name: z.string(),
   scoreName: z.string(),
-  judgeModel: z.string().nullish(),
+  judgeModel: z.string().optional(),
   target: z.string(),
   samplingPct: z.number(),
   dataType: z.string(),
-  categories: z.array(z.string()).nullish(),
-  promptTemplate: z.string().nullish(),
+  categories: z.array(z.string()),
+  promptTemplate: z.string().optional(),
   enabled: z.boolean(),
   analytics: z.object({ count: z.number(), meanValue: z.number() }),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 export type LlmEvaluator = z.infer<typeof evaluatorSchema>;
-const listSchema = z.object({ items: z.array(evaluatorSchema).nullish() });
+const listSchema = z.object({ items: z.array(evaluatorSchema) });
 
 export interface EvaluatorUpsertRequest {
   name: string;
@@ -42,7 +42,7 @@ export interface EvaluatorUpsertRequest {
 
 export async function listEvaluators(range: RangeParams): Promise<LlmEvaluator[]> {
   const res = await api.get<unknown>(`${BASE}/llm/evaluators`, { params: range });
-  return validateResponse(listSchema, res).items ?? [];
+  return validateResponse(listSchema, res).items;
 }
 
 export async function createEvaluator(req: EvaluatorUpsertRequest): Promise<LlmEvaluator> {

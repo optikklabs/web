@@ -20,15 +20,15 @@ export type LlmUsersOverview = z.infer<typeof overviewSchema>;
 
 const userSchema = z.object({
   userId: z.string(),
-  topService: z.string().nullish(),
+  topService: z.string(),
   traces: z.number(),
   tokens: z.number(),
   cost: z.number(),
-  avgScore: z.number(),
+  avgScore: z.number().nullable(),
   lastSeenMs: z.number(),
 });
 export type LlmUser = z.infer<typeof userSchema>;
-const usersResponseSchema = z.object({ users: z.array(userSchema).nullish() });
+const usersResponseSchema = z.object({ users: z.array(userSchema) });
 
 export async function getUsersOverview(range: RangeParams): Promise<LlmUsersOverview> {
   const res = await api.get<unknown>(`${BASE}/llm/users/overview`, { params: range });
@@ -38,5 +38,5 @@ export async function getUsersOverview(range: RangeParams): Promise<LlmUsersOver
 export async function queryUsers(range: RangeParams, limit = 100): Promise<LlmUser[]> {
   const res = await api.post<unknown>(`${BASE}/llm/users/query`, { ...range, limit });
   const data = validateResponse(usersResponseSchema, res);
-  return data.users ?? [];
+  return data.users;
 }

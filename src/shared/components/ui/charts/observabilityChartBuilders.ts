@@ -47,10 +47,7 @@ export function buildChartOptions({
   const scales: uPlot.Scales = {
     x: { time: true, ...(xRange ? { range: xRange } : {}) },
     y: {
-      range: (_u, min, max) => [
-        yMin ?? (min != null && min < 0 ? min : 0),
-        yMax ?? (max != null && max > 0 ? max * 1.1 : 1),
-      ],
+      range: (_u, min, max) => [yMin ?? (min < 0 ? min : 0), yMax ?? (max > 0 ? max * 1.1 : 1)],
     },
   };
   const labelColor = resolveThemeColor("--chart-axis", "#b9c0cf");

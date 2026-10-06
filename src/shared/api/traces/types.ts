@@ -22,7 +22,7 @@ export const traceSummarySchema = z.object({
   spanCount: z.number(),
   hasError: z.boolean(),
   errorCount: z.number(),
-  serviceSet: z.array(z.string()).optional(),
+  serviceSet: z.array(z.string()),
   truncated: z.boolean().optional(),
 });
 

@@ -13,7 +13,7 @@ export default function ContainerDetailPage(): JSX.Element {
   const params = useParams({ strict: false });
   const pod = decodeURIComponent(typeof params.container === "string" ? params.container : "");
 
-  const overviewQ = useTimeRangeQuery(`container-detail.overview.${pod}`, (_t, s, e) =>
+  const overviewQ = useTimeRangeQuery(`container-detail.overview.${pod}`, (s, e) =>
     getPodOverview(pod, s, e)
   );
   const overview = overviewQ.data ?? null;

@@ -23,41 +23,6 @@ const DEFAULT: CreateMonitorPayload = {
   tags: [],
 };
 
-// Parse the inbound CreateMonitorButton querystring (`?from=traces&filters=…`).
-// Returns prefill scope tags + a default type per source.
-function parsePrefill(): Partial<CreateMonitorPayload> {
-  if (typeof window === "undefined") return {};
-  const params = new URLSearchParams(window.location.search);
-  const from = params.get("from");
-  const filters = params.get("filters");
-  const out: Partial<CreateMonitorPayload> = {};
-  if (from === "traces") {
-    out.type = "apm";
-  } else if (from === "logs") {
-    out.type = "log";
-  } else if (from === "metrics") {
-    out.type = "metric";
-    const metricName = params.get("metric");
-    if (metricName) {
-      out.query = { metric: { metric: metricName, aggregation: "avg", windowSec: 300 } };
-    }
-  }
-  if (filters) {
-    const tags = filters
-      .split(";")
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map((seg) => {
-        const parts = seg.split(":");
-        if (parts.length < 3) return null;
-        return { key: parts[0], value: parts.slice(2).join(":") };
-      })
-      .filter((t): t is { key: string; value: string } => t !== null);
-    if (tags.length > 0) out.scope = { tags };
-  }
-  return out;
-}
-
 function applyTypeDefaults(payload: CreateMonitorPayload, type: MonitorType): CreateMonitorPayload {
   switch (type) {
     case "metric":
@@ -93,17 +58,6 @@ export function useWizardState(initial?: CreateMonitorPayload) {
     if (initial && !seededFromInitial.current) {
       seededFromInitial.current = true;
       setDraft(initial);
-    }
-  }, [initial]);
-
-  useEffect(() => {
-    if (initial) return;
-    const prefill = parsePrefill();
-    if (Object.keys(prefill).length > 0) {
-      setDraft((prev) => {
-        const merged = { ...prev, ...prefill };
-        return applyTypeDefaults(merged, merged.type);
-      });
     }
   }, [initial]);
 

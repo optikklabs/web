@@ -26,7 +26,6 @@ function sortPages(pages: DashboardPage[], sort: SortKey): DashboardPage[] {
 function deriveTags(pages: DashboardPage[]): Array<[string, number]> {
   const counts = new Map<string, number>();
   for (const page of pages) {
-    if (!page.tags) continue;
     for (const tag of page.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1);
   }
   return [...counts.entries()].sort((a, b) => b[1] - a[1]);

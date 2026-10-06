@@ -42,7 +42,7 @@ export function SparklineCell({
   height = 22,
   className,
 }: SparklineCellProps) {
-  if (!values || values.length < 2) {
+  if (values.length < 2) {
     return <span className="text-[11px] text-foreground-muted">—</span>;
   }
   const { line, area } = buildPaths(values, width, height);

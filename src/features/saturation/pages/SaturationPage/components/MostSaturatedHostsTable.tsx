@@ -5,19 +5,20 @@ import { useNavigate } from "@tanstack/react-router";
 import { ROUTES } from "@/shared/constants/routes";
 import DataTable from "@shared/components/ui/data-display/DataTable";
 import { cn } from "@shared/lib/utils";
+import { fmtPct } from "@shared/utils/formatters";
 import type { ColumnDef } from "@tanstack/react-table";
 
-import type { HostSaturationRow } from "../../../api/saturationApi";
+import type { Host } from "@shared/api/hosts";
 import type { Tone } from "../view-models/saturationScore";
 import { SaturationCard } from "./SaturationCard";
 
 type Props = {
-  rows: HostSaturationRow[];
+  rows: Host[];
 };
 
 const TONES: Record<string, Tone> = { ok: "ok", warn: "warn", err: "err" };
 
-function toneOf(row: HostSaturationRow): Tone {
+function toneOf(row: Host): Tone {
   return TONES[row.tone] ?? "ok";
 }
 
@@ -37,11 +38,11 @@ function subsystemLabel(subsystem: string): string {
   return subsystem.charAt(0).toUpperCase() + subsystem.slice(1);
 }
 
-function metrics(host: HostSaturationRow): string {
-  return `cpu ${Math.round(host.cpu)}% · mem ${Math.round(host.mem)}% · disk ${Math.round(host.disk)}%`;
+function metrics(host: Host): string {
+  return `cpu ${fmtPct(host.cpu, 0)} · mem ${fmtPct(host.mem, 0)} · disk ${fmtPct(host.disk, 0)}`;
 }
 
-const COLUMNS: ColumnDef<HostSaturationRow>[] = [
+const COLUMNS: ColumnDef<Host>[] = [
   {
     header: "Host",
     accessorKey: "host",
@@ -76,7 +77,7 @@ const COLUMNS: ColumnDef<HostSaturationRow>[] = [
             "absolute inset-y-0 left-0 rounded-[3px] transition-[width] duration-250",
             fillToneClass(toneOf(row))
           )}
-          style={{ width: `${Math.max(0, Math.min(100, row.saturation))}%` }}
+          style={{ width: `${Math.max(0, Math.min(100, row.saturation ?? 0))}%` }}
         />
       </div>
     ),
@@ -87,7 +88,7 @@ const COLUMNS: ColumnDef<HostSaturationRow>[] = [
     size: 56,
     meta: { align: "right" },
     cell: ({ row: { original: row } }) => (
-      <span className="font-mono text-[12.5px]">{`${Math.round(row.saturation)}%`}</span>
+      <span className="font-mono text-[12.5px]">{fmtPct(row.saturation, 0)}</span>
     ),
   },
 ];

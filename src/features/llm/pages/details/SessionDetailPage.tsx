@@ -22,7 +22,7 @@ export default function SessionDetailPage() {
 
       {detailQ.isPending ? (
         <Loading />
-      ) : !d || (d.turns ?? []).length === 0 ? (
+      ) : !d || d.turns.length === 0 ? (
         <EmptyState title="Session not found" description="No turns recorded for this session." />
       ) : (
         <div className="flex flex-col gap-3">
@@ -35,7 +35,7 @@ export default function SessionDetailPage() {
           </Card>
 
           <div className="flex flex-col gap-3">
-            {d.turns?.map((t) => (
+            {d.turns.map((t) => (
               <div key={t.traceId} className="flex flex-col gap-2">
                 {t.userText && (
                   <div className="flex justify-end">

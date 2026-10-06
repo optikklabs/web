@@ -1,27 +1,25 @@
 import { z } from "zod";
 
-import { integerValue, numericValue, stringValue } from "./saturationClient";
-
 export const topicThroughputSchema = z.object({
-  topic: stringValue,
-  bytesPerSec: numericValue,
-  bytesTotal: numericValue,
-  recordsPerSec: numericValue,
-  recordsTotal: numericValue,
+  topic: z.string(),
+  bytesPerSec: z.number(),
+  bytesTotal: z.number(),
+  recordsPerSec: z.number(),
+  recordsTotal: z.number(),
 });
 
 export const groupPartitionsSchema = z.object({
-  consumerGroup: stringValue,
-  assignedPartitions: numericValue,
-  topicCount: integerValue,
-  members: numericValue,
+  consumerGroup: z.string(),
+  assignedPartitions: z.number(),
+  topicCount: z.number().int(),
+  members: z.number(),
 });
 
 const kafkaSummarySchema = z.object({
-  topicCount: integerValue,
-  groupCount: integerValue,
-  messagesPerSec: numericValue,
-  assignedPartitions: numericValue,
+  topicCount: z.number().int(),
+  groupCount: z.number().int(),
+  messagesPerSec: z.number(),
+  assignedPartitions: z.number(),
 });
 
 export type TopicThroughputRow = z.infer<typeof topicThroughputSchema>;

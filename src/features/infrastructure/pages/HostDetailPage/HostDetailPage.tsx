@@ -20,7 +20,7 @@ import { HostDetailSystemMetrics } from "./HostDetailSystemMetrics";
 function useHostNode(host: string): InfrastructureNode | null {
   const nodesQ = useTimeRangeQuery<readonly InfrastructureNode[]>(
     "host-detail.nodes-list",
-    (_tenant, s, e) => getNodes(s, e)
+    (s, e) => getNodes(s, e)
   );
   return useMemo(
     () => nodesQ.data?.find((node) => node.host === host) ?? null,
@@ -42,7 +42,7 @@ export default function HostDetailPage(): JSX.Element {
   const node = useHostNode(host);
   const status = statusFromNode(node);
 
-  const overviewQ = useTimeRangeQuery(`host-detail.overview.${host}`, (_t, s, e) =>
+  const overviewQ = useTimeRangeQuery(`host-detail.overview.${host}`, (s, e) =>
     getHostOverview(host, s, e)
   );
   const overview = overviewQ.data ?? null;

@@ -25,16 +25,16 @@ export function useMemberMutations() {
   const queryClient = useQueryClient();
   const invalidate = () => queryClient.invalidateQueries({ queryKey: MEMBERS_KEY });
 
-  const create = useMutation<Member, Error, CreateMemberPayload>({
-    mutationFn: (payload) => createMember(payload),
+  const create = useMutation({
+    mutationFn: (payload: CreateMemberPayload) => createMember(payload),
     onSuccess: () => void invalidate(),
   });
-  const updateRole = useMutation<Member, Error, { id: number; role: MemberRole }>({
-    mutationFn: ({ id, role }) => updateMemberRole(id, role),
+  const updateRole = useMutation({
+    mutationFn: ({ id, role }: { id: number; role: MemberRole }) => updateMemberRole(id, role),
     onSuccess: () => void invalidate(),
   });
-  const remove = useMutation<void, Error, number>({
-    mutationFn: (id) => removeMember(id),
+  const remove = useMutation({
+    mutationFn: (id: number) => removeMember(id),
     onSuccess: () => void invalidate(),
   });
 

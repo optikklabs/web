@@ -78,7 +78,7 @@ export default function SaturationKafkaPage() {
         />
         <SaturationSubnav active="kafka" counts={{ kafka: summaryQ.data?.topicCount }} />
 
-        {clientsQ.isPending && !clientsQ.data ? <KafkaPageSkeleton /> : null}
+        {clientsQ.isPending ? <KafkaPageSkeleton /> : null}
 
         {clientsQ.isError && !clientsQ.data ? (
           <KafkaErrorState
@@ -104,7 +104,7 @@ export default function SaturationKafkaPage() {
               ) : null}
             </div>
 
-            {topologyQ.isPending && !topologyQ.data ? <KafkaPageSkeleton /> : null}
+            {topologyQ.isPending ? <KafkaPageSkeleton /> : null}
 
             {topologyQ.isError ? (
               <KafkaErrorState

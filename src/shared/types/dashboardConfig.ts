@@ -1,9 +1,4 @@
-import type {
-  FormulaDefinition,
-  MetricQueryDefinition,
-  MetricSpaceAggregation,
-  TimeStep,
-} from "@shared/metrics/types";
+import { z } from "zod";
 
 export type DashboardDrawerEntity =
   | "databaseSystem"
@@ -14,63 +9,54 @@ export type DashboardDrawerEntity =
   | "node"
   | "redisInstance"
   | "service";
-// Panel types and layout variants the metrics widget builder produces; the
-// backend validator accepts exactly these (see dashboards/endpoints.go).
-const DASHBOARD_PANEL_TYPES = [
-  "metrics-timeseries",
-  "metrics-value",
-  "metrics-toplist",
-  "metrics-table",
-] as const;
-export type DashboardPanelType = (typeof DASHBOARD_PANEL_TYPES)[number];
-const DASHBOARD_LAYOUT_VARIANTS = ["standard-chart", "kpi", "ranking", "detail-table"] as const;
-export type DashboardLayoutVariant = (typeof DASHBOARD_LAYOUT_VARIANTS)[number];
 
-export interface DashboardLayout {
-  x: number;
-  y: number;
+// A saved metrics-builder widget. The backend validator (query
+// dashboards/validate.go) accepts exactly these panel types, layout variants,
+// aggregations and operators, and requires a metrics query.
+const metricQuerySchema = z.object({
+  id: z.string(),
+  aggregation: z.enum(["avg", "sum", "min", "max", "count", "p50", "p95", "p99", "rate"]),
+  metricName: z.string(),
+  where: z.array(
+    z.object({
+      key: z.string(),
+      operator: z.enum(["eq", "neq", "in", "not_in", "wildcard"]),
+      value: z.union([z.string(), z.array(z.string())]),
+    })
+  ),
+  groupBy: z.array(z.string()),
+  spaceAggregation: z.enum(["avg", "sum", "min", "max"]),
+});
 
-  w: number;
+const metricsQuerySpecSchema = z.object({
+  kind: z.literal("metrics"),
+  step: z.enum(["1m", "5m", "15m", "1h", "1d"]),
+  spaceAggregation: z.enum(["avg", "sum", "min", "max"]),
+  queries: z.array(metricQuerySchema).min(1),
+  formulas: z.array(z.object({ id: z.string(), expression: z.string() })).optional(),
+});
 
-  h: number;
-}
+const layoutSchema = z.object({ x: z.number(), y: z.number(), w: z.number(), h: z.number() });
 
-/** SigNoz-style builder query replayed through the metrics explorer engine. */
-export interface DashboardMetricsQuerySpec {
-  kind: "metrics";
-  step: TimeStep;
-  spaceAggregation: MetricSpaceAggregation;
-  queries: MetricQueryDefinition[];
-  formulas?: FormulaDefinition[];
-}
+export const dashboardPanelSpecSchema = z.object({
+  id: z.string(),
+  panelType: z.enum(["metrics-timeseries", "metrics-value", "metrics-toplist", "metrics-table"]),
+  layoutVariant: z.enum(["standard-chart", "kpi", "ranking", "detail-table"]),
+  query: metricsQuerySpecSchema,
+  layout: layoutSchema,
+  title: z.string(),
+  legend: z.boolean(),
+  smooth: z.boolean(),
+});
 
-export type DashboardQuerySpec = DashboardMetricsQuerySpec;
-
-/** Narrows a widget query to the metrics builder variant. */
-export function isMetricsQuerySpec(
-  query: DashboardQuerySpec | undefined
-): query is DashboardMetricsQuerySpec {
-  return query != null && "kind" in query && query.kind === "metrics";
-}
+export type DashboardMetricsQuerySpec = z.infer<typeof metricsQuerySpecSchema>;
+export type DashboardLayout = z.infer<typeof layoutSchema>;
+export type DashboardPanelSpec = z.infer<typeof dashboardPanelSpecSchema>;
+export type DashboardPanelType = DashboardPanelSpec["panelType"];
+export type DashboardLayoutVariant = DashboardPanelSpec["layoutVariant"];
 
 export interface DashboardDrawerAction {
   entity: DashboardDrawerEntity;
   idField: string;
   titleField?: string;
-}
-
-/** A saved metrics-builder widget: what the builder writes and the card reads. */
-export interface DashboardPanelSpec {
-  readonly id: string;
-  readonly panelType: DashboardPanelType;
-  readonly layoutVariant: DashboardLayoutVariant;
-  readonly sectionId: string;
-  readonly order: number;
-  readonly query?: DashboardQuerySpec;
-  readonly layout: DashboardLayout;
-  readonly title?: string;
-  readonly dataSource?: string;
-  /** Per-widget render hints. */
-  readonly legend?: boolean;
-  readonly smooth?: boolean;
 }

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import api from "@/shared/api/http/client";
-import { decodeApiResponse } from "@/shared/api/utils/validate";
+import { validateResponse } from "@/shared/api/utils/validate";
 import { API_CONFIG } from "@config/apiConfig";
 import type { MetricQueryDefinition, TimeStep } from "@shared/metrics/types";
 
@@ -112,48 +112,28 @@ function toSecondsTimestamps(response: MetricsExplorerResponse): MetricsExplorer
 
 export const metricsExplorerApi = {
   async getMetricNames(params: MetricNamesRequest): Promise<MetricNamesResponse> {
-    const queryParams = new URLSearchParams({
-      startTime: String(params.startTime),
-      endTime: String(params.endTime),
+    const { startTime, endTime, search } = params;
+    const response = await api.get<unknown>(`${BASE}/metrics/names`, {
+      params: { startTime, endTime, search: search || undefined },
     });
-    if (params.search) {
-      queryParams.set("search", params.search);
-    }
-    const response = await api.get(`${BASE}/metrics/names?${queryParams.toString()}`);
-    return decodeApiResponse(metricNamesResponseSchema, response, {
-      context: "metric names",
-      expectedType: "object",
-      message: "Invalid metric names response",
-    });
+    return validateResponse(metricNamesResponseSchema, response);
   },
 
   async getMetricTags(params: MetricTagsRequest): Promise<MetricTagsResponse> {
-    const queryParams = new URLSearchParams({
-      startTime: String(params.startTime),
-      endTime: String(params.endTime),
-    });
-    if (params.tagKey) {
-      queryParams.set("tagKey", params.tagKey);
-    }
-    const encodedName = encodeURIComponent(params.metricName);
-    const response = await api.get(`${BASE}/metrics/${encodedName}/tags?${queryParams.toString()}`);
-    return decodeApiResponse(metricTagsResponseSchema, response, {
-      context: `metric tags (${params.metricName})`,
-      expectedType: "object",
-      message: "Invalid metric tags response",
-    });
+    const { metricName, startTime, endTime, tagKey } = params;
+    const response = await api.get<unknown>(
+      `${BASE}/metrics/${encodeURIComponent(metricName)}/tags`,
+      { params: { startTime, endTime, tagKey: tagKey || undefined } }
+    );
+    return validateResponse(metricTagsResponseSchema, response);
   },
 
   async query(
     body: MetricExplorerQueryRequest,
     signal?: AbortSignal
   ): Promise<MetricsExplorerResponse> {
-    const response = await api.post(`${BASE}/metrics/explorer/query`, body, { signal });
-    const decoded = decodeApiResponse(metricsExplorerResponseSchema, response, {
-      context: "metrics explorer query",
-      expectedType: "object",
-      message: "Invalid metrics explorer response",
-    });
+    const response = await api.post<unknown>(`${BASE}/metrics/explorer/query`, body, { signal });
+    const decoded = validateResponse(metricsExplorerResponseSchema, response);
     return toSecondsTimestamps(decoded);
   },
 };

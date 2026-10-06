@@ -1,42 +1,10 @@
 import type { ErrorTimeSeriesPoint } from "@shared/api/errors";
 import type { LatencyPercentilesPoint, StatusTimeseriesPoint } from "@shared/api/red/redApi";
 import type { ServiceTopologyEdge } from "@shared/api/topology";
-import type { DependencyRow, EndpointRow, ServiceSummarySnapshot } from "./types";
+import type { DependencyRow, EndpointRow } from "./types";
 
 function normalizeServiceKey(value: string): string {
   return value.trim().toLowerCase();
-}
-
-export function readNumber(value: unknown): number | null {
-  if (typeof value === "number") {
-    return Number.isFinite(value) ? value : null;
-  }
-  if (typeof value === "string" && value.trim() !== "") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-  return null;
-}
-
-export function buildInitialSummary(
-  data: Record<string, unknown> | null | undefined
-): ServiceSummarySnapshot | null {
-  if (!data) {
-    return null;
-  }
-
-  const requestCount = readNumber(data.requestCount) ?? 0;
-  const errorCount = readNumber(data.errorCount) ?? 0;
-  const explicitErrorRate = readNumber(data.errorRate);
-
-  return {
-    requestCount,
-    errorCount,
-    errorRate: explicitErrorRate ?? (requestCount > 0 ? (errorCount * 100) / requestCount : 0),
-    avgLatency: readNumber(data.avgLatency) ?? 0,
-    p95Latency: readNumber(data.p95Latency) ?? 0,
-    p99Latency: readNumber(data.p99Latency) ?? 0,
-  };
 }
 
 export function buildDependencyRows(
@@ -52,13 +20,13 @@ export function buildDependencyRows(
         ? normalizeServiceKey(edge.target) === normalizedServiceName
         : normalizeServiceKey(edge.source) === normalizedServiceName
     )
-    .sort((left, right) => Number(right.callCount ?? 0) - Number(left.callCount ?? 0))
+    .sort((left, right) => right.callCount - left.callCount)
     .slice(0, 6)
     .map((edge) => ({
       id: `${direction}:${edge.source}->${edge.target}`,
       serviceName: direction === "upstream" ? edge.source : edge.target,
-      callCount: Number(edge.callCount ?? 0),
-      p95LatencyMs: Number(edge.p95LatencyMs ?? 0),
+      callCount: edge.callCount,
+      p95LatencyMs: edge.p95LatencyMs,
     }));
 }
 
@@ -73,11 +41,7 @@ export function buildLatencyTrendSeries(points: readonly LatencyPercentilesPoint
 
 export function buildRequestTrendSeries(points: readonly StatusTimeseriesPoint[]) {
   return points.map((point) => {
-    const total =
-      (point.status2xx ?? 0) +
-      (point.status4xx ?? 0) +
-      (point.status5xx ?? 0) +
-      (point.statusOther ?? 0);
+    const total = point.status2xx + point.status4xx + point.status5xx + point.statusOther;
     return {
       timestamp: point.timestampMs,
       requestCount: total,
@@ -87,8 +51,8 @@ export function buildRequestTrendSeries(points: readonly StatusTimeseriesPoint[]
 
 export function buildErrorTrendSeries(points: readonly ErrorTimeSeriesPoint[]) {
   return points.map((point) => {
-    const requests = point.requestCount ?? 0;
-    const errors = point.errorCount ?? 0;
+    const requests = point.requestCount;
+    const errors = point.errorCount;
     return {
       timestamp: point.timestampMs,
       requestCount: requests,

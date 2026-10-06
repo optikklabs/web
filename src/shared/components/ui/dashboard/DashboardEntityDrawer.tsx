@@ -84,13 +84,7 @@ export default function DashboardEntityDrawer(): JSX.Element | null {
 
   if (drawer.entity === "service") {
     return (
-      <ServiceDetailDrawer
-        open
-        serviceName={drawer.id}
-        title={drawer.title}
-        initialData={drawer.data}
-        onClose={onClose}
-      />
+      <ServiceDetailDrawer open serviceName={drawer.id} title={drawer.title} onClose={onClose} />
     );
   }
 
@@ -102,7 +96,7 @@ export default function DashboardEntityDrawer(): JSX.Element | null {
   });
 
   return (
-    <DrawerShell open onClose={onClose} width={640}>
+    <DrawerShell open onClose={onClose} title={title} width={640}>
       <DrawerHeader onClose={onClose}>
         <div className="truncate font-semibold text-[15px] text-foreground">{title}</div>
       </DrawerHeader>

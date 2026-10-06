@@ -1,11 +1,9 @@
 import { ROUTES } from "@/shared/constants/routes";
 import { formatDuration, formatNumber, formatPercentage } from "@shared/utils/formatters";
 
-import type {
-  DatastoreSummary,
-  DatastoreSystemRow,
-  KafkaSummary,
-} from "../../../api/saturationApi";
+import type { DatastoreSystemRow } from "../../../api/datastoresExplorerSchemas";
+import type { KafkaSummary } from "../../../api/kafkaExplorerSchemas";
+import { type DatastoreSummary, summarizeDatastores } from "./datastoreSummary";
 
 import { type Tone, toneFromHealth } from "./saturationScore";
 
@@ -56,29 +54,13 @@ function categorizedRows(rows: DatastoreSystemRow[], category: string) {
 }
 
 function reduceCategory(rows: DatastoreSystemRow[]) {
-  if (rows.length === 0) {
-    return { qps: 0, p95: 0, errorRate: 0, conns: 0, slow: 0 };
-  }
-  let totalQps = 0;
-  let weightedLatency = 0;
-  let totalErrors = 0;
-  let totalConns = 0;
-  let slow = 0;
-  for (const row of rows) {
-    const qps = row.queryCount ?? 0;
-    totalQps += qps;
-    weightedLatency += (row.p95LatencyMs ?? 0) * Math.max(qps, 1);
-    totalErrors += (row.errorRate ?? 0) * Math.max(qps, 1);
-    totalConns += row.activeConnections ?? 0;
-    if ((row.p95LatencyMs ?? 0) >= 100) slow += 1;
-  }
-  const denom = Math.max(1, totalQps);
+  const summary = summarizeDatastores(rows);
   return {
-    qps: totalQps,
-    p95: weightedLatency / denom,
-    errorRate: totalErrors / denom,
-    conns: totalConns,
-    slow,
+    qps: summary.queryCount,
+    p95: summary.p95LatencyMs,
+    errorRate: summary.errorRate,
+    conns: summary.activeConnections,
+    slow: rows.filter((row) => row.p95LatencyMs >= 100).length,
   };
 }
 

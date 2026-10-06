@@ -13,17 +13,7 @@ import type {
 } from "@shared/metrics/types";
 import { deserializeStateSnapshot, serializeStateSnapshot } from "@shared/search/utils/urlState";
 
-/** Mirrors the /metrics route's validated search params (same param names). */
-type MetricsExplorerSearch = {
-  queries?: string;
-  formulas?: string;
-  chartType?: string;
-  step?: string;
-  spaceAgg?: string;
-  from?: string | number;
-  to?: string | number;
-  tz?: string;
-};
+import type { MetricsExplorerSearch } from "../search";
 
 const DEFAULT_QUERIES: MetricQueryDefinition[] = [createDefaultQuery(QUERY_LABELS[0])];
 
@@ -65,9 +55,9 @@ export function useMetricsExplorer() {
 
   const queries = useMemo(() => decodeQueries(search.queries), [search.queries]);
   const formulas = useMemo(() => decodeFormulas(search.formulas), [search.formulas]);
-  const chartType = (search.chartType as ChartType) || "line";
-  const step = (search.step as TimeStep) || "5m";
-  const spaceAgg = (search.spaceAgg as MetricSpaceAggregation) || "avg";
+  const chartType = search.chartType ?? "line";
+  const step = search.step ?? "5m";
+  const spaceAgg = search.spaceAgg ?? "avg";
 
   const setQueries = (next: MetricQueryDefinition[]) => {
     patchSearch({ queries: encodeQueries(next) });

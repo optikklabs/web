@@ -60,7 +60,7 @@ const columns: ColumnDef<LlmSession>[] = [
     size: 90,
     meta: { align: "right" },
     cell: ({ row: { original: s } }) => (
-      <span className="font-mono">{s.avgScore > 0 ? s.avgScore.toFixed(2) : "—"}</span>
+      <span className="font-mono">{s.avgScore === null ? "—" : s.avgScore.toFixed(2)}</span>
     ),
   },
   {
@@ -90,19 +90,22 @@ export default function SessionsTab() {
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard
-          metric={{ title: "Sessions", value: formatNumber(o?.sessions ?? 0) }}
+          metric={{ title: "Sessions", value: o ? formatNumber(o.sessions) : "—" }}
           visuals={{ loading: overviewQ.isPending }}
         />
         <StatCard
-          metric={{ title: "Avg turns", value: (o?.avgTurns ?? 0).toFixed(1) }}
+          metric={{ title: "Avg turns", value: o?.avgTurns == null ? "—" : o.avgTurns.toFixed(1) }}
           visuals={{ loading: overviewQ.isPending }}
         />
         <StatCard
-          metric={{ title: "Avg duration", value: formatDuration(o?.avgDurationMs ?? 0) }}
+          metric={{
+            title: "Avg duration",
+            value: o?.avgDurationMs == null ? "—" : formatDuration(o.avgDurationMs),
+          }}
           visuals={{ loading: overviewQ.isPending }}
         />
         <StatCard
-          metric={{ title: "Avg cost", value: formatCost(o?.avgCost ?? 0) }}
+          metric={{ title: "Avg cost", value: o?.avgCost == null ? "—" : formatCost(o.avgCost) }}
           visuals={{ loading: overviewQ.isPending }}
         />
       </div>

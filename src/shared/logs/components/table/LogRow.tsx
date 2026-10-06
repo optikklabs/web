@@ -55,7 +55,7 @@ function LogRowComponent({ row, searchTerm, isSelected, onClick, onContextMenu }
   // on a single row, and surface a visible placeholder for empty bodies so
   // the row keeps a stable visual presence.
   const displayBody = useMemo(() => {
-    let rawBody = row.body ?? "";
+    let rawBody = row.body;
     if (rawBody.length > 500) {
       rawBody = `${rawBody.slice(0, 500)}...`;
     }

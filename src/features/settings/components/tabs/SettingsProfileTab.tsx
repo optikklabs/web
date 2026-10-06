@@ -1,3 +1,4 @@
+import { errorMessage } from "@shared/api/utils/errorNormalization";
 import { Button } from "@shared/components/primitives/ui/button";
 import { Card as Surface } from "@shared/components/primitives/ui/card";
 import { Lock, User } from "lucide-react";
@@ -35,7 +36,7 @@ export default function SettingsProfileTab(): JSX.Element {
       setCurrentPassword("");
       setNewPassword("");
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Failed to change password");
+      toast.error(errorMessage(error));
     } finally {
       setIsSubmitting(false);
     }

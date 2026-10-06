@@ -3,8 +3,9 @@ import { memo, useState } from "react";
 
 import { ROUTES } from "@/shared/constants/routes";
 import { cn } from "@shared/lib/utils";
+import { fmtPct } from "@shared/utils/formatters";
 
-import type { HostSaturationRow } from "../../../api/saturationApi";
+import type { Host } from "@shared/api/hosts";
 import { SaturationCard } from "./SaturationCard";
 
 type FillBy = "Saturation" | "CPU" | "Memory" | "Disk";
@@ -17,7 +18,8 @@ const GROUPS: ReadonlyArray<{ key: string; label: string }> = [
   { key: "other", label: "Other" },
 ];
 
-function metricValue(host: HostSaturationRow, fill: FillBy): number {
+/** The host's percentage for fill, or null when the host did not report it. */
+function metricValue(host: Host, fill: FillBy): number | null {
   switch (fill) {
     case "CPU":
       return host.cpu;
@@ -30,7 +32,8 @@ function metricValue(host: HostSaturationRow, fill: FillBy): number {
   }
 }
 
-function fillToneClass(pct: number): string {
+function fillToneClass(pct: number | null): string {
+  if (pct === null) return "bg-muted";
   if (pct >= 90) return "bg-error";
   if (pct >= 70) return "bg-warning";
   return "bg-success";
@@ -43,14 +46,14 @@ function shortLabel(host: string): string {
 
 const HEX_CLIP = "polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%)";
 
-function Hex({ host, fill }: { host: HostSaturationRow; fill: FillBy }) {
+function Hex({ host, fill }: { host: Host; fill: FillBy }) {
   const value = metricValue(host, fill);
   const navigate = useNavigate();
 
   return (
     <button
       type="button"
-      title={`${host.host} · ${Math.round(value)}%`}
+      title={`${host.host} · ${value === null ? "not reported" : fmtPct(value, 0)}`}
       className={cn(
         "flex h-14 w-[50px] cursor-pointer flex-col items-center justify-center border-0 font-bold text-[12px] text-white hover:opacity-90",
         fillToneClass(value)
@@ -60,14 +63,14 @@ function Hex({ host, fill }: { host: HostSaturationRow; fill: FillBy }) {
         navigate({ to: ROUTES.hostDetail.replace("$host", encodeURIComponent(host.host)) as never })
       }
     >
-      {Math.round(value)}
+      {value === null ? "—" : Math.round(value)}
       <span className="mt-px font-semibold text-[10px] opacity-90">{shortLabel(host.host)}</span>
     </button>
   );
 }
 
 type Props = {
-  hosts: HostSaturationRow[];
+  hosts: Host[];
 };
 
 function FleetMapImpl({ hosts }: Props): JSX.Element {

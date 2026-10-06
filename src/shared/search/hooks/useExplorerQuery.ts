@@ -1,4 +1,4 @@
-import { useResolvedTimeBounds, useTenantId } from "@app/store/appStore";
+import { useResolvedTimeBounds } from "@app/store/appStore";
 import { useStandardQuery } from "@shared/hooks/useStandardQuery";
 import { useSearch } from "@tanstack/react-router";
 import { useMemo } from "react";
@@ -46,7 +46,6 @@ function useExplorerBounds(): { startTime: number; endTime: number } {
 }
 
 export function useExplorerQuery<TResponse>(args: UseExplorerQueryArgs<TResponse>) {
-  const tenantId = useTenantId();
   const { startTime, endTime } = useExplorerBounds();
 
   const query = useStandardQuery<TResponse>({
@@ -73,7 +72,7 @@ export function useExplorerQuery<TResponse>(args: UseExplorerQueryArgs<TResponse
     enabled: args.enabled ?? true,
   });
 
-  return { ...query, startTime, endTime, tenantId };
+  return { ...query, startTime, endTime };
 }
 
 export interface UseExplorerSubQueryArgs<TResponse> {

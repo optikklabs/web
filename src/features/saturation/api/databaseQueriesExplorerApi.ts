@@ -4,6 +4,7 @@ import { validateResponse } from "@shared/api/utils/validate";
 import { pageInfoSchema } from "@shared/search/schemas/pageInfo";
 import type { ExplorerFilter, TranslationWarning } from "@shared/search/types/filters";
 import type { ExplorerQueryRequest } from "@shared/search/types/queries";
+import { ownEntry } from "@shared/utils/ownEntry";
 import { z } from "zod";
 
 import { type SlowQueryPatternRow, slowQueryPatternSchema } from "./databaseSlowQueriesApi";
@@ -35,7 +36,7 @@ interface QueryPatternsBody {
 }
 
 const responseSchema = z.object({
-  results: z.union([z.array(slowQueryPatternSchema), z.null()]).transform((rows) => rows ?? []),
+  results: z.array(slowQueryPatternSchema),
   pageInfo: pageInfoSchema,
 });
 
@@ -73,8 +74,8 @@ function applyStringFilter(
   body: QueryPatternsBody,
   warnings: TranslationWarning[]
 ): boolean {
-  const key = STRING_FIELDS[filter.field as keyof typeof STRING_FIELDS];
-  if (!key) return false;
+  const key = ownEntry(STRING_FIELDS, filter.field);
+  if (key === undefined) return false;
   if (filter.op !== "eq" && filter.op !== "in") {
     warnings.push(warning(filter.field, `${filter.field} supports exact or IN matching`));
     return true;
@@ -91,8 +92,8 @@ function applyNumberFilter(
   body: QueryPatternsBody,
   warnings: TranslationWarning[]
 ): boolean {
-  const keys = NUMBER_FIELDS[filter.field as keyof typeof NUMBER_FIELDS];
-  if (!keys) return false;
+  const keys = ownEntry(NUMBER_FIELDS, filter.field);
+  if (keys === undefined) return false;
   const value = Number(filter.value);
   if (!Number.isFinite(value) || !["eq", "gt", "gte", "lt", "lte"].includes(filter.op)) {
     warnings.push(warning(filter.field, `${filter.field} requires a numeric comparison`));

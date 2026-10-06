@@ -13,7 +13,7 @@ interface HostDetailServicesProps {
 
 export function HostDetailServices({ host }: HostDetailServicesProps) {
   const navigate = useNavigate();
-  const servicesQ = useTimeRangeQuery(`host-detail.services.${host}`, (_tenant, s, e) =>
+  const servicesQ = useTimeRangeQuery(`host-detail.services.${host}`, (s, e) =>
     getNodeServices(host, Number(s), Number(e))
   );
   const services = servicesQ.data ?? [];

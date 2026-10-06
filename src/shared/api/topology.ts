@@ -45,13 +45,10 @@ interface FetchParams {
   service?: string;
 }
 
+/** Service graph over the window; `service` scopes it to that service's neighbours. */
 export async function getServiceTopology(params: FetchParams): Promise<ServiceTopologyResponse> {
-  const raw = await api.get<unknown>(`${API_V1_BASE}/services/topology`, {
-    params: {
-      startTime: params.startTime,
-      endTime: params.endTime,
-      ...(params.service ? { service: params.service } : {}),
-    },
-  });
-  return validateResponse(topologyResponseSchema, raw ?? { nodes: [], edges: [] });
+  return validateResponse(
+    topologyResponseSchema,
+    await api.get<unknown>(`${API_V1_BASE}/services/topology`, { params })
+  );
 }

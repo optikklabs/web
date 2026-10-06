@@ -51,7 +51,7 @@ const columns: ColumnDef<LlmUser>[] = [
     size: 90,
     meta: { align: "right" },
     cell: ({ row: { original: u } }) => (
-      <span className="font-mono">{u.avgScore > 0 ? u.avgScore.toFixed(2) : "—"}</span>
+      <span className="font-mono">{u.avgScore === null ? "—" : u.avgScore.toFixed(2)}</span>
     ),
   },
   {

@@ -83,7 +83,7 @@ export function PageCard({ page }: PageCardProps) {
           )}
 
           <div className="mt-0.5 flex flex-wrap gap-1">
-            {(page.tags || []).map((tag) => (
+            {page.tags.map((tag) => (
               <span
                 key={tag}
                 className="rounded bg-secondary px-1.5 py-0.5 font-mono text-[11px] text-foreground-secondary"

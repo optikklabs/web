@@ -42,7 +42,6 @@ export const ROUTES = {
   monitorDetail: "/monitors/$monitorId",
   monitorEdit: "/monitors/$monitorId/edit",
   monitorsNotifications: "/monitors/notifications",
-  alertsNew: "/alerts/new",
 
   dashboards: "/dashboards",
   dashboardDetail: "/dashboards/$pageId",

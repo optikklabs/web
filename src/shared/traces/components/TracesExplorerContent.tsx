@@ -25,7 +25,7 @@ type TracesExplorerModel = ReturnType<typeof useTracesExplorerModel>;
  */
 export function TracesExplorerContent({ model }: { readonly model: TracesExplorerModel }) {
   const trendData = useMemo<TrendChartBucket[] | undefined>(() => {
-    if (!model.trendBuckets || model.trendBuckets.length === 0) return undefined;
+    if (model.trendBuckets.length === 0) return undefined;
     return model.trendBuckets.map((b) => {
       const errors = b.counts.errors || 0;
       return {

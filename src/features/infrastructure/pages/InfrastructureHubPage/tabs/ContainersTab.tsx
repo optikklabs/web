@@ -32,7 +32,7 @@ const CONTAINERS_EXPLORER: ClientExplorerDefinition<FleetPod> = {
 export default function ContainersTab() {
   const navigate = useNavigate();
 
-  const query = useTimeRangeQuery<FleetPod[]>("infrastructure.containers.list", (_tenant, s, e) =>
+  const query = useTimeRangeQuery<FleetPod[]>("infrastructure.containers.list", (s, e) =>
     getFleetPods(s, e)
   );
 

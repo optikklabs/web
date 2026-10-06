@@ -1,5 +1,3 @@
-type DomainRecord = Record<string, unknown>;
-
 // Metrics Explorer Types
 
 type MetricType = "gauge" | "counter" | "histogram" | "exponential_histogram" | "summary";
@@ -32,7 +30,8 @@ export interface MetricTagFilter {
   readonly value: string | string[];
 }
 
-export type MetricSpaceAggregation = "avg" | "sum" | "min" | "max";
+export const METRIC_SPACE_AGGREGATIONS = ["avg", "sum", "min", "max"] as const;
+export type MetricSpaceAggregation = (typeof METRIC_SPACE_AGGREGATIONS)[number];
 
 export interface MetricQueryDefinition {
   readonly id: string;
@@ -43,13 +42,15 @@ export interface MetricQueryDefinition {
   readonly spaceAggregation: MetricSpaceAggregation;
 }
 
-export type ChartType = "line" | "area" | "bar" | "stack" | "heat" | "top";
+export const CHART_TYPES = ["line", "area", "bar", "stack", "heat", "top"] as const;
+export type ChartType = (typeof CHART_TYPES)[number];
 
 export type MetricYAxisScale = "linear" | "log" | "percent";
 
 export type TopSeriesGroupBy = "host" | "region" | "version";
 
-export type TimeStep = "1m" | "5m" | "15m" | "1h" | "1d";
+export const TIME_STEPS = ["1m", "5m", "15m", "1h", "1d"] as const;
+export type TimeStep = (typeof TIME_STEPS)[number];
 
 export interface MetricSeriesData {
   readonly tags: Record<string, string>;
@@ -66,14 +67,4 @@ export type MetricExplorerResults = Record<string, MetricQueryResult>;
 export interface FormulaDefinition {
   readonly id: string;
   readonly expression: string;
-}
-
-export interface ServiceMetricPoint extends DomainRecord {
-  serviceName: string;
-  requestCount: number;
-  errorCount: number;
-  avgLatency: number;
-  p50Latency: number;
-  p95Latency: number;
-  p99Latency: number;
 }

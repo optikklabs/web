@@ -4,63 +4,51 @@ import type { RequestTime } from "@/shared/api/service-types";
 
 import { getSaturation, rangeParams } from "./saturationClient";
 
-const collectionSchema = z
-  .object({
-    name: z.string().min(1),
-    queryCount: z.number().int().nonnegative(),
-    callCount: z.number().int().nonnegative(),
-    p95Ms: z.number().nonnegative().nullable(),
-    p99Ms: z.number().nonnegative().nullable(),
-  })
-  .strict();
+const collectionSchema = z.object({
+  name: z.string().min(1),
+  queryCount: z.number().int().nonnegative(),
+  callCount: z.number().int().nonnegative(),
+  p95Ms: z.number().nonnegative().nullable(),
+  p99Ms: z.number().nonnegative().nullable(),
+});
 
-const queryOptionSchema = z
-  .object({
-    queryHash: z.string().regex(/^[0-9a-f]{16}$/),
-    queryLabel: z.string(),
-    collectionName: z.string().min(1),
-    callCount: z.number().int().nonnegative(),
-    p95Ms: z.number().nonnegative().nullable(),
-    p99Ms: z.number().nonnegative().nullable(),
-  })
-  .strict();
+const queryOptionSchema = z.object({
+  queryHash: z.string().regex(/^[0-9a-f]{16}$/),
+  queryLabel: z.string(),
+  collectionName: z.string().min(1),
+  callCount: z.number().int().nonnegative(),
+  p95Ms: z.number().nonnegative().nullable(),
+  p99Ms: z.number().nonnegative().nullable(),
+});
 
-const catalogueSchema = z
-  .object({
-    collections: z.array(collectionSchema),
-    queries: z.array(queryOptionSchema),
-    totalQueries: z.number().int().nonnegative(),
-    truncated: z.boolean(),
-  })
-  .strict();
+const catalogueSchema = z.object({
+  collections: z.array(collectionSchema),
+  queries: z.array(queryOptionSchema),
+  totalQueries: z.number().int().nonnegative(),
+  truncated: z.boolean(),
+});
 
-const pointSchema = z
-  .object({
-    timeBucketMs: z.number().int().nonnegative(),
-    p50Ms: z.number().nonnegative(),
-    p95Ms: z.number().nonnegative(),
-    p99Ms: z.number().nonnegative(),
-    opsPerSec: z.number().nonnegative(),
-  })
-  .strict();
+const pointSchema = z.object({
+  timeBucketMs: z.number().int().nonnegative(),
+  p50Ms: z.number().nonnegative(),
+  p95Ms: z.number().nonnegative(),
+  p99Ms: z.number().nonnegative(),
+  opsPerSec: z.number().nonnegative(),
+});
 
-const seriesSchema = z
-  .object({
-    queryHash: z.string().regex(/^[0-9a-f]{16}$/),
-    queryLabel: z.string(),
-    collectionName: z.string().min(1),
-    callCount: z.number().int().nonnegative(),
-    points: z.array(pointSchema),
-  })
-  .strict();
+const seriesSchema = z.object({
+  queryHash: z.string().regex(/^[0-9a-f]{16}$/),
+  queryLabel: z.string(),
+  collectionName: z.string().min(1),
+  callCount: z.number().int().nonnegative(),
+  points: z.array(pointSchema),
+});
 
-const responseSchema = z
-  .object({
-    bucketSizeSeconds: z.number().int().positive(),
-    series: z.array(seriesSchema),
-    truncated: z.boolean(),
-  })
-  .strict();
+const responseSchema = z.object({
+  bucketSizeSeconds: z.number().int().positive(),
+  series: z.array(seriesSchema),
+  truncated: z.boolean(),
+});
 
 export type QueryPerformanceCatalogue = z.infer<typeof catalogueSchema>;
 export type QueryPerformanceCollection = z.infer<typeof collectionSchema>;

@@ -8,7 +8,7 @@ interface Props {
 }
 
 function NotificationsCard({ monitor }: Props) {
-  const ids = monitor.notify.channelIds ?? [];
+  const ids = monitor.notify.channelIds;
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="font-medium text-foreground text-sm">Notifications</div>

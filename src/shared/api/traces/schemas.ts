@@ -9,44 +9,33 @@ import { z } from "zod";
  * backend change stays non-breaking (see `validateResponse`).
  */
 
-/**
- * Domain model for a span as rendered by the trace detail UI. This is *not* a
- * wire shape: `normalizeSpan` builds it from `SpanRecord`, deriving
- * start/end times from `startNs`. Never parsed against a response.
- */
-const traceRecordSchema = z.object({
-  spanId: z.string(),
-  traceId: z.string(),
-  serviceName: z.string().default(""),
-  operationName: z.string().default(""),
-  startTime: z.string().default(""),
-  endTime: z.string().default(""),
-  durationMs: z.number().default(0),
-  status: z.string().default("UNSET"),
-  spanKind: z.string().default(""),
-  statusMessage: z.string().optional(),
-  httpMethod: z.string().optional(),
-  httpUrl: z.string().optional(),
-  httpStatusCode: z.number().optional(),
-  serviceNameOriginal: z.string().optional(),
-  parentSpanId: z.string().optional(),
-  hasError: z.boolean().default(false),
-  startNs: z.number().default(0),
-});
-
-/** Mirrors detail.SpanListItem — GET /traces/{traceId}/spans. */
+/** Mirrors models.SpanListItem — the spans of GET /traces/{traceId}. */
 export const spanRecordSchema = z.object({
   spanId: z.string(),
+  // Empty for a root span.
   parentSpanId: z.string(),
   traceId: z.string(),
   serviceName: z.string(),
   operationName: z.string(),
   spanKind: z.string(),
   status: z.string(),
+  statusMessage: z.string(),
+  // Empty / null on spans that are not HTTP.
+  httpMethod: z.string(),
+  httpStatusCode: z.number().nullable(),
   hasError: z.boolean(),
   durationMs: z.number(),
   startNs: z.number(),
 });
+
+/**
+ * A span as the trace detail UI renders it: the wire span plus ISO bounds,
+ * built by `toTraceRecord`.
+ */
+export interface TraceRecord extends SpanRecord {
+  startTime: string;
+  endTime: string;
+}
 
 /** Mirrors logs models.Log — GET /logs/trace/{traceID}. */
 export const traceLogSchema = z.object({
@@ -74,10 +63,10 @@ export const traceLogSchema = z.object({
 });
 
 /** Client-side envelope built by `getTraceLogs`; the wire is a bare array. */
-const traceLogsResponseSchema = z.object({
-  logs: z.array(traceLogSchema).default([]),
-  isSpeculative: z.boolean().default(false),
-});
+export interface TraceLogsResponse {
+  logs: TraceLog[];
+  isSpeculative: boolean;
+}
 
 /** Mirrors detail.SpanEvent — GET /traces/{traceId}/span-events. */
 export const spanEventSchema = z.object({
@@ -88,12 +77,16 @@ export const spanEventSchema = z.object({
   attributes: z.string(),
 });
 
-/** Mirrors paths.CriticalPathSpan — GET /traces/{traceId}/critical-path. */
+/**
+ * Mirrors models.CriticalPathSpan. selfMs is the part of the span's duration
+ * its critical child does not cover — where the path's time is spent.
+ */
 export const criticalPathSpanSchema = z.object({
   spanId: z.string(),
   operationName: z.string(),
   serviceName: z.string(),
   durationMs: z.number(),
+  selfMs: z.number(),
 });
 
 /** Mirrors paths.ErrorPathSpan — GET /traces/{traceId}/error-path. */
@@ -124,7 +117,7 @@ export const spanAttributesSchema = z.object({
   serviceName: z.string(),
   attributesString: z.record(z.string(), z.string()),
   resourceAttributes: z.record(z.string(), z.string()),
-  links: z.array(spanLinkSchema).optional(),
+  links: z.array(spanLinkSchema),
   exceptionType: z.string().optional(),
   exceptionMessage: z.string().optional(),
   exceptionStacktrace: z.string().optional(),
@@ -145,10 +138,8 @@ export const relatedTraceSchema = z.object({
   startTime: z.string(),
 });
 
-export type TraceRecord = z.infer<typeof traceRecordSchema>;
 export type SpanRecord = z.infer<typeof spanRecordSchema>;
 export type TraceLog = z.infer<typeof traceLogSchema>;
-export type TraceLogsResponse = z.infer<typeof traceLogsResponseSchema>;
 export type SpanEventRecord = z.infer<typeof spanEventSchema>;
 export type CriticalPathSpanRecord = z.infer<typeof criticalPathSpanSchema>;
 export type ErrorPathSpanRecord = z.infer<typeof errorPathSpanSchema>;

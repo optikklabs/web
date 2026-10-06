@@ -11,7 +11,7 @@ import { useKeyboardShortcuts } from "@shared/hooks/useKeyboardShortcuts";
 import { useAppStore } from "@app/store/appStore";
 import { cn } from "@shared/lib/utils";
 
-import { TrialBanner } from "@/features/onboarding/TrialBanner";
+import { TrialBanner } from "@/features/onboarding";
 
 import Header from "./Header";
 import Sidebar from "./Sidebar";

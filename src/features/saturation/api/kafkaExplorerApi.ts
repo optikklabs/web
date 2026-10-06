@@ -28,12 +28,12 @@ export async function getKafkaSummary(
 
   let messagesPerSec = 0;
   for (const t of throughput) {
-    messagesPerSec += t.recordsPerSec ?? 0;
+    messagesPerSec += t.recordsPerSec;
   }
 
   let assignedPartitions = 0;
   for (const g of partitions) {
-    assignedPartitions += g.assignedPartitions ?? 0;
+    assignedPartitions += g.assignedPartitions;
   }
 
   return {

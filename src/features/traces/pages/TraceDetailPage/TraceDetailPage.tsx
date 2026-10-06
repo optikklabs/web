@@ -98,10 +98,7 @@ export default function TraceDetailPage() {
   }
 
   const rootSpan = data.spans[0];
-  const httpStatus =
-    rootSpan?.httpStatusCode != null && rootSpan.httpStatusCode > 0
-      ? rootSpan.httpStatusCode
-      : undefined;
+  const httpStatus = rootSpan?.httpStatusCode ?? undefined;
 
   const onServiceChange = (svc: string | null) => {
     setActiveService(svc);
@@ -126,7 +123,7 @@ export default function TraceDetailPage() {
       <KPIStrip
         stats={stats}
         spans={data.spans}
-        criticalPathSpanIds={layoutProps.criticalPathSpanIds}
+        criticalPath={data.criticalPath}
         p50Ms={baseline.data?.p50Ms}
         p95Ms={baseline.data?.p95Ms}
       />

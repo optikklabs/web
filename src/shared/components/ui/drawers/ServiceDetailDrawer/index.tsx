@@ -8,13 +8,13 @@ import { DrawerKpi } from "@shared/components/ui/overlay/detail-drawer/DrawerKpi
 import { DrawerMiniSignal } from "@shared/components/ui/overlay/detail-drawer/DrawerMiniSignal";
 import { DrawerSection } from "@shared/components/ui/overlay/detail-drawer/DrawerSection";
 import { DrawerShell } from "@shared/components/ui/overlay/detail-drawer/DrawerShell";
-import { formatDuration, formatNumber, formatPercentage } from "@shared/utils/formatters";
+import { fmtMs, fmtNum, fmtPct } from "@shared/utils/formatters";
 
 import { ServiceDrawerDependenciesSection } from "./components/ServiceDrawerDependenciesSection";
 import { ServiceDrawerEndpointsSection } from "./components/ServiceDrawerEndpointsSection";
 import { useServiceDetailDrawerModel } from "./hooks/useServiceDetailDrawerModel";
 import type { ServiceDetailDrawerProps } from "./types";
-import { healthLabelForErrorRate, healthVariantForErrorRate, readNumber } from "./utils";
+import { healthLabelForErrorRate, healthVariantForErrorRate } from "./utils";
 
 const STATUS_COLOR = {
   success: "var(--ok)",
@@ -31,31 +31,13 @@ function initialsOf(name: string): string {
     .join("");
 }
 
-/** Version, environment, language, and instance count, when the caller supplied them. */
-function serviceMetaBits(initialData: ServiceDetailDrawerProps["initialData"]): string[] {
-  const out: string[] = [];
-  const version = typeof initialData?.version === "string" ? initialData.version : null;
-  const environment =
-    typeof initialData?.environment === "string" && initialData.environment !== "—"
-      ? initialData.environment
-      : null;
-  const lang = typeof initialData?.lang === "string" ? initialData.lang : null;
-  const instances = readNumber(initialData?.instances);
-  if (version) out.push(version);
-  if (environment) out.push(environment);
-  if (lang) out.push(lang);
-  if (instances != null) out.push(`${instances} inst`);
-  return out;
-}
-
 export default function ServiceDetailDrawer({
   open,
   onClose,
   serviceName,
   title,
-  initialData,
 }: ServiceDetailDrawerProps) {
-  const model = useServiceDetailDrawerModel(serviceName, title, initialData);
+  const model = useServiceDetailDrawerModel(serviceName, title);
   const m = model.summaryMetrics;
   const variant = healthVariantForErrorRate(m?.errorRate);
   const statusColor = STATUS_COLOR[variant];
@@ -63,8 +45,6 @@ export default function ServiceDetailDrawer({
   const requestSpark = model.requestTrendSeries.map((p) => p.requestCount);
   const errorSpark = model.errorTrendSeries.map((p) => p.errorRate);
   const latencySpark = model.latencyTrendSeries.map((p) => p.p99Ms);
-
-  const metaBits = serviceMetaBits(initialData);
 
   const footer = (
     <>
@@ -97,6 +77,7 @@ export default function ServiceDetailDrawer({
     <DrawerShell
       open={open}
       onClose={onClose}
+      title="Service details"
       width="min(620px, calc(100vw - 24px))"
       footer={footer}
     >
@@ -134,11 +115,6 @@ export default function ServiceDetailDrawer({
                 {healthLabelForErrorRate(m?.errorRate)}
               </span>
             </div>
-            {metaBits.length > 0 && (
-              <div className="mt-1 font-mono text-[12px] text-[var(--fg-3)]">
-                {metaBits.join(" · ")}
-              </div>
-            )}
           </div>
         </div>
       </DrawerHeader>
@@ -148,19 +124,19 @@ export default function ServiceDetailDrawer({
           <div className="grid grid-cols-3 gap-2.5">
             <DrawerKpi
               label="Requests"
-              value={formatNumber(m?.requestCount ?? 0)}
+              value={fmtNum(m?.requestCount)}
               spark={requestSpark}
               sparkTone="info"
             />
             <DrawerKpi
               label="Error rate"
-              value={formatPercentage(m?.errorRate ?? 0)}
+              value={fmtPct(m?.errorRate)}
               spark={errorSpark}
               sparkTone={variant === "error" ? "err" : "warn"}
             />
             <DrawerKpi
               label="Latency p99"
-              value={formatDuration(m?.p99Latency ?? 0)}
+              value={fmtMs(m?.p99Latency)}
               spark={latencySpark}
               sparkTone="err"
             />
@@ -173,25 +149,25 @@ export default function ServiceDetailDrawer({
             <div className="grid grid-cols-2 gap-4 px-0.5 pt-0.5">
               <DrawerMiniSignal
                 label="Request rate"
-                legend={formatNumber(m?.requestCount ?? 0)}
+                legend={fmtNum(m?.requestCount)}
                 values={requestSpark}
                 tone="info"
               />
               <DrawerMiniSignal
                 label="Error rate"
-                legend={formatPercentage(m?.errorRate ?? 0)}
+                legend={fmtPct(m?.errorRate)}
                 values={errorSpark}
                 tone={variant === "error" ? "err" : "warn"}
               />
               <DrawerMiniSignal
                 label="Latency p99"
-                legend={formatDuration(m?.p99Latency ?? 0)}
+                legend={fmtMs(m?.p99Latency)}
                 values={latencySpark}
                 tone="err"
               />
               <DrawerMiniSignal
                 label="Latency p95"
-                legend={formatDuration(m?.p95Latency ?? 0)}
+                legend={fmtMs(m?.p95Latency)}
                 values={model.latencyTrendSeries.map((p) => p.p95Ms)}
                 tone="warn"
               />
@@ -220,7 +196,7 @@ export default function ServiceDetailDrawer({
                     {healthLabelForErrorRate(m?.errorRate)} · error budget at risk
                   </span>
                   <span className="font-mono text-[12px] text-[var(--fg-2)]">
-                    {formatPercentage(m?.errorRate ?? 0)}
+                    {fmtPct(m?.errorRate)}
                   </span>
                 </div>
                 <div className="mt-1 text-[12px] text-[var(--fg-3)]">

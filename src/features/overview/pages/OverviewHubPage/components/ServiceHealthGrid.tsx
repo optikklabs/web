@@ -79,15 +79,7 @@ export default function ServiceHealthGrid({ cells, limit = 15 }: Props) {
   const visible = cells.slice(0, limit);
 
   const open = (cell: ServiceHealthCell): void => {
-    const search = buildServiceDrawerSearch(location.search, {
-      name: cell.name,
-      requestCount: cell.requestCount,
-      errorCount: cell.errorCount,
-      errorRate: cell.errorRate,
-      avgLatency: cell.avgLatency,
-      p95Latency: cell.p95Latency,
-      p99Latency: cell.p99Latency,
-    });
+    const search = buildServiceDrawerSearch(location.search, cell.name);
     navigate({ to: location.pathname + search });
   };
 

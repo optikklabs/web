@@ -14,7 +14,7 @@ interface HostDetailContainersProps {
 
 export function HostDetailContainers({ host }: HostDetailContainersProps) {
   const navigate = useNavigate();
-  const podsQ = useTimeRangeQuery<FleetPod[]>(`host-detail.fleet-pods.${host}`, (_tenant, s, e) =>
+  const podsQ = useTimeRangeQuery<FleetPod[]>(`host-detail.fleet-pods.${host}`, (s, e) =>
     getFleetPods(s, e, host)
   );
   const pods = podsQ.data ?? [];

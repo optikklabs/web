@@ -66,11 +66,15 @@ function parseUrlTimeRange(from: string | null, to: string | null): TimeRange | 
   return null;
 }
 
-function timeRangeToUrlParams(r: TimeRange): { from: string; to: string } {
+/**
+ * Absolute bounds are written as numbers: the router JSON-quotes a numeric
+ * string to keep its type, which would put `from="123"` in the URL.
+ */
+function timeRangeToUrlParams(r: TimeRange): { from: string | number; to: string | number } {
   if (r.kind === "relative") {
     return { from: presetToUrlValue(r.preset), to: "now" };
   }
-  return { from: String(r.startMs), to: String(r.endMs) };
+  return { from: r.startMs, to: r.endMs };
 }
 
 interface UrlTimeState {
@@ -80,8 +84,8 @@ interface UrlTimeState {
 }
 
 interface UrlWrite {
-  from: string;
-  to: string;
+  from: string | number;
+  to: string | number;
   tz: string | null;
 }
 
@@ -92,7 +96,11 @@ function resolveUrlWrite(
 ): UrlWrite | null {
   const params = timeRangeToUrlParams(timeRange);
   const expectedTz = timezone !== "local" ? timezone : null;
-  if (url.from === params.from && url.to === params.to && (url.tz ?? null) === expectedTz) {
+  if (
+    url.from === String(params.from) &&
+    url.to === String(params.to) &&
+    (url.tz ?? null) === expectedTz
+  ) {
     return null;
   }
   return { from: params.from, to: params.to, tz: expectedTz };
@@ -113,7 +121,7 @@ type SearchRecord = Record<string, unknown>;
 
 /** The router parses numeric params to numbers; normalize back to strings. */
 function paramToString(value: unknown): string | null {
-  if (typeof value === "string") return value.replace(/^["']+|["']+$/g, "");
+  if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
   return null;
 }

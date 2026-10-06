@@ -7,9 +7,9 @@ import type { DatastoreSystemRow } from "@/features/saturation/api/datastoresExp
 import { DatabaseExplorerNav } from "@/features/saturation/components/DatabaseExplorerNav";
 import { fmtNum } from "@shared/utils/formatters";
 
+import { useDatastoreSystems } from "../../hooks/useDatastoreSystems";
 import { STATUS_LABEL, instanceStatus } from "./databaseInstanceModel";
 import { useDatabaseSystemSparklines } from "./hooks/useDatabaseSystemSparklines";
-import { useDatastoreSystems } from "./hooks/useDatastoreSystems";
 import { DatabaseInstancesTable } from "./list/DatabaseInstancesTable";
 
 const DATABASE_EXPLORER: ClientExplorerDefinition<DatastoreSystemRow> = {
@@ -38,7 +38,7 @@ export default function SaturationDatabasePage() {
   const healthy = explorer.rows.filter((s) => instanceStatus(s) === "ok").length;
   const attention = explorer.rows.length - healthy;
   const queryCount = explorer.rows.reduce((sum, row) => sum + row.queryCount, 0);
-  const loading = systemsQ.isPending && systemsQ.data === undefined;
+  const loading = systemsQ.isPending;
 
   return (
     <ClientExplorerLayout

@@ -1,7 +1,5 @@
 import type { z } from "zod";
 
-import { decodeApiResponse } from "./decode";
-
 /**
  * Validate an API response against a Zod schema.
  *
@@ -10,8 +8,8 @@ import { decodeApiResponse } from "./decode";
  * a schema still rejects is a *missing* or wrong-typed required field, which
  * is the direction that corrupts the UI silently.
  *
- * Unknown keys are not free, though — they mean the wire has moved ahead of
- * the schema. We report them (dev console + telemetry) without failing.
+ * Unknown keys still mean the wire has moved ahead of the schema, so dev
+ * builds warn about them.
  */
 export function validateResponse<TSchema extends z.ZodTypeAny>(
   schema: TSchema,
@@ -22,18 +20,13 @@ export function validateResponse<TSchema extends z.ZodTypeAny>(
 }
 
 function reportUnknownKeys(schema: z.ZodTypeAny, value: unknown): void {
+  if (!import.meta.env.DEV) return;
   const unknownKeys = collectUnknownKeys(schema, value, "");
-  if (unknownKeys.length === 0) return;
-
-  if (import.meta.env.DEV) {
+  if (unknownKeys.length > 0) {
     console.warn(
       "[validateResponse] API contract drift — backend returned keys the schema does not declare.",
       { unknownKeys }
     );
-  }
-
-  if (typeof window !== "undefined") {
-    window.telemetry?.track("api_contract_drift", { unknownKeys });
   }
 }
 
@@ -93,5 +86,3 @@ function collectUnknownKeys(schema: z.ZodTypeAny, value: unknown, path: string):
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
-
-export { decodeApiResponse };

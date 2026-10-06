@@ -27,8 +27,8 @@ export function layoutTopology(nodes: Node[], edges: Edge[]): Node[] {
     return {
       ...n,
       position: {
-        x: (pos?.x ?? 0) - NODE_WIDTH / 2,
-        y: (pos?.y ?? 0) - NODE_HEIGHT / 2,
+        x: pos.x - NODE_WIDTH / 2,
+        y: pos.y - NODE_HEIGHT / 2,
       },
       sourcePosition: Position.Right,
       targetPosition: Position.Left,

@@ -17,10 +17,10 @@ const summarySchema = z.object({
   mean: z.number(),
 });
 export type LlmScoreSummary = z.infer<typeof summarySchema>;
-const summaryResponseSchema = z.object({ summaries: z.array(summarySchema).nullish() });
+const summaryResponseSchema = z.object({ summaries: z.array(summarySchema) });
 
 export async function getScoreSummary(range: RangeParams): Promise<LlmScoreSummary[]> {
   const res = await api.get<unknown>(`${BASE}/llm/scores/summary`, { params: range });
   const data = validateResponse(summaryResponseSchema, res);
-  return data.summaries ?? [];
+  return data.summaries;
 }

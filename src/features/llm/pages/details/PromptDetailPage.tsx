@@ -97,9 +97,9 @@ export default function PromptDetailPage() {
                     </Button>
                   </div>
                 </div>
-                {(active.variables ?? []).length > 0 && (
+                {active.variables.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
-                    {active.variables?.map((v) => (
+                    {active.variables.map((v) => (
                       <span
                         key={v}
                         className="rounded border border-border bg-surface px-1.5 py-0.5 font-mono text-[10px] text-foreground-secondary"

@@ -1,3 +1,4 @@
+import { fmtPct } from "@shared/utils/formatters";
 import { useNavigate } from "@tanstack/react-router";
 import { useServiceHosts } from "../../hooks/useServiceHosts";
 
@@ -74,11 +75,11 @@ export function OverviewPodFleet({ serviceName }: { serviceName: string }) {
                 <div className="mt-4 flex flex-col gap-1 text-[10px] text-foreground-muted">
                   <div className="flex justify-between">
                     <span>CPU</span>
-                    <strong className="font-medium text-foreground">{Math.round(cpu)}%</strong>
+                    <strong className="font-medium text-foreground">{fmtPct(cpu, 0)}</strong>
                   </div>
                   <div className="flex justify-between">
                     <span>RAM</span>
-                    <strong className="font-medium text-foreground">{Math.round(mem)}%</strong>
+                    <strong className="font-medium text-foreground">{fmtPct(mem, 0)}</strong>
                   </div>
                 </div>
               </button>

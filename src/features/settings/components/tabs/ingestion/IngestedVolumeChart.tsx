@@ -7,7 +7,7 @@ import ObservabilityChart, {
 import { PanelCard } from "@shared/components/ui/PanelCard";
 import { MetricSegmentedControl } from "@shared/metrics/components/MetricSegmentedControl";
 
-import type { IngestionTimeseries, TimeseriesSeries } from "../../../api/ingestionApi";
+import type { IngestionTimeseries, TimeseriesSeries } from "@shared/api/ingestion";
 import { type IngestionUnit, SERVICE_PALETTE, SIGNAL_COLORS, fmtValue } from "./format";
 
 type GroupBy = "type" | "service";

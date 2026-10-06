@@ -33,49 +33,17 @@ async function getComparableJson<S extends z.ZodTypeAny>(
 
 const timestamped = { timestampMs: z.number() };
 
-interface ServiceNode {
-  readonly name: string;
-  readonly requestCount: number;
-  readonly errorCount: number;
-  readonly errorRate: number;
-  readonly p50LatencyMs: number;
-  readonly p95LatencyMs: number;
-  readonly p99LatencyMs: number;
-  readonly health: string;
-}
-
-interface ServiceEdge {
-  readonly source: string;
-  readonly target: string;
-  readonly callCount: number;
-  readonly errorCount: number;
-  readonly errorRate: number;
-  readonly p50LatencyMs: number;
-  readonly p95LatencyMs: number;
-}
-
-export interface TopologyResponse {
-  readonly nodes: ServiceNode[];
-  readonly edges: ServiceEdge[];
-}
-
-export function getTopology(
-  s: RequestTime,
-  e: RequestTime,
-  service?: string
-): Promise<TopologyResponse> {
-  const params: Record<string, RequestTime | string> = { startTime: s, endTime: e };
-  if (service) params.service = service;
-  return api.get<TopologyResponse>(`${V1}/services/topology`, { params });
-}
-
 const redServiceRowSchema = z.object({
   serviceName: z.string(),
   requestCount: z.number(),
   errorCount: z.number(),
-  avgLatency: z.number(),
+  p50Latency: z.number(),
   p95Latency: z.number(),
   p99Latency: z.number(),
+  // Latest reported service.version / deployment.environment; empty if never reported.
+  version: z.string(),
+  environment: z.string(),
+  instances: z.number(),
 });
 
 const fleetOverviewSchema = z.object({
@@ -337,12 +305,12 @@ const serviceSummarySchema = z.object({
   p50Ms: z.number(),
   p95Ms: z.number(),
   p99Ms: z.number(),
-  cpuUtilization: z.number(),
-  memoryUtilization: z.number(),
-  diskUtilization: z.number(),
+  cpuUtilization: z.number().nullable(),
+  memoryUtilization: z.number().nullable(),
+  diskUtilization: z.number().nullable(),
 });
 
-const saturationPointSchema = z.object({ ...timestamped, value: z.number() });
+const saturationPointSchema = z.object({ ...timestamped, value: z.number().nullable() });
 
 export type ServiceSummaryResponse = z.infer<typeof serviceSummarySchema>;
 export type SaturationTimeSeriesPoint = z.infer<typeof saturationPointSchema>;

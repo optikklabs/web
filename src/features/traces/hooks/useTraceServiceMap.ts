@@ -10,7 +10,6 @@ import { tracesService } from "@shared/api/traces/tracesApi";
 const MINUTE_MS = 60_000;
 
 export function useTraceServiceMap(
-  tenantId: number | null,
   baseMap: ServiceTopologyResponse | undefined,
   bounds: { startMs?: number; endMs?: number },
   latencyEnabled: boolean
@@ -22,9 +21,9 @@ export function useTraceServiceMap(
   const fromMs = Math.floor(startMs / MINUTE_MS) * MINUTE_MS;
   const toMs = Math.ceil(endMs / MINUTE_MS) * MINUTE_MS;
   const latencyQuery = useStandardQuery({
-    queryKey: ["trace-service-latency", tenantId, fromMs, toMs],
+    queryKey: ["trace-service-latency", fromMs, toMs],
     queryFn: ({ signal }) => tracesService.getServiceLatencyBaselines(fromMs, toMs, signal),
-    enabled: !!tenantId && latencyEnabled && startMs > 0 && endMs >= startMs,
+    enabled: latencyEnabled && startMs > 0 && endMs >= startMs,
     staleTime: 60_000,
   });
 

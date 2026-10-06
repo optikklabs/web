@@ -72,9 +72,9 @@ export function formatPercentage(
   decimals = 2,
   clamp = true
 ): string {
-  if (value == null) return "N/A";
+  if (value == null) return "—";
   const num = Number(value);
-  if (!Number.isFinite(num)) return "N/A";
+  if (!Number.isFinite(num)) return "—";
 
   const percent = clamp ? Math.min(Math.max(num, 0), 100) : num;
   if (Math.abs(percent) < 1e-9) return "0%";
@@ -120,7 +120,7 @@ export function fmtMs(ms: number | null | undefined): string {
 }
 
 export function fmtPct(value: number | null | undefined, digits = 2): string {
-  if (value == null || !Number.isFinite(value)) return "N/A";
+  if (value == null || !Number.isFinite(value)) return "—";
   return formatPercentage(value, digits, false);
 }
 

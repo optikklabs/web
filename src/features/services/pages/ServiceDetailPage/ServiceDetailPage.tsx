@@ -1,5 +1,4 @@
 import { PageShell, PageSurface } from "@shared/components/ui/layout/PageShell";
-import { useTimeRange } from "@shared/hooks/useTimeRangeQuery";
 
 import { ServiceHeroHeader } from "./hero/ServiceHeroHeader";
 import { useServiceHeroData } from "./hooks/useServiceHeroData";
@@ -22,16 +21,12 @@ function InvalidIdentity() {
 }
 
 function ServiceDetailBody({ serviceName }: { serviceName: string }) {
-  const { timeRange, getTimeRange } = useTimeRange();
-  const { startTime, endTime } = getTimeRange();
-  const windowMs = Math.max(1, Number(endTime) - Number(startTime));
-  const hero = useServiceHeroData(serviceName, windowMs);
+  const hero = useServiceHeroData(serviceName);
   const { tab, setTab } = useActiveServiceTab();
-  void timeRange;
   return (
     <div className="flex flex-col gap-4">
       <ServiceHeroHeader serviceName={serviceName} hero={hero} />
-      <ServiceKpiStrip serviceName={serviceName} summary={hero.summary} />
+      <ServiceKpiStrip summary={hero.summary} />
       <ServiceDetailTabs active={tab} onChange={setTab} />
       <ServiceTabContent tab={tab} serviceName={serviceName} />
     </div>

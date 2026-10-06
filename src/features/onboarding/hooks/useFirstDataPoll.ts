@@ -1,9 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { useTenantId } from "@app/store/appStore";
-
-import { type FirstDataSnapshot, getFirstDataSnapshot } from "../api/firstDataApi";
+import { type IngestionOverview, getIngestionOverview } from "@shared/api/ingestion";
+import { useStandardQuery } from "@shared/hooks/useStandardQuery";
 
 const POLL_INTERVAL_MS = 5_000;
 const HINT_AFTER_MS = 2 * 60_000;
@@ -21,15 +19,14 @@ export type FirstDataState =
   | { readonly phase: "received"; readonly data: FirstData }
   | { readonly phase: "gaveUp" };
 
-function toFirstData(snapshot: FirstDataSnapshot | undefined): FirstData | null {
-  const totals = snapshot?.summary?.totals;
-  if (totals == null || totals.records <= 0) {
+function toFirstData(overview: IngestionOverview | undefined): FirstData | null {
+  if (overview === undefined || overview.summary.totals.records <= 0) {
     return null;
   }
   return {
-    records: totals.records,
-    spans: totals.spans,
-    service: snapshot?.services?.services?.[0]?.name ?? null,
+    records: overview.summary.totals.records,
+    spans: overview.summary.totals.spans,
+    service: overview.services.services[0]?.name ?? null,
   };
 }
 
@@ -41,16 +38,14 @@ function toFirstData(snapshot: FirstDataSnapshot | undefined): FirstData | null 
 export function useFirstDataPoll(): FirstDataState {
   const [startedAt] = useState(() => Date.now());
   const [now, setNow] = useState(startedAt);
-  const tenantId = useTenantId();
 
-  const { data } = useQuery({
-    queryKey: ["onboarding", "first-data", tenantId],
-    queryFn: ({ signal }) => getFirstDataSnapshot(startedAt - LOOKBACK_MS, Date.now(), signal),
+  const { data } = useStandardQuery({
+    queryKey: ["onboarding", "first-data", startedAt],
+    queryFn: ({ signal }) => getIngestionOverview(startedAt - LOOKBACK_MS, Date.now(), signal),
     refetchInterval: (query) => {
       const expired = Date.now() - startedAt >= GIVE_UP_AFTER_MS;
       return toFirstData(query.state.data) != null || expired ? false : POLL_INTERVAL_MS;
     },
-    retry: false,
     gcTime: 0,
   });
 

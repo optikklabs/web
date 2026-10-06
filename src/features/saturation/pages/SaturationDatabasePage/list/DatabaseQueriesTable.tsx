@@ -25,7 +25,7 @@ const COLUMNS: ColumnDef<SlowQueryPatternRow>[] = [
     minSize: 180,
     cell: ({ row: { original: row } }) => (
       <div className="flex min-w-0 items-center gap-2">
-        <StatusDot status={queryStatus(row.p99Ms ?? 0)} />
+        <StatusDot status={queryStatus(row.p99Ms)} />
         <span className="block truncate font-mono text-[11.5px] text-foreground">
           {row.queryText || "—"}
         </span>

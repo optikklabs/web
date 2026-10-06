@@ -8,18 +8,12 @@ import { pageInfoSchema } from "@shared/search/schemas/pageInfo";
 
 const V1 = API_CONFIG.ENDPOINTS.V1_BASE;
 
-// Backend may serialize absent strings as null; the public contract is `?: string`.
-const optionalString = z
-  .string()
-  .nullish()
-  .transform((value) => value ?? undefined);
-
 export interface ErrorGroup {
   readonly groupId: string;
   readonly serviceName: string;
   readonly operationName: string;
   readonly statusMessage: string;
-  readonly httpStatusCode: number;
+  readonly httpStatusCode: number | null;
   readonly errorCount: number;
   readonly lastOccurrence: string;
   readonly firstOccurrence: string;
@@ -31,7 +25,7 @@ export const errorGroupSchema = z.object({
   serviceName: z.string(),
   operationName: z.string(),
   statusMessage: z.string(),
-  httpStatusCode: z.number(),
+  httpStatusCode: z.number().nullable(),
   errorCount: z.number(),
   lastOccurrence: z.string(),
   firstOccurrence: z.string(),
@@ -42,7 +36,7 @@ export interface ErrorGroupDetail {
   readonly groupId: string;
   readonly serviceName: string;
   readonly operationName: string;
-  readonly httpStatusCode: number;
+  readonly httpStatusCode: number | null;
   readonly errorCount: number;
   readonly lastOccurrence: string;
   readonly firstOccurrence: string;
@@ -53,11 +47,11 @@ const errorGroupDetailSchema = z.object({
   groupId: z.string(),
   serviceName: z.string(),
   operationName: z.string(),
-  httpStatusCode: z.number(),
+  httpStatusCode: z.number().nullable(),
   errorCount: z.number(),
   lastOccurrence: z.string(),
   firstOccurrence: z.string(),
-  exceptionType: optionalString,
+  exceptionType: z.string().optional(),
 });
 
 export interface ErrorLatestOccurrence {
@@ -69,7 +63,7 @@ export interface ErrorLatestOccurrence {
   readonly stacktrace?: string;
   readonly httpMethod: string;
   readonly httpRoute: string;
-  readonly httpStatusCode: string;
+  readonly httpStatusCode: number | null;
   readonly serviceVersion: string;
   readonly environment: string;
   readonly pod: string;
@@ -82,10 +76,10 @@ const errorLatestOccurrenceSchema = z.object({
   timestamp: z.string(),
   durationMs: z.number(),
   message: z.string(),
-  stacktrace: optionalString,
+  stacktrace: z.string().optional(),
   httpMethod: z.string(),
   httpRoute: z.string(),
-  httpStatusCode: z.string(),
+  httpStatusCode: z.number().nullable(),
   serviceVersion: z.string(),
   environment: z.string(),
   pod: z.string(),
@@ -137,15 +131,13 @@ export interface ErrorTimeSeriesPoint {
   readonly errorCount: number;
 }
 
-// errorRate/avgLatency are serialized by the backend (TimeSeriesPoint) but not
-// part of the web contract yet; declared so they don't register as drift.
 const errorTimeSeriesPointSchema = z.object({
   serviceName: z.string(),
   timestampMs: z.number(),
   requestCount: z.number(),
   errorCount: z.number(),
-  errorRate: z.number().nullish(),
-  avgLatency: z.number().nullish(),
+  errorRate: z.number(),
+  avgLatency: z.number(),
 });
 
 function paginatedSchema<TSchema extends z.ZodTypeAny>(results: TSchema) {
@@ -160,23 +152,23 @@ export async function getErrorGroupDetail(
   groupId: string,
   s: RequestTime,
   e: RequestTime
-): Promise<ErrorGroupDetail | null> {
+): Promise<ErrorGroupDetail> {
   const res = await api.get<unknown>(`${V1}/errors/groups/${encodeURIComponent(groupId)}`, {
     params: range(s, e),
   });
-  return validateResponse(errorGroupDetailSchema.nullable(), res ?? null);
+  return validateResponse(errorGroupDetailSchema, res);
 }
 
 export async function getErrorGroupLatestOccurrence(
   groupId: string,
   s: RequestTime,
   e: RequestTime
-): Promise<ErrorLatestOccurrence | null> {
+): Promise<ErrorLatestOccurrence> {
   const res = await api.get<unknown>(
     `${V1}/errors/groups/${encodeURIComponent(groupId)}/latest-occurrence`,
     { params: range(s, e) }
   );
-  return validateResponse(errorLatestOccurrenceSchema.nullable(), res ?? null);
+  return validateResponse(errorLatestOccurrenceSchema, res);
 }
 
 export async function getErrorGroupFacets(
@@ -187,7 +179,7 @@ export async function getErrorGroupFacets(
   const res = await api.get<unknown>(`${V1}/errors/groups/${encodeURIComponent(groupId)}/facets`, {
     params: range(s, e),
   });
-  return validateResponse(z.array(errorFacetGroupSchema), res ?? []);
+  return validateResponse(z.array(errorFacetGroupSchema), res);
 }
 
 export async function getErrorGroupTraces(
@@ -211,14 +203,14 @@ export async function getErrorGroupTimeseries(
     `${V1}/errors/groups/${encodeURIComponent(groupId)}/timeseries`,
     { params: range(s, e) }
   );
-  return validateResponse(z.array(errorTimeSeriesPointSchema), res ?? []);
+  return validateResponse(z.array(errorTimeSeriesPointSchema), res);
 }
 
 export async function getServiceErrorRate(
   s: RequestTime,
   e: RequestTime,
-  p?: { serviceName?: string }
+  p?: { service?: string }
 ): Promise<ErrorTimeSeriesPoint[]> {
   const res = await api.get<unknown>(`${V1}/errors/service-error-rate`, { params: range(s, e, p) });
-  return validateResponse(z.array(errorTimeSeriesPointSchema), res ?? []);
+  return validateResponse(z.array(errorTimeSeriesPointSchema), res);
 }

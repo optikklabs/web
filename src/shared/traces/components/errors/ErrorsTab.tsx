@@ -11,7 +11,7 @@ interface Props {
 }
 
 function ErrorsTabComponent({ spans, onSelect, errorGroups }: Props) {
-  const errs = spans.filter((s) => (s.status ?? "").toUpperCase() === "ERROR");
+  const errs = spans.filter((s) => s.status.toUpperCase() === "ERROR");
   const groups = errorGroups ?? [];
 
   if (errs.length === 0 && groups.length === 0) {
@@ -47,7 +47,7 @@ function ErrorsTabComponent({ spans, onSelect, errorGroups }: Props) {
             <span className="text-[12px] text-foreground-muted">{s.serviceName}</span>
             <span className="font-mono text-[12.5px] text-foreground">{s.operationName}</span>
             <span className="ml-auto font-mono text-foreground-muted">
-              {formatDuration(s.durationMs ?? 0)}
+              {formatDuration(s.durationMs)}
             </span>
           </div>
           <div className="flex flex-col gap-2">

@@ -13,7 +13,7 @@ const providerKeySchema = z.object({
   createdAt: z.string(),
 });
 export type LlmProviderKey = z.infer<typeof providerKeySchema>;
-const listSchema = z.object({ items: z.array(providerKeySchema).nullish() });
+const listSchema = z.object({ items: z.array(providerKeySchema) });
 
 export interface CreateProviderKeyRequest {
   provider: "openai" | "anthropic" | "mistral";
@@ -23,7 +23,7 @@ export interface CreateProviderKeyRequest {
 
 export async function listProviderKeys(): Promise<LlmProviderKey[]> {
   const res = await api.get<unknown>(`${BASE}/llm/provider-keys`);
-  return validateResponse(listSchema, res).items ?? [];
+  return validateResponse(listSchema, res).items;
 }
 
 export async function createProviderKey(req: CreateProviderKeyRequest): Promise<LlmProviderKey> {

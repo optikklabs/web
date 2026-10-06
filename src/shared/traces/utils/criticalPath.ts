@@ -1,35 +1,39 @@
-import type { TraceRecord } from "@shared/api/traces/schemas";
+import type { CriticalPathSpanRecord, TraceRecord } from "@shared/api/traces/schemas";
 
 export interface CriticalPathSummary {
   readonly spanCount: number;
   readonly durationMs: number;
-  readonly pctOfTrace: number;
-  readonly topSpanName: string | null;
+  /** The span that accounts for most of the path, with its share of it. */
+  readonly top: {
+    readonly name: string;
+    readonly selfMs: number;
+    readonly sharePct: number;
+  } | null;
 }
 
+/**
+ * Summarises the server's critical path. Each span's selfMs is the stretch of
+ * the path it accounts for, so the values add up to the path's wall time.
+ */
 export function summarizeCriticalPath(
-  spans: readonly TraceRecord[],
-  criticalPathSpanIds: ReadonlySet<string>,
-  traceDurationMs?: number
+  criticalPath: readonly CriticalPathSpanRecord[]
 ): CriticalPathSummary {
-  if (!spans.length || !criticalPathSpanIds.size) {
-    return { spanCount: 0, durationMs: 0, pctOfTrace: 0, topSpanName: null };
-  }
-
-  const critSpans = spans.filter((s) => criticalPathSpanIds.has(s.spanId));
-  const durationMs = critSpans.reduce((acc, s) => acc + (s.durationMs ?? 0), 0);
-  const total = traceDurationMs && traceDurationMs > 0 ? traceDurationMs : 1;
-  const pctOfTrace = Math.min(100, Math.round((durationMs / total) * 100));
-
-  critSpans.sort((a, b) => (b.durationMs ?? 0) - (a.durationMs ?? 0));
-  const topSpan = critSpans[0];
-  const topSpanName = topSpan ? `${topSpan.serviceName} · ${topSpan.operationName}` : null;
-
+  const durationMs = criticalPath.reduce((acc, s) => acc + s.selfMs, 0);
+  const top = criticalPath.reduce<CriticalPathSpanRecord | undefined>(
+    (best, s) => (best === undefined || s.selfMs > best.selfMs ? s : best),
+    undefined
+  );
   return {
-    spanCount: critSpans.length,
+    spanCount: criticalPath.length,
     durationMs,
-    pctOfTrace,
-    topSpanName,
+    top:
+      top === undefined || durationMs <= 0
+        ? null
+        : {
+            name: `${top.serviceName} · ${top.operationName}`,
+            selfMs: top.selfMs,
+            sharePct: Math.round((top.selfMs / durationMs) * 100),
+          },
   };
 }
 

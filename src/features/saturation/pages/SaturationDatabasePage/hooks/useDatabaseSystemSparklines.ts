@@ -29,7 +29,7 @@ function groupP95BySystem(rows: LatencySeriesPoint[]): Map<string, number[]> {
 export function useDatabaseSystemSparklines(): Map<string, number[]> {
   const { data } = useTimeRangeQuery<LatencySeriesPoint[]>(
     "saturation-db.system-sparklines",
-    (_tenant, s, e) => getLatencyBySystem(s, e)
+    (s, e) => getLatencyBySystem(s, e)
   );
   return useMemo(() => groupP95BySystem(data ?? []), [data]);
 }

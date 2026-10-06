@@ -12,41 +12,42 @@ interface RangeParams {
 
 const overviewSchema = z.object({
   sessions: z.number(),
-  avgTurns: z.number(),
-  avgDurationMs: z.number(),
-  avgCost: z.number(),
+  // Null when the window has no sessions.
+  avgTurns: z.number().nullable(),
+  avgDurationMs: z.number().nullable(),
+  avgCost: z.number().nullable(),
 });
 export type LlmSessionsOverview = z.infer<typeof overviewSchema>;
 
 const sessionSchema = z.object({
   sessionId: z.string(),
   service: z.string(),
-  userId: z.string().nullish(),
-  preview: z.string().nullish(),
+  userId: z.string(),
+  preview: z.string(),
   turns: z.number(),
   durationMs: z.number(),
   cost: z.number(),
-  avgScore: z.number(),
+  avgScore: z.number().nullable(),
   lastMs: z.number(),
 });
 export type LlmSession = z.infer<typeof sessionSchema>;
-const sessionsResponseSchema = z.object({ sessions: z.array(sessionSchema).nullish() });
+const sessionsResponseSchema = z.object({ sessions: z.array(sessionSchema) });
 
 const turnSchema = z.object({
   traceId: z.string(),
   startMs: z.number(),
   durationMs: z.number(),
   model: z.string(),
-  userText: z.string().nullish(),
-  outputText: z.string().nullish(),
+  userText: z.string(),
+  outputText: z.string(),
   cost: z.number(),
 });
 
 const sessionDetailSchema = z.object({
   sessionId: z.string(),
   service: z.string(),
-  userId: z.string().nullish(),
-  turns: z.array(turnSchema).nullish(),
+  userId: z.string(),
+  turns: z.array(turnSchema),
 });
 export type LlmSessionDetail = z.infer<typeof sessionDetailSchema>;
 
@@ -58,7 +59,7 @@ export async function getSessionsOverview(range: RangeParams): Promise<LlmSessio
 export async function querySessions(range: RangeParams, limit = 100): Promise<LlmSession[]> {
   const res = await api.post<unknown>(`${BASE}/llm/sessions/query`, { ...range, limit });
   const data = validateResponse(sessionsResponseSchema, res);
-  return data.sessions ?? [];
+  return data.sessions;
 }
 
 export async function getSessionDetail(

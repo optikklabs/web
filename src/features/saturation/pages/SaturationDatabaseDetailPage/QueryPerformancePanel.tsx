@@ -103,7 +103,7 @@ export function QueryPerformancePanel({ system }: { readonly system: string }) {
       </div>
     );
   }
-  if (!catalogue && catalogueQuery.isPending) {
+  if (catalogueQuery.isPending) {
     return <div className="h-40 animate-pulse rounded-md border border-border bg-card" />;
   }
   if (!catalogue || catalogue.collections.length === 0 || catalogue.queries.length === 0) {

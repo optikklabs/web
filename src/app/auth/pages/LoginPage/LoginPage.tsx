@@ -1,3 +1,4 @@
+import { errorMessage } from "@shared/api/utils/errorNormalization";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -19,9 +20,7 @@ export function LoginPage() {
         toast.success("Email verified. Your API key is ready.");
         navigate({ to: ROUTES.welcome });
       })
-      .catch((error: unknown) =>
-        toast.error(error instanceof Error ? error.message : "Email verification failed")
-      );
+      .catch((error: unknown) => toast.error(errorMessage(error)));
   }, [navigate]);
   return (
     <AuthPageShell

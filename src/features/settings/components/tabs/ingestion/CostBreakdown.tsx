@@ -1,6 +1,6 @@
 import { PanelCard } from "@shared/components/ui/PanelCard";
 
-import type { CostLine, IngestionCost } from "../../../api/ingestionApi";
+import type { CostLine, IngestionCost } from "@shared/api/ingestion";
 import { fmtMoney } from "./format";
 
 interface Props {

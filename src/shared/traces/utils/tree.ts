@@ -119,6 +119,6 @@ export function matchesQuery(span: TraceRecord, q: string): boolean {
   if (!q) return true;
   const ql = q.toLowerCase();
   const hay =
-    `${span.serviceName} ${span.operationName} ${span.httpMethod ?? ""} ${span.httpStatusCode ?? ""}`.toLowerCase();
+    `${span.serviceName} ${span.operationName} ${span.httpMethod} ${span.httpStatusCode ?? ""}`.toLowerCase();
   return hay.includes(ql);
 }

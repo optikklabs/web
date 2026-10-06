@@ -39,54 +39,16 @@ export const rawLogRowSchema = z.object({
   scopeVersion: z.string(),
 });
 
-function tsToNsString(ts: string): string {
-  if (ts.includes("T")) {
-    const ms = Date.parse(ts);
-    if (!Number.isNaN(ms)) return String(BigInt(ms) * 1_000_000n);
-  }
-  return ts;
-}
-
-function base64UrlEncodeUtf8(s: string): string {
-  const bytes = new TextEncoder().encode(s);
-  let bin = "";
-  for (const b of bytes) bin += String.fromCharCode(b);
-  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function fnv1a(s: string): string {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return (h >>> 0).toString(36);
-}
-
-/** `id` is always present but may be empty when ClickHouse has no log_id. */
-function fallbackLogId(row: z.infer<typeof rawLogRowSchema>): string {
-  const payload = `${row.traceId}:${row.spanId}:${tsToNsString(row.timestamp)}:${
-    row.serviceName
-  }:${fnv1a(row.body)}`;
-  return base64UrlEncodeUtf8(payload);
-}
-
-export function coerceTimestampToIso(ts: string): string {
-  if (ts.includes("T")) return ts;
-  try {
-    const bi = BigInt(ts);
-    return new Date(Number(bi / 1_000_000n)).toISOString();
-  } catch {
-    return ts;
-  }
+/** Converts the API's Unix-nanosecond timestamp string to ISO 8601. */
+export function nsToIso(ns: string): string {
+  return new Date(Number(BigInt(ns) / 1_000_000n)).toISOString();
 }
 
 export function normalizeLogRecord(row: z.infer<typeof rawLogRowSchema>): LogRecord {
-  const id = row.id || fallbackLogId(row);
   return {
-    id,
-    timestamp: coerceTimestampToIso(row.timestamp),
-    observedTimestamp: coerceTimestampToIso(row.observedTimestamp),
+    id: row.id,
+    timestamp: nsToIso(row.timestamp),
+    observedTimestamp: nsToIso(row.observedTimestamp),
     serviceName: row.serviceName,
     severityText: row.severityText,
     severityBucket: row.severityBucket,
@@ -113,7 +75,7 @@ const queryResponseSchema = z
   .transform(
     (r): LogsQueryResponse => ({
       results: r.results.map(normalizeLogRecord),
-      cursor: r.pageInfo.nextCursor || undefined,
+      cursor: r.pageInfo.nextCursor,
       hasMore: r.pageInfo.hasMore,
     })
   );
@@ -129,40 +91,8 @@ export interface QueryLogsArgs {
 export async function queryLogs(args: QueryLogsArgs): Promise<LogsQueryResponse> {
   const { body } = buildLogsFilters(args.filters, args.startTime, args.endTime, {
     cursor: args.cursor,
-    limit: args.limit ?? 100,
+    limit: args.limit,
   });
   const raw = await api.post<unknown>(`${V1}/logs/query`, body);
-  const parsed = validateResponse(queryResponseSchema, raw);
-  return dedupeRows(enforceIdFilters(parsed, body));
-}
-
-function dedupeRows(resp: LogsQueryResponse): LogsQueryResponse {
-  const seen = new Set<string>();
-  const out: LogRecord[] = [];
-  for (const r of resp.results) {
-    if (seen.has(r.id)) continue;
-    seen.add(r.id);
-    out.push(r);
-  }
-  if (out.length === resp.results.length) return resp;
-  return { ...resp, results: out };
-}
-
-function enforceIdFilters(
-  resp: LogsQueryResponse,
-  body: { traceId?: string; spanId?: string }
-): LogsQueryResponse {
-  const traceFilter = body.traceId;
-  const spanFilter = body.spanId;
-  if (!traceFilter && !spanFilter) return resp;
-  const filtered = resp.results.filter(
-    (r) => (!traceFilter || r.traceId === traceFilter) && (!spanFilter || r.spanId === spanFilter)
-  );
-  if (filtered.length !== resp.results.length) {
-    console.warn(
-      `[logs/query] Backend returned ${resp.results.length - filtered.length} row(s) that do not match the active id filter`,
-      { traceFilter, spanFilter, returned: resp.results.length, kept: filtered.length }
-    );
-  }
-  return { ...resp, results: filtered };
+  return validateResponse(queryResponseSchema, raw);
 }

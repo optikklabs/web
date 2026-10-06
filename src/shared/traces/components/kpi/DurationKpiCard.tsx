@@ -39,14 +39,14 @@ function BaselineBar({ dur, p50, p95 }: { dur: number; p50: number; p95: number 
 }
 
 function DurationKpiCardComponent({ durationMs, p50Ms, p95Ms }: Props) {
-  const showBaseline = !!p50Ms && !!p95Ms && p50Ms > 0 && p95Ms > 0;
-  const slowFactor = showBaseline && p50Ms ? durationMs / p50Ms : null;
+  // A baseline over zero spans comes back as zeros; there is nothing to compare to.
+  const hasBaseline = p50Ms !== undefined && p95Ms !== undefined && p50Ms > 0 && p95Ms > 0;
 
   return (
     <div className={cn(kpiBase, "bg-secondary")}>
       <div className={kpiK}>Duration</div>
       <div className={kpiV}>{formatDuration(durationMs)}</div>
-      {showBaseline && slowFactor != null && p95Ms != null && p50Ms != null ? (
+      {hasBaseline ? (
         <>
           <div
             className={cn(
@@ -54,7 +54,8 @@ function DurationKpiCardComponent({ durationMs, p50Ms, p95Ms }: Props) {
               durationMs > p95Ms && "text-error"
             )}
           >
-            {slowFactor.toFixed(1)}× p50 · {durationMs > p95Ms ? "above p95" : "below p95"}
+            {(durationMs / p50Ms).toFixed(1)}× p50 ·{" "}
+            {durationMs > p95Ms ? "above p95" : "below p95"}
           </div>
           <BaselineBar dur={durationMs} p50={p50Ms} p95={p95Ms} />
         </>

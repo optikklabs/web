@@ -45,6 +45,7 @@ function LogDetailDrawerInner({ logId, startTime, endTime, open, onClose, onPrev
     <DrawerShell
       open={open}
       onClose={onClose}
+      title="Log details"
       width="min(560px, calc(100vw - 24px))"
       footer={<LogDetailFooter traceId={traceId} onPrev={onPrev} onNext={onNext} />}
     >
@@ -77,12 +78,7 @@ function LogDetailDrawerInner({ logId, startTime, endTime, open, onClose, onPrev
             {tab === "json" && <DrawerJson data={log} />}
 
             {tab === "related" && (
-              <LogDetailRelatedTab
-                traceId={traceId}
-                log={log}
-                open={open}
-                isActive={tab === "related"}
-              />
+              <LogDetailRelatedTab traceId={traceId} log={log} open={open} isActive />
             )}
           </>
         )}

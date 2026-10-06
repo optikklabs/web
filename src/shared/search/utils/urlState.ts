@@ -59,6 +59,14 @@ export function asSearchString(value: unknown): string | undefined {
   return typeof value === "string" && value !== "" ? value : undefined;
 }
 
+/** A search param restricted to `allowed`; anything else is dropped. */
+export function asSearchEnum<T extends string>(
+  value: unknown,
+  allowed: readonly T[]
+): T | undefined {
+  return allowed.find((a) => a === value);
+}
+
 /** validateSearch fragment for routes that host the explorer. */
 export function pickExplorerSearch(search: Record<string, unknown>): ExplorerUrlSearch {
   return {

@@ -1,31 +1,16 @@
-import {
-  type QueryFunction,
-  type UseQueryOptions,
-  keepPreviousData,
-  useQuery,
-} from "@tanstack/react-query";
+import { useStandardQuery } from "@shared/hooks/useStandardQuery";
 
-/**
- * Like `useStandardQuery` but tuned for data that never changes once fetched
- * (e.g. a specific trace's spans/logs/critical-path in the detail drawer).
- * `staleTime: Infinity` + a long `gcTime` mean re-navigating to the same
- * trace inside a user's session is a pure cache hit — no re-fetch, no spinner.
- *
- * Not an application cache: this is React Query's in-memory dedupe of the
- * current session only. A page reload clears it.
- */
 const HOUR_MS = 60 * 60 * 1000;
 
-export function useImmutableQuery<T>(
-  options: Omit<UseQueryOptions<T, Error, T>, "queryKey" | "queryFn"> & {
-    queryKey: readonly unknown[];
-    queryFn: QueryFunction<T, readonly unknown[]>;
-  }
-) {
-  return useQuery<T, Error, T>({
-    placeholderData: keepPreviousData,
+/**
+ * `useStandardQuery` for data that never changes once fetched (a specific
+ * trace's spans, logs, critical path). Re-opening the same trace in the
+ * session is a pure cache hit — no re-fetch, no spinner. A reload clears it.
+ */
+export function useImmutableQuery<T>(options: Parameters<typeof useStandardQuery<T>>[0]) {
+  return useStandardQuery<T>({
     staleTime: Number.POSITIVE_INFINITY,
     gcTime: HOUR_MS,
     ...options,
-  } as UseQueryOptions<T, Error, T>);
+  });
 }

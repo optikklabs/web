@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Check, MoreHorizontal, Pause, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, MoreHorizontal, Pause, Pencil, Play, Trash2 } from "lucide-react";
 import { memo, useState } from "react";
 
 import { Modal } from "@shared/components/primitives/ui/dialog";
@@ -12,7 +12,8 @@ import PriorityChip from "../../components/PriorityChip";
 interface Props {
   readonly monitor: Monitor;
   readonly onAck: () => void;
-  readonly onMute: () => void;
+  /** Called with the current mute state; mutes for an hour or unmutes. */
+  readonly onMute: (muted: boolean) => void;
   readonly onEdit: () => void;
   readonly onDelete: () => void;
   readonly deleting: boolean;
@@ -24,6 +25,7 @@ function DetailHeader({ monitor, onAck, onMute, onEdit, onDelete, deleting, dele
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const scope = (monitor.scope.tags ?? []).map((t) => `${t.key}:${t.value}`).join(" ");
+  const muted = monitor.mutedUntil !== undefined && Date.parse(monitor.mutedUntil) > Date.now();
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2 text-xs">
@@ -79,11 +81,11 @@ function DetailHeader({ monitor, onAck, onMute, onEdit, onDelete, deleting, dele
           </button>
           <button
             type="button"
-            onClick={onMute}
+            onClick={() => onMute(muted)}
             className="flex items-center gap-1.5 rounded border border-border bg-card px-3 py-1.5 text-sm hover:bg-secondary"
           >
-            <Pause size={13} />
-            Mute · 1h
+            {muted ? <Play size={13} /> : <Pause size={13} />}
+            {muted ? "Unmute" : "Mute · 1h"}
           </button>
           <DropdownMenu
             open={menuOpen}

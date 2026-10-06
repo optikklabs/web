@@ -2,7 +2,6 @@ import DashboardEntityDrawer from "@shared/components/ui/dashboard/DashboardEnti
 import PageHeader from "@shared/components/ui/layout/PageHeader";
 import { PageShell } from "@shared/components/ui/layout/PageShell";
 
-import type { ServiceMetricPoint } from "@shared/metrics/types";
 import InfrastructureStrip from "./components/InfrastructureStrip";
 import OverviewHero from "./components/OverviewHero";
 import ServiceHealthGrid from "./components/ServiceHealthGrid";
@@ -32,10 +31,9 @@ export default function OverviewHubPage() {
   const summary = summaryQ.data;
   const summaryLoading = summaryQ.isPending && !summaryQ.data;
 
-  const healthCells = useServiceHealthCells(summary?.services as unknown as ServiceMetricPoint[]);
+  const healthCells = useServiceHealthCells(summary?.services);
   const topErrors = useRankedErrorRows(errorsQ.data);
 
-  const serviceCount = summary?.serviceCount ?? healthCells.length;
   const degradedCount = healthCells.filter((c) => c.status !== "ok").length;
 
   return (
@@ -47,7 +45,7 @@ export default function OverviewHubPage() {
             <DegradedBadge count={degradedCount} />
           </span>
         }
-        subtitle={`${serviceCount || 0} services · golden signals for the selected time range`}
+        subtitle={`${summary?.serviceCount ?? "—"} services · golden signals for the selected time range`}
       />
 
       <OverviewHero summary={summary} loading={summaryLoading} />

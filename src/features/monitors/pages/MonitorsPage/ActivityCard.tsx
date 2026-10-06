@@ -8,12 +8,9 @@ interface Props {
   readonly loading: boolean;
 }
 
-const KIND_COLORS: Record<string, string> = {
+const KIND_COLORS: Record<MonitorEvent["kind"], string> = {
   triggered: "bg-error",
   recovered: "bg-success",
-  acked: "bg-primary",
-  muted: "bg-foreground-muted",
-  test: "bg-foreground-muted",
 };
 
 function ActivityCard({ events, loading }: Props) {
@@ -30,7 +27,7 @@ function ActivityCard({ events, loading }: Props) {
           events.map((e) => (
             <div key={e.id} className="flex items-start gap-2">
               <span
-                className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${KIND_COLORS[e.kind] ?? "bg-foreground-muted"}`}
+                className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${KIND_COLORS[e.kind]}`}
               />
               <div className="flex-1">
                 <div className="text-foreground text-xs">

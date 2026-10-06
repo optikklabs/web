@@ -22,14 +22,14 @@ export default function SystemPerformanceCard() {
     const series: ObservabilityChartSeries[] = [
       {
         label: "Requests",
-        values: rows.map((r) => Number(r.requestCount ?? 0)),
+        values: rows.map((r) => r.requestCount),
         color: REQUESTS_COLOR,
         fill: true,
         scale: "y",
       },
       {
         label: "Errors",
-        values: rows.map((r) => Number(r.errorCount ?? 0)),
+        values: rows.map((r) => r.errorCount),
         color: ERRORS_COLOR,
         width: 1.5,
         scale: "errors",

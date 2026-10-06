@@ -35,13 +35,13 @@ function buildValueSuggestions(
       hint: i.count.toLocaleString(),
     }));
   }
-  if (facets?.host?.length) {
+  if (facets?.host.length) {
     suggestions.host = facets.host.map((i) => ({ kind: "value", value: i.value, label: i.value }));
   }
-  if (facets?.pod?.length) {
+  if (facets?.pod.length) {
     suggestions.pod = facets.pod.map((i) => ({ kind: "value", value: i.value, label: i.value }));
   }
-  if (facets?.environment?.length) {
+  if (facets?.environment.length) {
     suggestions.environment = facets.environment.map((i) => ({
       kind: "value",
       value: i.value,

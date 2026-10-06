@@ -17,7 +17,7 @@ function scopeKeys(hash: string, filters: DatabaseFilters) {
 export function useQueryDetailSummary(hash: string, filters: DatabaseFilters, enabled: boolean) {
   return useTimeRangeQuery<QueryDetailSummary | null>(
     "saturation-db.query-summary",
-    (_tenant, s, e) => getQueryDetailSummary(hash, s, e, filters),
+    (s, e) => getQueryDetailSummary(hash, s, e, filters),
     { extraKeys: scopeKeys(hash, filters), enabled }
   );
 }
@@ -25,7 +25,7 @@ export function useQueryDetailSummary(hash: string, filters: DatabaseFilters, en
 export function useQueryDetailTimeseries(hash: string, filters: DatabaseFilters, enabled: boolean) {
   return useTimeRangeQuery<QueryTimeseriesPoint[]>(
     "saturation-db.query-timeseries",
-    (_tenant, s, e) => getQueryDetailTimeseries(hash, s, e, filters),
+    (s, e) => getQueryDetailTimeseries(hash, s, e, filters),
     { extraKeys: scopeKeys(hash, filters), enabled }
   );
 }
@@ -33,7 +33,7 @@ export function useQueryDetailTimeseries(hash: string, filters: DatabaseFilters,
 export function useQueryDetailExecutions(hash: string, filters: DatabaseFilters, enabled: boolean) {
   return useTimeRangeQuery<QueryExecutionRow[]>(
     "saturation-db.query-executions",
-    (_tenant, s, e) => getQueryDetailExecutions(hash, s, e, filters),
+    (s, e) => getQueryDetailExecutions(hash, s, e, filters),
     { extraKeys: scopeKeys(hash, filters), enabled }
   );
 }

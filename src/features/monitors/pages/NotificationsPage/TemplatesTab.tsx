@@ -19,7 +19,7 @@ function formFromTemplate(t: Template): TemplateForm {
   return { id: t.id, name: t.name, description: t.description ?? "", body: t.body };
 }
 
-import { getErrorMessage } from "@shared/utils/errorUtils";
+import { errorMessage } from "@shared/api/utils/errorNormalization";
 
 export default function TemplatesTab() {
   const q = useTemplates();
@@ -46,7 +46,7 @@ export default function TemplatesTab() {
       }
       setForm(emptyForm());
     } catch (err) {
-      setStatus(getErrorMessage(err, "Failed to save template"));
+      setStatus(errorMessage(err));
     }
   };
 
@@ -56,7 +56,7 @@ export default function TemplatesTab() {
       await remove.mutateAsync(id);
       if (form.id === id) setForm(emptyForm());
     } catch (err) {
-      setStatus(getErrorMessage(err, "Failed to delete template"));
+      setStatus(errorMessage(err));
     }
   };
 
@@ -108,7 +108,7 @@ export default function TemplatesTab() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {q.isPending && !q.data ? (
+        {q.isPending ? (
           <div className="col-span-2 rounded-lg border border-border bg-card p-6 text-center text-foreground-muted text-xs">
             Loading templates…
           </div>

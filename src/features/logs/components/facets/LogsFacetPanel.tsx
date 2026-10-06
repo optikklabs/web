@@ -114,7 +114,7 @@ function LogsFacetPanelComponent({
                 onExclude={onExclude}
               />
             ) : null}
-            {facets.host && facets.host.length > 0 && matchesSearch("host") ? (
+            {facets.host.length > 0 && matchesSearch("host") ? (
               <ResourceFacet
                 field="host"
                 label="Host"
@@ -123,7 +123,7 @@ function LogsFacetPanelComponent({
                 onExclude={onExclude}
               />
             ) : null}
-            {facets.pod && facets.pod.length > 0 && matchesSearch("pod") ? (
+            {facets.pod.length > 0 && matchesSearch("pod") ? (
               <ResourceFacet
                 field="pod"
                 label="Pod"
@@ -132,7 +132,7 @@ function LogsFacetPanelComponent({
                 onExclude={onExclude}
               />
             ) : null}
-            {facets.environment && facets.environment.length > 0 && matchesSearch("environment") ? (
+            {facets.environment.length > 0 && matchesSearch("environment") ? (
               <ResourceFacet
                 field="environment"
                 label="Environment"

@@ -1,12 +1,21 @@
+import { z } from "zod";
+
 import api from "@/shared/api/http/client";
 import type { RequestTime } from "@/shared/api/service-types";
+import { validateResponse } from "@/shared/api/utils/validate";
 import { API_CONFIG } from "@config/apiConfig";
 
-import type {
-  FleetPod,
-  InfrastructureNode,
-  InfrastructureNodeService,
-  InfrastructureNodeSummary,
+import {
+  type FleetPod,
+  type InfrastructureNode,
+  type InfrastructureNodeService,
+  type InfrastructureNodeSummary,
+  type MetricValue,
+  fleetPodSchema,
+  infrastructureNodeSchema,
+  infrastructureNodeServiceSchema,
+  infrastructureNodeSummarySchema,
+  metricValueSchema,
 } from "../types";
 
 const V1 = API_CONFIG.ENDPOINTS.V1_BASE;
@@ -15,28 +24,31 @@ function range(s: RequestTime, e: RequestTime) {
   return { startTime: s, endTime: e };
 }
 
-export function getNodes(s: RequestTime, e: RequestTime): Promise<InfrastructureNode[]> {
-  return api.get<InfrastructureNode[]>(`${V1}/infrastructure/nodes`, { params: range(s, e) });
+export async function getNodes(s: RequestTime, e: RequestTime): Promise<InfrastructureNode[]> {
+  const res = await api.get<unknown>(`${V1}/infrastructure/nodes`, { params: range(s, e) });
+  return validateResponse(z.array(infrastructureNodeSchema), res);
 }
 
-export function getNodesSummary(
+export async function getNodesSummary(
   s: RequestTime,
   e: RequestTime
 ): Promise<InfrastructureNodeSummary> {
-  return api.get<InfrastructureNodeSummary>(`${V1}/infrastructure/nodes/summary`, {
+  const res = await api.get<unknown>(`${V1}/infrastructure/nodes/summary`, {
     params: range(s, e),
   });
+  return validateResponse(infrastructureNodeSummarySchema, res);
 }
 
-export function getNodeServices(
+export async function getNodeServices(
   host: string,
   s: RequestTime,
   e: RequestTime
 ): Promise<InfrastructureNodeService[]> {
-  return api.get<InfrastructureNodeService[]>(
+  const res = await api.get<unknown>(
     `${V1}/infrastructure/nodes/${encodeURIComponent(host)}/services`,
     { params: range(s, e) }
   );
+  return validateResponse(z.array(infrastructureNodeServiceSchema), res);
 }
 
 export async function getFleetPods(
@@ -44,8 +56,18 @@ export async function getFleetPods(
   e: RequestTime,
   host?: string
 ): Promise<FleetPod[]> {
-  const data = await api.get<FleetPod[]>(`${V1}/infrastructure/fleet/pods`, {
-    params: host ? { ...range(s, e), host } : range(s, e),
+  const res = await api.get<unknown>(`${V1}/infrastructure/fleet/pods`, {
+    params: { ...range(s, e), host },
   });
-  return Array.isArray(data) ? data : [];
+  return validateResponse(z.array(fleetPodSchema), res);
+}
+
+/** Fleet-wide average CPU or memory utilization. */
+export async function getFleetAverage(
+  metric: "cpu" | "memory",
+  s: RequestTime,
+  e: RequestTime
+): Promise<MetricValue> {
+  const res = await api.get<unknown>(`${V1}/infrastructure/${metric}/avg`, { params: range(s, e) });
+  return validateResponse(metricValueSchema, res);
 }

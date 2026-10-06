@@ -11,17 +11,12 @@ import type { ServiceSummarySnapshot } from "../types";
 import {
   buildDependencyRows,
   buildErrorTrendSeries,
-  buildInitialSummary,
   buildLatencyTrendSeries,
   buildRequestTrendSeries,
 } from "../utils";
 import { useServiceDrawerQueries } from "./useServiceDrawerQueries";
 
-export function useServiceDetailDrawerModel(
-  serviceName: string,
-  title: string | null | undefined,
-  initialData: Record<string, unknown> | null | undefined
-) {
+export function useServiceDetailDrawerModel(serviceName: string, title: string | null | undefined) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -40,11 +35,11 @@ export function useServiceDetailDrawerModel(
         requestCount: row.requestCount,
         errorCount: row.errorCount,
         errorRate: row.errorRate,
-        avgLatency: row.p50Ms,
+        p50Latency: row.p50Ms,
         p95Latency: row.p95Ms,
         p99Latency: row.p99Ms,
       }
-    : buildInitialSummary(initialData);
+    : null;
 
   const requestTrendSeries = buildRequestTrendSeries(requestTrendQuery.data ?? []);
 
@@ -52,8 +47,8 @@ export function useServiceDetailDrawerModel(
 
   const latencyTrendSeries = buildLatencyTrendSeries(latencyTrendQuery.data ?? []);
 
-  const endpointRows = [...(endpointsQuery.data?.data?.results ?? [])]
-    .sort((left, right) => Number(right.totalCount ?? 0) - Number(left.totalCount ?? 0))
+  const endpointRows = [...(endpointsQuery.data?.data.results ?? [])]
+    .sort((left, right) => right.totalCount - left.totalCount)
     .slice(0, 6)
     .map((row, index) => {
       const method = endpointMethod(row);
@@ -65,7 +60,7 @@ export function useServiceDetailDrawerModel(
         httpMethod: method ?? "",
         requestCount: row.totalCount,
         errorCount: row.errorCount,
-        avgLatency: row.p50Ms,
+        p50Latency: row.p50Ms,
         p95Latency: row.p95Ms,
       };
     });

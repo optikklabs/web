@@ -23,31 +23,13 @@ const SERVICE_EXPLORER: ClientExplorerDefinition<CatalogRow> = {
       suggest: true,
     },
   },
-  searchText: (row) =>
-    [row.serviceName, row.status, row.version, row.environment, row.lang].join(" "),
+  searchText: (row) => [row.serviceName, row.status, row.version, row.environment].join(" "),
 };
-
-function toDrawerInitialData(row: CatalogRow | null): Record<string, unknown> | null {
-  if (!row) return null;
-  return {
-    requestCount: row.requestCount,
-    errorCount: row.errorCount,
-    errorRate: row.errorRate,
-    p95Latency: row.p95Ms,
-    p99Latency: row.p99Ms,
-    version: row.version,
-    environment: row.environment,
-    lang: row.lang,
-    instances: row.instances,
-  };
-}
 
 export function CatalogTab() {
   const { rows, isPending, isError } = useCatalogList();
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const explorer = useClientExplorerController({ rows, definition: SERVICE_EXPLORER });
-
-  const selected = selectedName ? (rows.find((r) => r.serviceName === selectedName) ?? null) : null;
 
   return (
     <>
@@ -69,7 +51,6 @@ export function CatalogTab() {
       <ServiceDetailDrawer
         open={Boolean(selectedName)}
         serviceName={selectedName ?? ""}
-        initialData={toDrawerInitialData(selected)}
         onClose={() => setSelectedName(null)}
       />
     </>

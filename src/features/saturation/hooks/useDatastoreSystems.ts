@@ -5,7 +5,7 @@ import type { DatastoreSystemRow } from "@/features/saturation/api/datastoresExp
 
 // Fleet of monitored datastore instances for the list screen.
 export function useDatastoreSystems() {
-  return useTimeRangeQuery<DatastoreSystemRow[]>("saturation-db.systems", (_tenant, s, e) =>
+  return useTimeRangeQuery<DatastoreSystemRow[]>("saturation-db.systems", (s, e) =>
     getDatastoreSystems(s, e)
   );
 }

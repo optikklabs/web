@@ -42,7 +42,7 @@ function WaterfallTraceRowComponent({
   const widthPct = Math.max(0.4, widthPctRaw);
   const endPct = leftPct + widthPct;
   const flipLeft = endPct > 80;
-  const isErr = (span.status ?? "").toUpperCase() === "ERROR";
+  const isErr = span.status.toUpperCase() === "ERROR";
   const isSelected = selectedSpanId === span.spanId;
   const hue = svcHue(span.serviceName || "");
   const barColor = `oklch(0.62 0.14 ${hue})`;

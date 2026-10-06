@@ -129,7 +129,7 @@ const columns: ColumnDef<LlmTrace>[] = [
     size: 170,
     cell: ({ row: { original: t } }) => (
       <div className="flex flex-wrap gap-1">
-        {(t.scores ?? []).slice(0, 3).map((s) => (
+        {t.scores.slice(0, 3).map((s) => (
           <ScorePill key={s.name} score={s} />
         ))}
       </div>

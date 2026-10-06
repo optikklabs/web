@@ -40,11 +40,11 @@ export function computeSpanTiming(
   }
 
   const startMs = selectedSpan.startTime ? new Date(selectedSpan.startTime).getTime() : 0;
-  const durMs = selectedSpan.durationMs ?? 0;
+  const durMs = selectedSpan.durationMs;
   const endMs = selectedSpan.endTime ? new Date(selectedSpan.endTime).getTime() : startMs + durMs;
 
   const children = spans.filter((s) => s.parentSpanId === selectedSpan.spanId);
-  const childDurMs = children.reduce((acc, c) => acc + (c.durationMs ?? 0), 0);
+  const childDurMs = children.reduce((acc, c) => acc + c.durationMs, 0);
   const selfMs = Math.max(0, durMs - childDurMs);
 
   const tStart = traceStartMs ?? 0;

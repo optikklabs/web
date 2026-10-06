@@ -15,7 +15,7 @@ function buildDelta(now: TopDBQuery, prev: TopDBQuery | undefined): number | nul
 export function useTopDBQueries(serviceName: string, limit = 50, cursor?: string) {
   return useTimeRangeQuery<PaginatedResponse<DBQueryWithDelta[]>>(
     "service-detail.top-db-queries",
-    async (_tenant, start, end): Promise<PaginatedResponse<DBQueryWithDelta[]>> => {
+    async (start, end): Promise<PaginatedResponse<DBQueryWithDelta[]>> => {
       const payload = await getTopDBQueries(
         start,
         end,
@@ -24,7 +24,7 @@ export function useTopDBQueries(serviceName: string, limit = 50, cursor?: string
         "previous_period",
         cursor
       );
-      const primary = payload.data?.results ?? [];
+      const primary = payload.data.results;
       const previousByOp = new Map<string, TopDBQuery>();
       for (const row of payload.comparison?.results ?? []) {
         previousByOp.set(row.operationName, row);
@@ -35,7 +35,7 @@ export function useTopDBQueries(serviceName: string, limit = 50, cursor?: string
       }));
       return {
         results,
-        pageInfo: payload.data?.pageInfo ?? { hasMore: false, limit },
+        pageInfo: payload.data.pageInfo,
       };
     },
     { extraKeys: [serviceName, limit, cursor], enabled: Boolean(serviceName) }

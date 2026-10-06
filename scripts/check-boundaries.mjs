@@ -24,7 +24,7 @@ const ALLOWLIST = [
   // The command palette registry composes feature palette actions.
   { file: "app/layout/CommandPalette/registry.ts", allowed: /^@\/features\/[\w-]+\/palette$/ },
   // MainLayout mounts the onboarding trial banner.
-  { file: "app/layout/MainLayout.tsx", allowed: /^@\/features\/onboarding\/TrialBanner$/ },
+  { file: "app/layout/MainLayout.tsx", allowed: /^@\/features\/onboarding$/ },
 ];
 
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx"]);

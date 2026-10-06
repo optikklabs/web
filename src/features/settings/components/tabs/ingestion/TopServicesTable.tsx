@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 import { PanelCard } from "@shared/components/ui/PanelCard";
 
-import type { IngestionServiceRow, IngestionServices } from "../../../api/ingestionApi";
+import type { IngestionServiceRow, IngestionServices } from "@shared/api/ingestion";
 import { type IngestionUnit, SERVICE_PALETTE, SIGNAL_COLORS, fmtCount, fmtValue } from "./format";
 
 interface Props {
@@ -127,7 +127,7 @@ function buildColumns(unit: IngestionUnit): ColumnDef<IngestionServiceRow>[] {
       size: 130,
       cell: ({ row }) => (
         <SparklineChart
-          data={[...((bytes ? row.original.byteSpark : row.original.spark) ?? [])]}
+          data={[...(bytes ? row.original.byteSpark : row.original.spark)]}
           color={paletteColor(row.index)}
           width={120}
           height={24}

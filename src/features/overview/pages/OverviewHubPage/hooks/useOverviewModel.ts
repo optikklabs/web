@@ -1,14 +1,16 @@
 import { useMemo } from "react";
 
-import { overviewHubApi } from "@/features/overview/api/overviewHubApi";
-import { OVERVIEW_QUERY_STALE_MS } from "@/features/overview/overviewHubConstants";
-import type { RequestErrorRatePoint } from "@shared/api/red/redApi";
-import type { ServiceMetricPoint } from "@shared/metrics/types";
+import { getErrorHotspot } from "@/features/overview/api/overviewErrorsApi";
+import { OVERVIEW_QUERY_STALE_MS } from "@/features/overview/constants";
+import {
+  type RedServiceRow,
+  type RequestErrorRatePoint,
+  getRedSummary,
+  getRequestAndErrorRateSeries,
+} from "@shared/api/red/redApi";
 
 import { useTimeRangeQuery } from "@shared/hooks/useTimeRangeQuery";
 import type { UseQueryResult } from "@tanstack/react-query";
-
-import { num } from "./mappers";
 
 export type ServiceHealthStatus = "ok" | "warn" | "err";
 
@@ -19,7 +21,7 @@ export interface ServiceHealthCell {
   readonly errorRate: number;
   readonly p95Latency: number;
   readonly p99Latency: number;
-  readonly avgLatency: number;
+  readonly p50Latency: number;
   readonly status: ServiceHealthStatus;
 }
 
@@ -37,18 +39,16 @@ function statusFromRate(rate: number): ServiceHealthStatus {
   return "ok";
 }
 
-function toCell(row: ServiceMetricPoint): ServiceHealthCell {
-  const requestCount = num(row.requestCount);
-  const errorCount = num(row.errorCount);
-  const errorRate = requestCount > 0 ? (errorCount / requestCount) * 100 : 0;
+function toCell(row: RedServiceRow): ServiceHealthCell {
+  const errorRate = row.requestCount > 0 ? (row.errorCount / row.requestCount) * 100 : 0;
   return {
-    name: String(row.serviceName ?? ""),
-    requestCount,
-    errorCount,
+    name: row.serviceName,
+    requestCount: row.requestCount,
+    errorCount: row.errorCount,
     errorRate,
-    avgLatency: num(row.avgLatency),
-    p95Latency: num(row.p95Latency),
-    p99Latency: num(row.p99Latency),
+    p50Latency: row.p50Latency,
+    p95Latency: row.p95Latency,
+    p99Latency: row.p99Latency,
     status: statusFromRate(errorRate),
   };
 }
@@ -56,7 +56,7 @@ function toCell(row: ServiceMetricPoint): ServiceHealthCell {
 export function useOverviewSummaryQuery() {
   return useTimeRangeQuery(
     "overview-summary",
-    (_tenant, start, end, signal) => overviewHubApi.getFleetRedMetrics(start, end, signal),
+    (start, end, signal) => getRedSummary(start, end, undefined, signal),
     { staleTime: OVERVIEW_QUERY_STALE_MS }
   );
 }
@@ -64,8 +64,7 @@ export function useOverviewSummaryQuery() {
 export function useSystemPerformanceQuery(): UseQueryResult<RequestErrorRatePoint[]> {
   return useTimeRangeQuery<RequestErrorRatePoint[]>(
     "overview-performance",
-    (_tenant, start, end, signal) =>
-      overviewHubApi.getPerformanceSeries(start, end, undefined, signal),
+    (start, end, signal) => getRequestAndErrorRateSeries(start, end, undefined, signal),
     { staleTime: OVERVIEW_QUERY_STALE_MS }
   );
 }
@@ -73,25 +72,16 @@ export function useSystemPerformanceQuery(): UseQueryResult<RequestErrorRatePoin
 export function useTopErrorsQuery(enabled = true): UseQueryResult<ErrorHotspotRow[]> {
   return useTimeRangeQuery<ErrorHotspotRow[]>(
     "overview-top-errors",
-    async (_tenant, start, end, signal) => {
-      const rows = await overviewHubApi.getErrorHotspot(start, end, signal);
-      return rows.map((raw) => {
-        const r = raw as Record<string, unknown>;
-        return {
-          key: `${r.serviceName}::${r.groupId}`,
-          groupId: String(r.groupId ?? ""),
-          serviceName: String(r.serviceName ?? "unknown"),
-          operationName: String(r.operationName ?? "unknown"),
-          errorCount: num(r.errorCount),
-        };
-      });
+    async (start, end, signal) => {
+      const rows = await getErrorHotspot(start, end, signal);
+      return rows.map((r) => ({ ...r, key: `${r.serviceName}::${r.groupId}` }));
     },
     { staleTime: OVERVIEW_QUERY_STALE_MS, enabled }
   );
 }
 
 export function useServiceHealthCells(
-  rows: readonly ServiceMetricPoint[] | undefined
+  rows: readonly RedServiceRow[] | undefined
 ): readonly ServiceHealthCell[] {
   return useMemo(() => {
     if (!rows || rows.length === 0) return [];

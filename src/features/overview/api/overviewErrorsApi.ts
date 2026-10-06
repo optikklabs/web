@@ -1,16 +1,31 @@
-import { api } from "@shared/api/http/client";
-import { buildREDFilters } from "@shared/api/red/buildREDFilters";
-import type { RequestTime } from "@shared/api/service-types";
-
 import { API_CONFIG } from "@config/apiConfig";
+import { api } from "@shared/api/http/client";
+import type { RequestTime } from "@shared/api/service-types";
+import { validateResponse } from "@shared/api/utils/validate";
+import { z } from "zod";
 
-const V1 = API_CONFIG.ENDPOINTS.V1_BASE;
+const errorHotspotSchema = z.array(
+  z.object({
+    serviceName: z.string(),
+    operationName: z.string(),
+    groupId: z.string(),
+    errorCount: z.number(),
+  })
+);
 
+export type ErrorHotspotCell = z.infer<typeof errorHotspotSchema>[number];
+
+/** Error counts per service, operation and error group over the window. */
 export async function getErrorHotspot(
   startTime: RequestTime,
   endTime: RequestTime,
   signal?: AbortSignal
-): Promise<unknown[]> {
-  const params = buildREDFilters(startTime, endTime);
-  return api.get<unknown[]>(`${V1}/spans/error-hotspot`, { params, signal });
+): Promise<ErrorHotspotCell[]> {
+  return validateResponse(
+    errorHotspotSchema,
+    await api.get<unknown>(`${API_CONFIG.ENDPOINTS.V1_BASE}/spans/error-hotspot`, {
+      params: { startTime, endTime },
+      signal,
+    })
+  );
 }

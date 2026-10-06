@@ -42,7 +42,7 @@ const columns: ColumnDef<ErrorGroup>[] = [
     meta: { align: "right" },
     cell: ({ row: { original: row } }) => (
       <span className="font-mono text-[12.5px] text-foreground-secondary">
-        {row.httpStatusCode || "—"}
+        {row.httpStatusCode ?? "—"}
       </span>
     ),
   },

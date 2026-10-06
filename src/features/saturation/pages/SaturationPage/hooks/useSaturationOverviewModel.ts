@@ -1,15 +1,15 @@
+import type { ApiErrorShape } from "@shared/api/utils/errorNormalization";
 import { useMemo } from "react";
 
 import { useTimeRangeQuery } from "@shared/hooks/useTimeRangeQuery";
 
-import type {
-  DatastoreSummary,
-  DatastoreSystemRow,
-  HostSaturationRow,
-  KafkaSummary,
-} from "../../../api/saturationApi";
-import { saturationApi } from "../../../api/saturationApi";
+import { type Host, getHosts } from "@shared/api/hosts";
 
+import { getKafkaSummary } from "../../../api/kafkaExplorerApi";
+import type { KafkaSummary } from "../../../api/kafkaExplorerSchemas";
+import { useDatastoreSystems } from "../../../hooks/useDatastoreSystems";
+
+import { summarizeDatastores } from "../view-models/datastoreSummary";
 import {
   type SubsystemCardSpec,
   buildDatabaseCardSpec,
@@ -21,34 +21,26 @@ const HOSTS_LIMIT = 10;
 
 export type SaturationOverviewModel = {
   isPending: boolean;
-  error: Error | null;
+  error: ApiErrorShape | null;
   cards: SubsystemCardSpec[];
-  hosts: HostSaturationRow[];
-  topHosts: HostSaturationRow[];
+  hosts: Host[];
+  topHosts: Host[];
   summary: ReturnType<typeof buildOverviewSummary>;
   counts: { database: number; topics: number };
 };
 
-function firstError(...errors: Array<Error | null>): Error | null {
-  return errors.find((e): e is Error => e instanceof Error) ?? null;
+function firstError(...errors: Array<ApiErrorShape | null>): ApiErrorShape | null {
+  return errors.find((e) => e !== null) ?? null;
 }
 
 export function useSaturationOverviewModel(): SaturationOverviewModel {
-  const datastoreSummary = useTimeRangeQuery<DatastoreSummary>(
-    "saturation-overview-datastores-summary",
-    (tenantId, s, e) => saturationApi.getDatastoreSummary(tenantId, s, e)
-  );
-  const datastoreSystems = useTimeRangeQuery<DatastoreSystemRow[]>(
-    "saturation-overview-datastores-systems",
-    (tenantId, s, e) => saturationApi.getDatastoreSystems(tenantId, s, e)
-  );
+  const datastoreSystems = useDatastoreSystems();
   const kafkaSummary = useTimeRangeQuery<KafkaSummary>(
     "saturation-overview-kafka-summary",
-    (tenantId, s, e) => saturationApi.getKafkaSummary(tenantId, s, e)
+    (s, e) => getKafkaSummary(s, e)
   );
-  const hostSaturation = useTimeRangeQuery<HostSaturationRow[]>(
-    "saturation-overview-hosts",
-    (tenantId, s, e) => saturationApi.getHostSaturation(tenantId, s, e)
+  const hostSaturation = useTimeRangeQuery<Host[]>("saturation-overview-hosts", (s, e) =>
+    getHosts(s, e)
   );
 
   const systems = datastoreSystems.data ?? [];
@@ -57,8 +49,12 @@ export function useSaturationOverviewModel(): SaturationOverviewModel {
   const cards = [buildKafkaCardSpec(kafkaSummary.data), buildDatabaseCardSpec(systems)];
   const topHosts = hosts.slice(0, HOSTS_LIMIT);
   const summary = useMemo(
-    () => buildOverviewSummary(datastoreSummary.data, kafkaSummary.data),
-    [datastoreSummary.data, kafkaSummary.data]
+    () =>
+      buildOverviewSummary(
+        datastoreSystems.data && summarizeDatastores(datastoreSystems.data),
+        kafkaSummary.data
+      ),
+    [datastoreSystems.data, kafkaSummary.data]
   );
   const counts = {
     database: systems.filter((row) => row.category === "database").length,
@@ -66,19 +62,11 @@ export function useSaturationOverviewModel(): SaturationOverviewModel {
   };
 
   const isPending =
-    datastoreSummary.isPending ||
-    datastoreSystems.isPending ||
-    kafkaSummary.isPending ||
-    hostSaturation.isPending;
+    datastoreSystems.isPending || kafkaSummary.isPending || hostSaturation.isPending;
 
   return {
     isPending,
-    error: firstError(
-      datastoreSummary.error,
-      datastoreSystems.error,
-      kafkaSummary.error,
-      hostSaturation.error
-    ),
+    error: firstError(datastoreSystems.error, kafkaSummary.error, hostSaturation.error),
     cards,
     hosts,
     topHosts,

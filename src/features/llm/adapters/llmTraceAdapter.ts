@@ -12,7 +12,7 @@ export interface LlmTraceAdapterOptions {
 }
 
 function sourceSpans(detail: LlmTraceDetail): LlmSpan[] {
-  if (detail.spans?.length) return detail.spans;
+  if (detail.spans.length > 0) return detail.spans;
   return [
     {
       spanId: `${detail.traceId}-root`,
@@ -51,6 +51,8 @@ function toTraceRecord(detail: LlmTraceDetail, span: LlmSpan, index: number): Tr
     hasError: span.hasError,
     startNs: (span.startMs || 0) * 1_000_000,
     statusMessage: span.hasError ? "Error during LLM execution" : "",
+    httpMethod: "",
+    httpStatusCode: null,
   };
 }
 
@@ -63,9 +65,9 @@ function genAIAttributes(span: LlmSpan): Record<string, string> {
     "gen_ai.system": span.vendor || "—",
     "gen_ai.request.model": span.model || "—",
     "gen_ai.response.model": span.responseModel || span.model || "—",
-    "gen_ai.usage.input_tokens": String(span.inputTokens ?? 0),
-    "gen_ai.usage.output_tokens": String(span.outputTokens ?? 0),
-    "gen_ai.cost": `$${(span.cost ?? 0).toFixed(4)}`,
+    "gen_ai.usage.input_tokens": String(span.inputTokens),
+    "gen_ai.usage.output_tokens": String(span.outputTokens),
+    "gen_ai.cost": `$${span.cost.toFixed(4)}`,
     "gen_ai.kind": span.kind || "span",
   };
 }

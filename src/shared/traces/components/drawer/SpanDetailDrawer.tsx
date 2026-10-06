@@ -91,6 +91,7 @@ function SpanDetailDrawerComponent(props: Props) {
     <DrawerShell
       open={open}
       onClose={onClose}
+      title="Span details"
       width="min(560px, calc(100vw - 24px))"
       footer={footer}
     >

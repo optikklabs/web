@@ -4,33 +4,11 @@ import {
   buildLegacyDashboardDrawerSearch,
 } from "@shared/components/ui/dashboard/utils/dashboardDrawerState";
 
-export interface ServiceDrawerSeedData {
-  readonly name: string;
-  readonly requestCount?: number;
-  readonly errorCount?: number;
-  readonly errorRate?: number;
-  readonly avgLatency?: number;
-  readonly p95Latency?: number;
-  readonly p99Latency?: number;
-}
-
 export function buildServiceDrawerSearch(
   currentSearch: string | Record<string, unknown>,
-  service: string | ServiceDrawerSeedData
+  serviceName: string
 ): string {
-  const serviceName = typeof service === "string" ? service : service.name;
-  const row =
-    typeof service === "string"
-      ? { serviceName: serviceName }
-      : {
-          serviceName: service.name,
-          requestCount: service.requestCount,
-          errorCount: service.errorCount,
-          errorRate: service.errorRate,
-          avgLatency: service.avgLatency,
-          p95Latency: service.p95Latency,
-          p99Latency: service.p99Latency,
-        };
+  const row = { serviceName };
 
   return (
     buildDashboardDrawerSearch(

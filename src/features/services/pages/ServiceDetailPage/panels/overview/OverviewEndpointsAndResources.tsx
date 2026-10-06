@@ -1,8 +1,40 @@
 import { endpointMethod } from "@shared/utils/endpointMethod";
+import { fmtPct } from "@shared/utils/formatters";
 import { useEffect, useState } from "react";
 import { useServiceHosts } from "../../hooks/useServiceHosts";
 import { useTopEndpoints } from "../../hooks/useTopEndpoints";
 import { type TopOpRow, TopOpsTable } from "./TopOpsTable";
+
+/** One peak-utilization bar; a null pct means no host reported the metric. */
+function UtilizationBar({
+  label,
+  swatch,
+  pct,
+}: {
+  label: string;
+  swatch: string;
+  pct: number | null;
+}) {
+  const color =
+    pct === null ? "var(--muted)" : pct >= 90 ? "var(--err)" : pct >= 70 ? "var(--warn)" : swatch;
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between text-[12px]">
+        <div className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: swatch }} />
+          <span className="font-medium text-foreground">{label}</span>
+        </div>
+        <span className="font-bold font-mono text-[14px] text-foreground">{fmtPct(pct, 0)}</span>
+      </div>
+      <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-muted">
+        <div
+          className="h-full rounded transition-all duration-300"
+          style={{ width: `${Math.round(pct ?? 0)}%`, backgroundColor: color }}
+        />
+      </div>
+    </div>
+  );
+}
 
 export function OverviewEndpointsAndResources({ serviceName }: { serviceName: string }) {
   const [page, setPage] = useState(0);
@@ -15,8 +47,8 @@ export function OverviewEndpointsAndResources({ serviceName }: { serviceName: st
   const loading = endpointsQ.isPending || hostsQ.isPending;
 
   const results = endpointsQ.data?.results ?? [];
-  const hasMore = endpointsQ.data?.pageInfo?.hasMore ?? false;
-  const nextCursor = endpointsQ.data?.pageInfo?.nextCursor;
+  const hasMore = endpointsQ.data?.pageInfo.hasMore ?? false;
+  const nextCursor = endpointsQ.data?.pageInfo.nextCursor;
 
   useEffect(() => {
     if (nextCursor) {
@@ -38,9 +70,13 @@ export function OverviewEndpointsAndResources({ serviceName }: { serviceName: st
 
   // Peak resource utilization across the service's hosts/pods.
   const hosts = hostsQ.data ?? [];
+  const peak = (values: Array<number | null>): number | null => {
+    const reported = values.filter((v): v is number => v !== null);
+    return reported.length > 0 ? Math.max(...reported) : null;
+  };
   const resourceMetrics = {
-    maxCpu: Math.max(0, ...hosts.map((h) => h.cpu)),
-    maxMem: Math.max(0, ...hosts.map((h) => h.mem)),
+    maxCpu: peak(hosts.map((h) => h.cpu)),
+    maxMem: peak(hosts.map((h) => h.mem)),
     totalPods: hosts.length,
   };
 
@@ -106,63 +142,8 @@ export function OverviewEndpointsAndResources({ serviceName }: { serviceName: st
           </div>
         ) : (
           <div className="flex flex-1 flex-col justify-center gap-5">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-between text-[12px]">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-sm bg-[var(--warn)]" />
-                  <span className="font-medium text-foreground">CPU</span>
-                </div>
-                <div className="flex items-baseline gap-0.5">
-                  <span className="font-bold font-mono text-[14px] text-foreground">
-                    {Math.round(resourceMetrics.maxCpu)}
-                  </span>
-                  <span className="font-medium text-[11px] text-foreground-muted">%</span>
-                </div>
-              </div>
-              <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-muted">
-                <div
-                  className="h-full rounded transition-all duration-300"
-                  style={{
-                    width: `${Math.round(resourceMetrics.maxCpu)}%`,
-                    backgroundColor:
-                      resourceMetrics.maxCpu >= 90
-                        ? "var(--err)"
-                        : resourceMetrics.maxCpu >= 70
-                          ? "var(--warn)"
-                          : "var(--ok)",
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-between text-[12px]">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-sm bg-[var(--chart-1)]" />
-                  <span className="font-medium text-foreground">Memory</span>
-                </div>
-                <div className="flex items-baseline gap-0.5">
-                  <span className="font-bold font-mono text-[14px] text-foreground">
-                    {Math.round(resourceMetrics.maxMem)}
-                  </span>
-                  <span className="font-medium text-[11px] text-foreground-muted">%</span>
-                </div>
-              </div>
-              <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-muted">
-                <div
-                  className="h-full rounded transition-all duration-300"
-                  style={{
-                    width: `${Math.round(resourceMetrics.maxMem)}%`,
-                    backgroundColor:
-                      resourceMetrics.maxMem >= 90
-                        ? "var(--err)"
-                        : resourceMetrics.maxMem >= 70
-                          ? "var(--warn)"
-                          : "var(--chart-1)",
-                  }}
-                />
-              </div>
-            </div>
+            <UtilizationBar label="CPU" swatch="var(--warn)" pct={resourceMetrics.maxCpu} />
+            <UtilizationBar label="Memory" swatch="var(--chart-1)" pct={resourceMetrics.maxMem} />
           </div>
         )}
       </div>

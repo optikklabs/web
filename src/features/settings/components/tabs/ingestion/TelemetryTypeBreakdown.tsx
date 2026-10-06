@@ -1,6 +1,6 @@
 import { PanelCard } from "@shared/components/ui/PanelCard";
 
-import type { IngestionSummary } from "../../../api/ingestionApi";
+import type { IngestionSummary } from "@shared/api/ingestion";
 import { Bar } from "./Bar";
 import { type IngestionUnit, SIGNAL_COLORS, fmtCount, fmtValue } from "./format";
 

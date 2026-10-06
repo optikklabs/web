@@ -1,3 +1,4 @@
+import { errorMessage } from "@shared/api/utils/errorNormalization";
 import { useNavigate } from "@tanstack/react-router";
 import { FolderPlus, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
@@ -82,7 +83,7 @@ export function SaveGraphDialog({
       onClose();
       navigate({ to: "/dashboards/$pageId", params: { pageId: String(targetPageId) } });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to save graph");
+      toast.error(errorMessage(err));
     } finally {
       setSaving(false);
     }

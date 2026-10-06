@@ -48,13 +48,13 @@ function ChannelChip({
 export default function WizardNotifyStep({ draft, setDraft }: Props) {
   const navigate = useNavigate();
   const channelsQ = useChannels();
-  const ids = draft.notify.channelIds ?? [];
+  const ids = draft.notify.channelIds;
 
   return (
     <StepShell n={4} title="Configure notifications" sub="Who should be alerted, and how?">
       <FieldRow label="Send to">
         <div className="flex flex-wrap items-center gap-1.5">
-          {channelsQ.isPending && !channelsQ.data ? (
+          {channelsQ.isPending ? (
             <span className="text-foreground-muted text-xs">Loading channels…</span>
           ) : (channelsQ.data ?? []).length === 0 ? (
             <span className="text-foreground-muted text-xs">
@@ -77,7 +77,7 @@ export default function WizardNotifyStep({ draft, setDraft }: Props) {
                 onToggle={() =>
                   setDraft((prev) => ({
                     ...prev,
-                    notify: { channelIds: toggle(prev.notify.channelIds ?? [], ch.id) },
+                    notify: { channelIds: toggle(prev.notify.channelIds, ch.id) },
                   }))
                 }
               />

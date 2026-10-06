@@ -1,4 +1,4 @@
-import axios, { AxiosError, type AxiosRequestConfig, type AxiosResponse } from "axios";
+import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 
 declare module "axios" {
   // The response interceptor lifts the envelope's comparison sibling here so
@@ -17,12 +17,7 @@ declare module "axios" {
 
 import { API_CONFIG } from "@config/apiConfig";
 
-import {
-  createInvalidApiResponseError,
-  isApiEnvelope,
-  isHtmlLikePayload,
-  normalizeApiPayload,
-} from "../utils/decode";
+import { invalidResponseError, isApiEnvelope } from "../utils/decode";
 import { attachAuthInterceptor } from "./interceptors/authInterceptor";
 import { attachErrorInterceptor } from "./interceptors/errorInterceptor";
 
@@ -33,43 +28,18 @@ const axiosClient = axios.create({
     "Content-Type": "application/json",
   },
   withCredentials: true,
+  // Arrays go out as repeated keys (services=a&services=b), the form the API
+  // reads, not axios's default services[]=a.
+  paramsSerializer: { indexes: null },
 });
 
 attachAuthInterceptor(axiosClient);
 axiosClient.interceptors.response.use((response) => {
-  const normalized = normalizeApiPayload(response.data);
-
-  if (typeof normalized === "string" && isHtmlLikePayload(normalized)) {
-    return Promise.reject(
-      createInvalidApiResponseError(response, "Invalid API response", normalized)
-    );
+  const body: unknown = response.data;
+  if (!isApiEnvelope(body)) {
+    return Promise.reject(invalidResponseError(body));
   }
-
-  if (isApiEnvelope(normalized)) {
-    if (!normalized.success) {
-      const err = new AxiosError(
-        "Request failed",
-        AxiosError.ERR_BAD_RESPONSE,
-        response.config,
-        response.request,
-        { ...response, data: normalized }
-      );
-      return Promise.reject(err);
-    }
-    return {
-      ...response,
-      data: normalizeApiPayload(normalized.data),
-      comparison:
-        normalized.comparison === undefined
-          ? undefined
-          : normalizeApiPayload(normalized.comparison),
-    };
-  }
-
-  return {
-    ...response,
-    data: normalized,
-  };
+  return { ...response, data: body.data, comparison: body.comparison };
 });
 attachErrorInterceptor(axiosClient);
 

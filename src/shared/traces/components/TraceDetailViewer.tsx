@@ -57,10 +57,7 @@ function TraceDetailViewerComponent({
   } = useTraceDetailViewerState({ spans, getSpanAttributes });
 
   const rootSpan = spans[0];
-  const httpStatus =
-    rootSpan?.httpStatusCode != null && rootSpan.httpStatusCode > 0
-      ? rootSpan.httpStatusCode
-      : undefined;
+  const httpStatus = rootSpan?.httpStatusCode ?? undefined;
 
   if (spans.length === 0) {
     return (
@@ -83,7 +80,7 @@ function TraceDetailViewerComponent({
         onBack={onBack}
       />
 
-      <KPIStrip stats={stats} spans={spans} criticalPathSpanIds={new Set()} />
+      <KPIStrip stats={stats} spans={spans} criticalPath={[]} />
 
       <ServiceStrip
         spans={spans}

@@ -1,24 +1,16 @@
 import { z } from "zod";
 
-import { numericValue, stringValue } from "./saturationClient";
-
-const nullableNumber = z.number().nullable();
-
-export const slowQueryPatternSchema = z
-  .object({
-    queryHash: z.string().regex(/^[0-9a-f]{16}$/),
-    queryText: stringValue,
-    dbSystem: stringValue,
-    collectionName: stringValue,
-    namespace: stringValue,
-    server: stringValue,
-    p50Ms: nullableNumber,
-    p95Ms: nullableNumber,
-    p99Ms: nullableNumber,
-    callCount: numericValue,
-    errorCount: numericValue,
-  })
-  .strict();
+export const slowQueryPatternSchema = z.object({
+  queryHash: z.string().regex(/^[0-9a-f]{16}$/),
+  queryText: z.string(),
+  dbSystem: z.string(),
+  collectionName: z.string(),
+  p50Ms: z.number(),
+  p95Ms: z.number(),
+  p99Ms: z.number(),
+  callCount: z.number(),
+  errorCount: z.number(),
+});
 
 export type SlowQueryPatternRow = z.infer<typeof slowQueryPatternSchema>;
 

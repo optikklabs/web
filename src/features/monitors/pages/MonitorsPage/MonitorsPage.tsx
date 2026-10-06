@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import PageHeader from "@shared/components/ui/layout/PageHeader";
 import { PageShell } from "@shared/components/ui/layout/PageShell";
 
-import type { ListMonitorsParams, MonitorStatus } from "../../api/monitorsApi";
+import type { ListMonitorsParams } from "../../api/monitorsApi";
 import { useMonitorsActivity } from "../../hooks/useMonitorsActivity";
 import { useMonitorsList } from "../../hooks/useMonitorsList";
 
@@ -17,11 +17,11 @@ import Tabs, { type MonitorTab } from "./Tabs";
 function tabToParams(tab: MonitorTab): ListMonitorsParams {
   switch (tab) {
     case "triggered":
-      return { status: "alert" as MonitorStatus };
+      return { status: ["alert", "warn"] };
     case "muted":
       return { muted: true };
     case "no_data":
-      return { status: "no_data" as MonitorStatus };
+      return { status: ["no_data"] };
     default:
       return {};
   }
@@ -40,21 +40,18 @@ export default function MonitorsPage() {
   const listQ = useMonitorsList(params);
   const activityQ = useMonitorsActivity(8);
 
-  const counts = listQ.data?.counts ?? {
-    alert: 0,
-    warn: 0,
-    ok: 0,
-    noData: 0,
-    muted: 0,
-    total: 0,
-  };
+  const counts = listQ.data?.counts;
   const monitors = listQ.data?.items ?? [];
 
   return (
     <PageShell>
       <PageHeader
         title="Monitors"
-        subtitle={`${counts.total} monitors · ${counts.muted} muted · ${counts.noData} no data · evaluated continuously`}
+        subtitle={
+          counts
+            ? `${counts.total} monitors · ${counts.muted} muted · ${counts.noData} no data · evaluated continuously`
+            : "Loading monitors…"
+        }
         icon={<Bell size={22} />}
         actions={
           <div className="flex items-center gap-2">

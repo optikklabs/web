@@ -14,7 +14,7 @@ const COMPARATORS: { id: MonitorConditions["comparator"]; label: string }[] = [
   { id: "equal", label: "equal to" },
 ];
 
-const NO_DATA_AS: { id: NonNullable<MonitorConditions["noDataAs"]>; label: string }[] = [
+const NO_DATA_AS: { id: MonitorConditions["noDataAs"]; label: string }[] = [
   { id: "no_data", label: "no-data" },
   { id: "alert", label: "alert" },
   { id: "ok", label: "ok" },

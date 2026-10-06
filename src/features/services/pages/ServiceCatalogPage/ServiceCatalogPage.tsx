@@ -16,7 +16,7 @@ import { useServiceHubTab } from "./useServiceHubTab";
 
 function pickEnvironment(rows: ReadonlyArray<CatalogRow>): string | null {
   for (const row of rows) {
-    if (row.environment && row.environment !== "—") return row.environment;
+    if (row.environment !== "") return row.environment;
   }
   return null;
 }

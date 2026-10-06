@@ -7,11 +7,6 @@ import { z } from "zod";
 
 const BASE = API_CONFIG.ENDPOINTS.V1_BASE;
 
-const traceLogArraySchema = z
-  .array(traceLogSchema)
-  .nullish()
-  .transform((v) => v ?? []);
-
 export async function getTraceLogs(
   traceId: string,
   startMs?: number,
@@ -23,6 +18,6 @@ export async function getTraceLogs(
     params: { limit, startTime: startMs, endTime: endMs },
     signal,
   });
-  const logs = validateResponse(traceLogArraySchema, data ?? []);
+  const logs = validateResponse(z.array(traceLogSchema), data);
   return { logs, isSpeculative: false };
 }

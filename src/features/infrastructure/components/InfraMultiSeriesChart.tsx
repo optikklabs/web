@@ -10,7 +10,7 @@ import { useTimeRangeQuery } from "@shared/hooks/useTimeRangeQuery";
 import { tsMs } from "@shared/utils/chartDataUtils";
 import { getChartColor } from "@shared/utils/charting";
 
-import { infraGet } from "../api/infrastructureApi";
+import { type SeriesPoint, getSeries } from "../api/infrastructureApi";
 import InfraSeriesList, { type InfraSeriesListItem } from "./InfraSeriesList";
 import { type SeriesFormat, formatSeriesValue } from "./seriesFormat";
 
@@ -23,13 +23,6 @@ const INFRA_CHART_HEIGHT = 220;
  * the rest are dropped once the chart stops being readable.
  */
 const MAX_SERIES = 20;
-
-/** One row of `/infrastructure/{hosts,pods}/…/series` (seriesgroup.Point). */
-interface SeriesPoint {
-  readonly timeBucket: string;
-  readonly series: string;
-  readonly value: number;
-}
 
 interface InfraSeries {
   readonly key: string;
@@ -52,7 +45,7 @@ function buildSeries(rows: readonly SeriesPoint[]): {
   const pointsByKey = new Map<string, Map<number, number>>();
 
   for (const row of rows) {
-    const key = row.series?.trim() || "unknown";
+    const key = row.series.trim() || "unknown";
     const ms = tsMs(row.timeBucket);
     const value = Number(row.value);
     if (!Number.isFinite(ms) || !Number.isFinite(value)) continue;
@@ -98,7 +91,8 @@ interface InfraMultiSeriesChartProps {
   readonly height?: number;
   readonly datasetLabel?: string;
   readonly format?: SeriesFormat;
-  readonly extraParams?: Record<string, string | number | undefined>;
+  /** The metric group the series endpoint returns. */
+  readonly metric: string;
 }
 
 export default memo(function InfraMultiSeriesChart({
@@ -108,7 +102,7 @@ export default memo(function InfraMultiSeriesChart({
   height = INFRA_CHART_HEIGHT,
   datasetLabel = "Value",
   format = "number",
-  extraParams,
+  metric,
 }: InfraMultiSeriesChartProps) {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
@@ -118,14 +112,8 @@ export default memo(function InfraMultiSeriesChart({
     );
   };
 
-  const extraParamsKey = JSON.stringify(extraParams ?? {});
-  const q = useTimeRangeQuery<SeriesPoint[]>(
-    `${queryKey}|${extraParamsKey}`,
-    async (tenantId, start, end) => {
-      if (!tenantId) return [];
-      const data = await infraGet<SeriesPoint[]>(endpoint, Number(start), Number(end), extraParams);
-      return Array.isArray(data) ? data : [];
-    }
+  const q = useTimeRangeQuery(`${queryKey}|${metric}`, (start, end) =>
+    getSeries(endpoint, metric, start, end)
   );
 
   // Memoized because this folds every raw sample in the range, unlike the two

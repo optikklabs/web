@@ -33,7 +33,7 @@ export function SeriesChartCard({ endpoint, queryKeyPrefix, def }: SeriesChartCa
         title={def.title}
         format={def.format}
         datasetLabel={def.label}
-        extraParams={{ metric: def.group }}
+        metric={def.group}
       />
     </Card>
   );

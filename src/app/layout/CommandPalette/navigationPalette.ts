@@ -68,7 +68,7 @@ export const navigationPaletteActions: PaletteAction[] = [
     icon: createElement(Columns2, { size: 16 }),
     perform: () => {
       const { viewPreferences, setViewPreference } = useAppStore.getState();
-      const current = viewPreferences?.density ?? "comfortable";
+      const current = viewPreferences.density;
       setViewPreference("density", current === "comfortable" ? "compact" : "comfortable");
     },
   },

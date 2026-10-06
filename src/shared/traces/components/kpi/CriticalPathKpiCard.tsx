@@ -11,8 +11,12 @@ interface Props {
 const kpiBase = "p-3.5 flex flex-col justify-between min-w-0 bg-background";
 const kpiK = "text-[11px] font-medium text-foreground-caption uppercase tracking-[0.05em]";
 
+/** A single span owning this much of the critical path is flagged as the bottleneck. */
+const BOTTLENECK_SHARE_PCT = 80;
+
 function CriticalPathKpiCardComponent({ critical }: Props) {
-  const isHeavy = critical.pctOfTrace >= 80;
+  const { top } = critical;
+  const isHeavy = top !== null && top.sharePct >= BOTTLENECK_SHARE_PCT;
 
   return (
     <div className={cn(kpiBase, isHeavy && "bg-degraded-subtle/30")}>
@@ -31,19 +35,15 @@ function CriticalPathKpiCardComponent({ critical }: Props) {
 
       <div className="mt-1 flex items-baseline gap-2">
         <span className="font-mono font-semibold text-[20px] text-foreground tracking-[-0.02em]">
-          {critical.pctOfTrace}%
+          {top === null ? "—" : `${top.sharePct}%`}
         </span>
         <span className="text-[12px] text-foreground-muted">
-          of trace time ({formatDuration(critical.durationMs)})
+          of {formatDuration(critical.durationMs)} path across {critical.spanCount} spans
         </span>
       </div>
 
-      <div className="mt-1 flex items-center justify-between text-[11.5px] text-foreground-caption">
-        <span className="truncate">
-          {critical.topSpanName
-            ? `Longest: ${critical.topSpanName}`
-            : `${critical.spanCount} spans in main sequence`}
-        </span>
+      <div className="mt-1 truncate text-[11.5px] text-foreground-caption">
+        {top === null ? "No critical path" : `in ${top.name} (${formatDuration(top.selfMs)})`}
       </div>
     </div>
   );

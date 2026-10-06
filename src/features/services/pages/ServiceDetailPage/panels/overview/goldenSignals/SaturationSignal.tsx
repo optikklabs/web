@@ -20,7 +20,8 @@ export function SaturationSignal({ serviceName }: { serviceName: string }) {
   const timestamps = useMemo(() => activeRows.map((r) => r.timestampMs / 1000), [activeRows]);
   const values = activeRows.map((r) => r.value);
 
-  const latest = values.length ? values[values.length - 1] : 0;
+  // Buckets nothing reported are gaps (null); the header shows the last value.
+  const latest = values.findLast((v) => v !== null);
   const series: ObservabilityChartSeries[] = [
     { label: "saturation", values, color: "var(--color-accent,#8b5cf6)", fill: true },
   ];
@@ -29,7 +30,7 @@ export function SaturationSignal({ serviceName }: { serviceName: string }) {
     <PanelCard
       title="Saturation (CPU)"
       subtitle="%"
-      action={<SignalLegend>curr {fmtSat(latest)}</SignalLegend>}
+      action={<SignalLegend>curr {latest == null ? "—" : fmtSat(latest)}</SignalLegend>}
     >
       <ObservabilityChart
         type="area"

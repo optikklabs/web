@@ -1,29 +1,26 @@
 import api from "@/shared/api/http/client";
+import { validateResponse } from "@/shared/api/utils/validate";
 import { API_CONFIG } from "@config/apiConfig";
+import { z } from "zod";
 
 /**
- * Canonical OTLP connection info, owned by the backend
- * (`GET /api/v1/tenants/current/ingestion-endpoints`) so the UI never
+ * Canonical OTLP connection info, owned by the backend so the UI never
  * derives ingest endpoints from its own origin.
  */
-export interface IngestionEndpoints {
+const ingestionEndpointsSchema = z.object({
   /** Host:port for OTLP over gRPC, e.g. "ingest.optikk.in:4317". */
-  readonly grpc: string;
+  grpc: z.string(),
   /** Base URL for OTLP over HTTP, e.g. "https://ingest.optikk.in:4318". */
-  readonly http: string;
+  http: z.string(),
   /** Header carrying the tenant API key, e.g. "x-api-key". */
-  readonly headerName: string;
-}
+  headerName: z.string(),
+});
 
-/** Local-dev ingest ports (`ingest/config.yml`), used if the fetch fails. */
-export const LOCAL_INGESTION_ENDPOINTS: IngestionEndpoints = {
-  grpc: "localhost:18317",
-  http: "http://localhost:18318",
-  headerName: "x-api-key",
-};
+export type IngestionEndpoints = z.infer<typeof ingestionEndpointsSchema>;
 
-export function getIngestionEndpoints(): Promise<IngestionEndpoints> {
-  return api.get<IngestionEndpoints>(
-    `${API_CONFIG.ENDPOINTS.V1_BASE}/tenants/current/ingestion-endpoints`
+export async function getIngestionEndpoints(): Promise<IngestionEndpoints> {
+  return validateResponse(
+    ingestionEndpointsSchema,
+    await api.get<unknown>(`${API_CONFIG.ENDPOINTS.V1_BASE}/tenants/current/ingestion-endpoints`)
   );
 }

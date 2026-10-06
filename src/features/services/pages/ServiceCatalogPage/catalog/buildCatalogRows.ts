@@ -17,12 +17,10 @@ export interface CatalogRow {
   readonly p99DeltaPct: number | null;
   readonly status: ServiceHealth;
   readonly sparkline: number[];
+  /** Empty when the service does not report it. */
   readonly version: string;
   readonly environment: string;
-  readonly tier: string;
-  readonly tenant: string;
-  readonly lang: string;
-  readonly instances: number | null;
+  readonly instances: number;
 }
 
 function deltaPct(now: number, prev: number | undefined): number | null {
@@ -39,7 +37,7 @@ function bySparkline(data: RequestRateSeries | undefined): Map<string, number[]>
 function byPrevP99(prev: ServiceCatalogRedSummary | undefined): Map<string, number> {
   const m = new Map<string, number>();
   if (!prev) return m;
-  for (const row of prev.services ?? []) m.set(row.serviceName, row.p99Latency);
+  for (const row of prev.services) m.set(row.serviceName, row.p99Latency);
   return m;
 }
 
@@ -64,25 +62,22 @@ function buildCatalogRow(
     errorCount: row.errorCount,
     errorRate,
     rps: windowSec > 0 ? row.requestCount / windowSec : 0,
-    p50Ms: row.avgLatency,
+    p50Ms: row.p50Latency,
     p95Ms: row.p95Latency,
     p99Ms: row.p99Latency,
     p99DeltaPct: deltaPct(row.p99Latency, prevP99.get(row.serviceName)),
     status: classifyServiceHealth(errorRate, row.p99Latency),
     sparkline: spark.get(row.serviceName) ?? [],
-    version: "—",
-    environment: "—",
-    tier: "—",
-    tenant: "—",
-    lang: "—",
-    instances: null,
+    version: row.version,
+    environment: row.environment,
+    instances: row.instances,
   };
 }
 
 export function buildCatalogRows(inputs: BuildCatalogInputs): CatalogRow[] {
   const spark = bySparkline(inputs.rateSeries);
   const prevP99 = byPrevP99(inputs.comparison);
-  return (inputs.primary.services ?? []).map((row) =>
+  return inputs.primary.services.map((row) =>
     buildCatalogRow(row, inputs.windowSec, spark, prevP99)
   );
 }

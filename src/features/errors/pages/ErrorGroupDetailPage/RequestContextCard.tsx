@@ -4,7 +4,7 @@ import { formatDuration } from "@shared/utils/formatters";
 import type { ErrorLatestOccurrence } from "@shared/api/errors";
 
 interface Props {
-  readonly occurrence: ErrorLatestOccurrence | null | undefined;
+  readonly occurrence: ErrorLatestOccurrence | undefined;
 }
 
 interface Row {
@@ -17,14 +17,14 @@ interface Row {
 export function RequestContextCard({ occurrence }: Props): JSX.Element | null {
   if (!occurrence) return null;
 
-  const statusNum = Number.parseInt(occurrence.httpStatusCode, 10);
+  const status = occurrence.httpStatusCode;
   const rows: Row[] = [
     { k: "http.method", v: occurrence.httpMethod },
     { k: "http.route", v: occurrence.httpRoute },
     {
       k: "http.status",
-      v: occurrence.httpStatusCode,
-      bad: Number.isFinite(statusNum) && statusNum >= 400,
+      v: status === null ? "" : String(status),
+      bad: status !== null && status >= 400,
     },
     { k: "duration", v: formatDuration(occurrence.durationMs), bad: occurrence.durationMs >= 1000 },
     { k: "traceId", v: occurrence.traceId },

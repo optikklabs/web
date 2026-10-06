@@ -29,7 +29,7 @@ function formFromPolicy(p: Policy): PolicyForm {
   };
 }
 
-import { getErrorMessage } from "@shared/utils/errorUtils";
+import { errorMessage } from "@shared/api/utils/errorNormalization";
 
 function parseActions(json: string): unknown[] {
   const trimmed = json.trim();
@@ -72,7 +72,7 @@ export default function PoliciesTab() {
       }
       setForm(emptyForm());
     } catch (err) {
-      setStatus(getErrorMessage(err, "Failed to save policy"));
+      setStatus(errorMessage(err));
     }
   };
 
@@ -82,7 +82,7 @@ export default function PoliciesTab() {
       await remove.mutateAsync(id);
       if (form.id === id) setForm(emptyForm());
     } catch (err) {
-      setStatus(getErrorMessage(err, "Failed to delete policy"));
+      setStatus(errorMessage(err));
     }
   };
 

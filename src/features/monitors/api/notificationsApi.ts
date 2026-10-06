@@ -1,90 +1,105 @@
 import api from "@/shared/api/http/client";
+import { validateResponse } from "@/shared/api/utils/validate";
 import { API_CONFIG } from "@config/apiConfig";
+import { z } from "zod";
 
 const V1 = API_CONFIG.ENDPOINTS.V1_BASE;
+const BASE = `${V1}/notifications`;
 
-type ChannelType = "slack";
+const channelSchema = z.object({
+  id: z.number(),
+  type: z.literal("slack"),
+  name: z.string(),
+  config: z.object({ webhookConfigured: z.boolean() }),
+  status: z.enum(["ok", "warn"]),
+  usedByCount: z.number(),
+  lastUsedAt: z.string().optional(),
+  lastDeliveryAt: z.string().optional(),
+  lastErrorText: z.string().optional(),
+  createdAt: z.string(),
+});
 
-export interface Channel {
-  readonly id: number;
-  readonly type: string;
-  readonly name: string;
-  readonly config: Record<string, unknown>;
-  readonly status: "ok" | "warn" | "muted";
-  readonly usedByCount: number;
-  readonly lastUsedAt?: string;
-  readonly lastDeliveryAt?: string;
-  readonly lastErrorText?: string;
-  readonly createdAt: string;
-}
+const integrationSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  desc: z.string(),
+  status: z.enum(["connected", "not_connected"]),
+  count: z.number(),
+  color: z.string(),
+});
 
-export interface Integration {
-  readonly id: string;
-  readonly name: string;
-  readonly desc: string;
-  readonly status: "connected" | "not_connected";
-  readonly count: number;
-  readonly color: string;
-}
+const policySchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  matchDsl: z.string(),
+  actions: z.array(z.unknown()),
+  hits30d: z.number(),
+  lastUsedAt: z.string().optional(),
+  enabled: z.boolean(),
+  position: z.number(),
+  createdAt: z.string(),
+});
 
-export interface Policy {
-  readonly id: number;
-  readonly name: string;
-  readonly matchDsl: string;
-  readonly actions: unknown[];
-  readonly hits30d: number;
-  readonly lastUsedAt?: string;
-  readonly enabled: boolean;
-  readonly position: number;
-  readonly createdAt: string;
-}
+const templateSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  description: z.string().optional(),
+  body: z.string(),
+  usedCount: z.number(),
+  createdAt: z.string(),
+});
 
-export interface Template {
-  readonly id: number;
-  readonly name: string;
-  readonly description?: string;
-  readonly body: string;
-  readonly usedCount: number;
-  readonly createdAt: string;
-}
+const testChannelSchema = z.object({
+  ok: z.boolean(),
+  errorText: z.string().optional(),
+});
+
+export type Channel = z.infer<typeof channelSchema>;
+export type Integration = z.infer<typeof integrationSchema>;
+export type Policy = z.infer<typeof policySchema>;
+export type Template = z.infer<typeof templateSchema>;
+export type TestChannelResult = z.infer<typeof testChannelSchema>;
 
 // Channels ------------------------------------------------------------------
 
-export async function listChannels(): Promise<Channel[]> {
-  return api.get<Channel[]>(`${V1}/notifications/channels`);
+export interface CreateChannelPayload {
+  type: Channel["type"];
+  name: string;
+  /** Omit `webhookUrl` on update to keep the stored one. */
+  config: { webhookUrl?: string };
 }
 
-export interface CreateChannelPayload {
-  type: ChannelType;
-  name: string;
-  config: Record<string, unknown>;
+export async function listChannels(): Promise<Channel[]> {
+  return validateResponse(z.array(channelSchema), await api.get<unknown>(`${BASE}/channels`));
 }
+
 export async function createChannel(payload: CreateChannelPayload): Promise<Channel> {
-  return api.post<Channel>(`${V1}/notifications/channels`, payload);
+  return validateResponse(channelSchema, await api.post<unknown>(`${BASE}/channels`, payload));
 }
 
 export async function updateChannel(id: number, payload: CreateChannelPayload): Promise<Channel> {
-  return api.put<Channel>(`${V1}/notifications/channels/${id}`, payload);
+  return validateResponse(channelSchema, await api.put<unknown>(`${BASE}/channels/${id}`, payload));
 }
 
 export async function deleteChannel(id: number): Promise<void> {
-  await api.delete<unknown>(`${V1}/notifications/channels/${id}`);
+  await api.delete<unknown>(`${BASE}/channels/${id}`);
 }
 
-export async function testChannel(id: number): Promise<{ ok: boolean; errorText?: string }> {
-  return api.post<{ ok: boolean; errorText?: string }>(
-    `${V1}/notifications/channels/${id}/test`,
-    {}
+export async function testChannel(id: number): Promise<TestChannelResult> {
+  return validateResponse(
+    testChannelSchema,
+    await api.post<unknown>(`${BASE}/channels/${id}/test`, {})
   );
 }
 
 export async function listIntegrations(): Promise<Integration[]> {
-  return api.get<Integration[]>(`${V1}/notifications/integrations`);
+  return validateResponse(
+    z.array(integrationSchema),
+    await api.get<unknown>(`${BASE}/integrations`)
+  );
 }
 
-export async function listPolicies(): Promise<Policy[]> {
-  return api.get<Policy[]>(`${V1}/notifications/policies`);
-}
+// Policies ------------------------------------------------------------------
 
 export interface CreatePolicyPayload {
   name: string;
@@ -93,34 +108,49 @@ export interface CreatePolicyPayload {
   enabled?: boolean;
   position?: number;
 }
-export async function createPolicy(payload: CreatePolicyPayload): Promise<Policy> {
-  return api.post<Policy>(`${V1}/notifications/policies`, payload);
-}
-export async function updatePolicy(id: number, payload: CreatePolicyPayload): Promise<Policy> {
-  return api.put<Policy>(`${V1}/notifications/policies/${id}`, payload);
-}
-export async function deletePolicy(id: number): Promise<void> {
-  await api.delete<unknown>(`${V1}/notifications/policies/${id}`);
+
+export async function listPolicies(): Promise<Policy[]> {
+  return validateResponse(z.array(policySchema), await api.get<unknown>(`${BASE}/policies`));
 }
 
-export async function listTemplates(): Promise<Template[]> {
-  return api.get<Template[]>(`${V1}/notifications/templates`);
+export async function createPolicy(payload: CreatePolicyPayload): Promise<Policy> {
+  return validateResponse(policySchema, await api.post<unknown>(`${BASE}/policies`, payload));
 }
+
+export async function updatePolicy(id: number, payload: CreatePolicyPayload): Promise<Policy> {
+  return validateResponse(policySchema, await api.put<unknown>(`${BASE}/policies/${id}`, payload));
+}
+
+export async function deletePolicy(id: number): Promise<void> {
+  await api.delete<unknown>(`${BASE}/policies/${id}`);
+}
+
+// Templates -----------------------------------------------------------------
 
 export interface CreateTemplatePayload {
   name: string;
   description?: string;
   body: string;
 }
-export async function createTemplate(payload: CreateTemplatePayload): Promise<Template> {
-  return api.post<Template>(`${V1}/notifications/templates`, payload);
+
+export async function listTemplates(): Promise<Template[]> {
+  return validateResponse(z.array(templateSchema), await api.get<unknown>(`${BASE}/templates`));
 }
+
+export async function createTemplate(payload: CreateTemplatePayload): Promise<Template> {
+  return validateResponse(templateSchema, await api.post<unknown>(`${BASE}/templates`, payload));
+}
+
 export async function updateTemplate(
   id: number,
   payload: CreateTemplatePayload
 ): Promise<Template> {
-  return api.put<Template>(`${V1}/notifications/templates/${id}`, payload);
+  return validateResponse(
+    templateSchema,
+    await api.put<unknown>(`${BASE}/templates/${id}`, payload)
+  );
 }
+
 export async function deleteTemplate(id: number): Promise<void> {
-  await api.delete<unknown>(`${V1}/notifications/templates/${id}`);
+  await api.delete<unknown>(`${BASE}/templates/${id}`);
 }

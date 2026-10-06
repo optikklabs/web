@@ -25,7 +25,7 @@ export function useDataset(id: number | null) {
     queryFn: () => getDataset(id ?? 0),
     enabled: id != null && id > 0,
     refetchInterval: (query) =>
-      query.state.data?.runs?.some((run) => run.status === "running") ? 2_000 : false,
+      query.state.data?.runs.some((run) => run.status === "running") ? 2_000 : false,
   });
 }
 

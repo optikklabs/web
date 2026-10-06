@@ -11,22 +11,18 @@ import type { ErrorGroupsPage, ErrorsFacets, ErrorsOverview } from "./types";
 
 const BASE = API_CONFIG.ENDPOINTS.V1_BASE;
 
-const facetBucketsSchema = z
-  .union([z.array(z.object({ value: z.string(), count: z.number() })), z.null()])
-  .transform((v) => v ?? []);
+const facetBucketsSchema = z.array(z.object({ value: z.string(), count: z.number() }));
 
 /** Keys mirror Go errors.Facets, which mirrors the DSL field names. */
-const facetsSchema = z
-  .object({
-    service: facetBucketsSchema.optional(),
-    operation: facetBucketsSchema.optional(),
-    httpStatus: facetBucketsSchema.optional(),
-    exceptionType: facetBucketsSchema.optional(),
-  })
-  .nullish();
+const facetsSchema = z.object({
+  service: facetBucketsSchema,
+  operation: facetBucketsSchema,
+  httpStatus: facetBucketsSchema,
+  exceptionType: facetBucketsSchema,
+});
 
 const groupsResponseSchema = z.object({
-  results: z.union([z.array(errorGroupSchema), z.null()]).transform((v) => v ?? []),
+  results: z.array(errorGroupSchema),
   pageInfo: pageInfoSchema,
 });
 
@@ -37,9 +33,7 @@ const overviewSchema = z.object({
     newIssues: z.number(),
     servicesAffected: z.number(),
   }),
-  trend: z
-    .union([z.array(z.object({ timeBucketMs: z.number(), errors: z.number() })), z.null()])
-    .transform((v) => v ?? []),
+  trend: z.array(z.object({ timeBucketMs: z.number(), errors: z.number() })),
 });
 
 type FilterBody = Pick<ExplorerQueryRequest, "startTime" | "endTime" | "filters">;
@@ -63,15 +57,15 @@ export async function queryErrorGroups(req: ExplorerQueryRequest): Promise<Error
   });
   return {
     groups: parsed.results,
-    nextCursor: parsed.pageInfo.hasMore ? (parsed.pageInfo.nextCursor ?? undefined) : undefined,
+    nextCursor: parsed.pageInfo.nextCursor,
   };
 }
 
 export async function queryErrorFacets(req: FilterBody): Promise<ErrorsFacets> {
   const parsed = await post("/errors/facets", req, facetsSchema);
   const out: Record<string, readonly ExplorerFacetBucket[]> = {};
-  for (const [field, buckets] of Object.entries(parsed ?? {})) {
-    if (buckets && buckets.length > 0) out[field] = buckets;
+  for (const [field, buckets] of Object.entries(parsed)) {
+    if (buckets.length > 0) out[field] = buckets;
   }
   return out;
 }

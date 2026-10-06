@@ -10,7 +10,7 @@ import {
 export function useQueryPerformanceCatalogue(system: string) {
   return useTimeRangeQuery<QueryPerformanceCatalogue>(
     "saturation-db.query-performance-catalogue",
-    (_tenant, start, end) => getQueryPerformanceCatalogue(system, start, end),
+    (start, end) => getQueryPerformanceCatalogue(system, start, end),
     { extraKeys: [system] }
   );
 }
@@ -26,7 +26,7 @@ export function useQueryPerformanceSeries(system: string, scope: QueryPerformanc
   const selected = scope.mode === "collection" ? scope.collection : scope.queryHash;
   return useTimeRangeQuery<QueryPerformanceResponse>(
     "saturation-db.query-performance-series",
-    (_tenant, start, end) => {
+    (start, end) => {
       const requestScope =
         scope.mode === "collection"
           ? {

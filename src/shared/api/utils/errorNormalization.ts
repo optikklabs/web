@@ -1,5 +1,5 @@
-import { UNKNOWN_ERROR } from "@/shared/constants/errorCodes";
-import type { ErrorCode } from "@/shared/constants/errorCodes";
+import { type ErrorCode, UNKNOWN_ERROR } from "@/shared/constants/errorCodes";
+import { ZodError } from "zod";
 
 export interface ApiErrorShape {
   readonly status: number;
@@ -7,7 +7,6 @@ export interface ApiErrorShape {
   readonly message: string;
   readonly data?: unknown;
 }
-import { ZodError } from "zod";
 
 /**
  * Normalizes an unknown error value into a consistent ApiErrorShape.
@@ -29,19 +28,12 @@ export function toApiErrorShape(error: unknown): ApiErrorShape {
     };
   }
 
-  if (error instanceof Error) {
-    return {
-      status: 0,
-      code: UNKNOWN_ERROR,
-      message: error.message || "An unexpected error occurred",
-    };
-  }
+  return { status: 0, code: UNKNOWN_ERROR, message: "An unexpected error occurred" };
+}
 
-  return {
-    status: 0,
-    code: "UNKNOWN_ERROR",
-    message: "An unexpected error occurred",
-  };
+/** The user-facing message of an API (or any) error. */
+export function errorMessage(error: unknown): string {
+  return toApiErrorShape(error).message;
 }
 
 export function formatErrorForDisplay(error: unknown): string {

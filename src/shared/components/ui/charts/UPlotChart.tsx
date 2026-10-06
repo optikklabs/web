@@ -27,7 +27,7 @@ interface UPlotChartProps {
 }
 
 function isAlignedDataShapeCompatible(next: uPlot.AlignedData, prev: uPlot.AlignedData): boolean {
-  return next?.length === prev?.length;
+  return next.length === prev.length;
 }
 
 function UPlotChart({
@@ -60,7 +60,7 @@ function UPlotChart({
   const structureKey = useMemo(
     () =>
       [
-        options.series?.length ?? 0,
+        options.series.length,
         height,
         fillHeight ? 1 : 0,
         syncKey?.key ?? "",
@@ -70,7 +70,7 @@ function UPlotChart({
         theme,
       ].join(":"),
     [
-      options.series?.length,
+      options.series.length,
       height,
       fillHeight,
       syncKey,

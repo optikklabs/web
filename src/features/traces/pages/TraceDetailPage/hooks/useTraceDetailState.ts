@@ -1,7 +1,5 @@
 import { useParams } from "@tanstack/react-router";
 
-import { useAppStore } from "@app/store/appStore";
-
 import { useTraceDetailData } from "../../../hooks/useTraceDetailData";
 import { useTraceServiceMap } from "../../../hooks/useTraceServiceMap";
 import { type VisualizationTab, useTracesStore } from "../../../store/tracesStore";
@@ -9,7 +7,6 @@ import { type VisualizationTab, useTracesStore } from "../../../store/tracesStor
 export function useTraceDetailState() {
   const { traceId } = useParams({ strict: false });
   const traceIdParam = traceId ?? "";
-  const selectedTenantId = useAppStore((state) => state.selectedTenantId);
 
   const rawActiveTab = useTracesStore((s) => s.visualizationTab);
 
@@ -22,13 +19,12 @@ export function useTraceDetailState() {
       : "waterfall";
   const setActiveTab = useTracesStore((s) => s.setVisualizationTab);
 
-  const data = useTraceDetailData(selectedTenantId, traceIdParam);
+  const data = useTraceDetailData(traceIdParam);
 
   const resolvedTraceId =
     data.spans.length > 0 ? data.spans[0].traceId || traceIdParam : traceIdParam;
 
   const serviceMap = useTraceServiceMap(
-    selectedTenantId,
     data.serviceMap,
     data.traceTimeBounds,
     activeTab === "service_map"

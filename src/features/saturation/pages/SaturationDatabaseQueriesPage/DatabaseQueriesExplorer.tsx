@@ -63,8 +63,6 @@ export function DatabaseQueriesExplorer({
       search: {
         dbSystem: row.dbSystem || dbSystem || undefined,
         collection: row.collectionName || undefined,
-        namespace: row.namespace || undefined,
-        server: row.server || undefined,
       } as never,
     });
   };

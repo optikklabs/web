@@ -21,31 +21,31 @@ export function useServiceDrawerQueries(serviceName: string) {
 
   const requestTrendQuery = useTimeRangeQuery(
     "service-drawer-request-trend",
-    async (_t, s, e) => getStatusTimeseries(s, e, serviceName),
+    async (s, e) => getStatusTimeseries(s, e, serviceName),
     opts
   );
 
   const errorTrendQuery = useTimeRangeQuery(
     "service-drawer-error-trend",
-    async (_t, s, e) => getServiceErrorRate(s, e, { serviceName }),
+    async (s, e) => getServiceErrorRate(s, e, { service: serviceName }),
     opts
   );
 
   const latencyTrendQuery = useTimeRangeQuery(
     "service-drawer-latency-trend",
-    async (_t, s, e) => getLatencyPercentilesTimeseries(s, e, serviceName),
+    async (s, e) => getLatencyPercentilesTimeseries(s, e, serviceName),
     opts
   );
 
   const endpointsQuery = useTimeRangeQuery(
     "service-drawer-endpoints",
-    async (_t, s, e) => getTopEndpoints(s, e, serviceName, 6),
+    async (s, e) => getTopEndpoints(s, e, serviceName, 6),
     opts
   );
 
   const dependenciesQuery = useTimeRangeQuery(
     "service-drawer-dependencies",
-    async (_t, s, e) => getServiceTopology({ startTime: s, endTime: e, service: serviceName }),
+    async (s, e) => getServiceTopology({ startTime: s, endTime: e, service: serviceName }),
     opts
   );
 

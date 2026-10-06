@@ -33,30 +33,20 @@ import {
 
 const BASE = API_CONFIG.ENDPOINTS.V1_BASE;
 
-function extractNextCursor(pageInfo: unknown): string | undefined {
-  const parsed = pageInfoSchema.safeParse(pageInfo);
-  if (parsed.success && parsed.data.nextCursor && parsed.data.nextCursor !== "") {
-    return parsed.data.nextCursor;
-  }
-  return undefined;
-}
-
 const facetBucketSchema = z.object({
   value: z.string(),
   count: z.number(),
 });
 
-const rawFacetsSchema = z
-  .object({
-    service: z.array(facetBucketSchema).optional(),
-    operation: z.array(facetBucketSchema).optional(),
-    httpMethod: z.array(facetBucketSchema).optional(),
-    httpStatus: z.array(facetBucketSchema).optional(),
-    status: z.array(facetBucketSchema).optional(),
-  })
-  .partial();
+const facetsSchema = z.object({
+  service: z.array(facetBucketSchema),
+  operation: z.array(facetBucketSchema),
+  httpMethod: z.array(facetBucketSchema),
+  httpStatus: z.array(facetBucketSchema),
+  status: z.array(facetBucketSchema),
+});
 
-const rawTrendRowSchema = z.object({
+const trendRowSchema = z.object({
   timeBucketMs: z.number(),
   total: z.number(),
   errors: z.number(),
@@ -64,30 +54,15 @@ const rawTrendRowSchema = z.object({
 
 const tracesQueryResponseSchema = z
   .object({
-    results: z.union([z.array(traceSummarySchema), z.null()]).transform((v) => v ?? []),
-    pageInfo: z.unknown().optional(),
+    results: z.array(traceSummarySchema),
+    pageInfo: pageInfoSchema,
   })
-  .transform((r) => {
-    const out: TracesQueryResponse = {
+  .transform(
+    (r): TracesQueryResponse => ({
       traces: r.results,
-      nextCursor: extractNextCursor(r.pageInfo),
-    };
-    return out;
-  });
-
-function logDevSnippet(raw: unknown, err: unknown) {
-  if (!import.meta.env.DEV) return;
-  let snippet: string;
-  try {
-    snippet = JSON.stringify(raw).slice(0, 800);
-  } catch {
-    snippet = String(raw).slice(0, 800);
-  }
-  console.warn("[traces/query] validateResponse failed — check API contract vs Zod schema.", {
-    snippet,
-    error: err,
-  });
-}
+      nextCursor: r.pageInfo.nextCursor,
+    })
+  );
 
 export async function query(body: TracesQueryRequest): Promise<TracesQueryResponse> {
   const { body: reqBody } = buildTracesFilters(body.filters, body.startTime, body.endTime, {
@@ -95,57 +70,31 @@ export async function query(body: TracesQueryRequest): Promise<TracesQueryRespon
     cursor: body.cursor,
   });
   const raw = await api.post<unknown>(`${BASE}/traces/query`, reqBody);
-
-  if (
-    import.meta.env.DEV &&
-    body.startTime > 0 &&
-    body.endTime > body.startTime &&
-    body.endTime < 1e12
-  ) {
-    console.warn(
-      "[traces/query] startTime/endTime look like seconds, not ms — queries may return no rows.",
-      { startTime: body.startTime, endTime: body.endTime }
-    );
-  }
-
-  try {
-    return validateResponse(tracesQueryResponseSchema, raw);
-  } catch (err) {
-    logDevSnippet(raw, err);
-    throw err;
-  }
+  return validateResponse(tracesQueryResponseSchema, raw);
 }
 
 export async function queryFacets(body: TracesQueryRequest) {
   const { body: reqBody } = buildTracesFilters(body.filters, body.startTime, body.endTime);
   const raw = await api.post<unknown>(`${BASE}/traces/facets`, reqBody);
-  const facets: TracesFacets = validateResponse(rawFacetsSchema, raw);
-  return Object.keys(facets).length > 0 ? facets : undefined;
+  const facets: TracesFacets = validateResponse(facetsSchema, raw);
+  return facets;
 }
 
 export async function queryTrend(body: TracesQueryRequest) {
   const { body: reqBody } = buildTracesFilters(body.filters, body.startTime, body.endTime);
   const raw = await api.post<unknown>(`${BASE}/traces/trend`, reqBody);
-  const validated = validateResponse(z.union([z.array(rawTrendRowSchema), z.null()]), raw) ?? [];
-  return validated.map((b) => ({
-    timeBucketMs: b.timeBucketMs,
-    total: b.total,
-    errors: b.errors,
-  }));
+  return validateResponse(z.array(trendRowSchema), raw);
 }
-
-const nullableArray = <T extends z.ZodTypeAny>(item: T) =>
-  z.union([z.array(item), z.null(), z.undefined()]).transform((v) => v ?? ([] as z.infer<T>[]));
 
 // Consolidated trace detail: summary + span list + server-derived views.
 // summary is null when the trace has no spans in the requested range.
 const traceDetailResponseSchema = z.object({
   summary: traceSummarySchema.nullable(),
-  spans: nullableArray(spanRecordSchema),
-  criticalPath: nullableArray(criticalPathSpanSchema),
-  errorPath: nullableArray(errorPathSpanSchema),
+  spans: z.array(spanRecordSchema),
+  criticalPath: z.array(criticalPathSpanSchema),
+  errorPath: z.array(errorPathSpanSchema),
   serviceMap: topologyResponseSchema,
-  errors: nullableArray(traceErrorGroupSchema),
+  errors: z.array(traceErrorGroupSchema),
 });
 
 interface TraceDetailResponse {
@@ -167,15 +116,7 @@ async function getTraceDetail(
     params: { startTime: startMs, endTime: endMs },
     signal,
   });
-  const parsed = validateResponse(traceDetailResponseSchema, data);
-  return {
-    summary: parsed.summary,
-    spans: parsed.spans,
-    criticalPath: parsed.criticalPath,
-    errorPath: parsed.errorPath,
-    serviceMap: parsed.serviceMap,
-    errors: parsed.errors,
-  };
+  return validateResponse(traceDetailResponseSchema, data);
 }
 
 async function getSpanEvents(
@@ -249,7 +190,7 @@ async function getServiceLatencyBaselines(
     params: { startTime: startMs, endTime: endMs },
     signal,
   });
-  const parsed = validateResponse(fleetOverviewServicesSchema, data ?? { services: [] });
+  const parsed = validateResponse(fleetOverviewServicesSchema, data);
   const out = new Map<string, ServiceLatencyBaseline>();
   for (const s of parsed.services) {
     out.set(s.serviceName, { p95: s.p95Latency, p99: s.p99Latency });

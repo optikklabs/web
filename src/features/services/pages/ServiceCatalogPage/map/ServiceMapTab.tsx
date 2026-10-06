@@ -38,7 +38,7 @@ export function ServiceMapTab() {
 
   const query = useTimeRangeQuery<ServiceTopologyResponse>(
     "service-hub.map-topology",
-    (_tenant, startTime, endTime) => getServiceTopology({ startTime, endTime })
+    (startTime, endTime) => getServiceTopology({ startTime, endTime })
   );
   const data = query.data ?? EMPTY;
 

@@ -163,7 +163,7 @@ export default function DeploymentsPage() {
         content={
           query.isError ? (
             <div className="rounded-md border border-error/30 bg-error-subtle px-4 py-5 text-center text-[12.5px] text-error">
-              Deployments could not be loaded. {query.error?.message}
+              Deployments could not be loaded. {query.error.message}
             </div>
           ) : tab === "timeline" ? (
             <DeploymentTimeline rows={rows} onOpen={openDeployment} />

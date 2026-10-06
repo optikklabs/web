@@ -59,7 +59,7 @@ function Select({
   return (
     <div className={cn("relative inline-block", className)} style={style} {...props}>
       <SelectPrimitive.Root
-        value={value !== undefined && value !== null ? String(value) : undefined}
+        value={value !== undefined ? String(value) : undefined}
         onValueChange={(v) => {
           const opt = options.find((o) => String(o.value) === v);
           onChange?.(opt ? opt.value : v);

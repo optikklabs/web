@@ -1,38 +1,46 @@
+import { z } from "zod";
+
 import api from "@/shared/api/http/client";
 import type { RequestTime } from "@/shared/api/service-types";
+import { validateResponse } from "@/shared/api/utils/validate";
 import { API_CONFIG } from "@config/apiConfig";
 
 const V1 = API_CONFIG.ENDPOINTS.V1_BASE;
 
 /** Host machine metadata from retained resource attributes. */
-export interface HostAbout {
-  readonly osType?: string;
-  readonly osDescription?: string;
-  readonly arch?: string;
-  readonly hostId?: string;
-  readonly cloudProvider?: string;
-  readonly cloudPlatform?: string;
-  readonly cloudRegion?: string;
-  readonly cloudZone?: string;
-  readonly k8sNodeName?: string;
-}
+const hostAboutSchema = z.object({
+  osType: z.string().optional(),
+  osDescription: z.string().optional(),
+  arch: z.string().optional(),
+  hostId: z.string().optional(),
+  cloudProvider: z.string().optional(),
+  cloudPlatform: z.string().optional(),
+  cloudRegion: z.string().optional(),
+  cloudZone: z.string().optional(),
+  k8sNodeName: z.string().optional(),
+});
+export type HostAbout = z.infer<typeof hostAboutSchema>;
 
-/** Mirrors hostdetail.HostOverview; nil KPIs mean the metric is not reported. */
-export interface HostOverview {
-  readonly host: string;
-  readonly lastSeen?: string;
-  readonly environments: readonly string[];
-  readonly namespaces: readonly string[];
-  readonly cpuPct: number | null;
-  readonly memoryPct: number | null;
-  readonly diskPct: number | null;
-  readonly load1m: number | null;
-  readonly load5m: number | null;
-  readonly load15m: number | null;
-  readonly processCount: number | null;
-  readonly availableMetrics: readonly string[];
-  readonly about?: HostAbout;
-}
+/**
+ * Mirrors models.HostOverview. Null KPIs (and lastSeen) mean the host
+ * reported no metrics for them in the window.
+ */
+const hostOverviewSchema = z.object({
+  host: z.string(),
+  lastSeen: z.string().nullable(),
+  environments: z.array(z.string()),
+  namespaces: z.array(z.string()),
+  cpuPct: z.number().nullable(),
+  memoryPct: z.number().nullable(),
+  diskPct: z.number().nullable(),
+  load1m: z.number().nullable(),
+  load5m: z.number().nullable(),
+  load15m: z.number().nullable(),
+  processCount: z.number().nullable(),
+  availableMetrics: z.array(z.string()),
+  about: hostAboutSchema.optional(),
+});
+export type HostOverview = z.infer<typeof hostOverviewSchema>;
 
 export type HostMetricGroup =
   | "cpu"
@@ -43,14 +51,16 @@ export type HostMetricGroup =
   | "network_io"
   | "network_errors";
 
-export function getHostOverview(
+export async function getHostOverview(
   host: string,
   startTime: RequestTime,
   endTime: RequestTime
 ): Promise<HostOverview> {
-  return api.get<HostOverview>(`${V1}/infrastructure/hosts/${encodeURIComponent(host)}/overview`, {
-    params: { startTime, endTime },
-  });
+  const res = await api.get<unknown>(
+    `${V1}/infrastructure/hosts/${encodeURIComponent(host)}/overview`,
+    { params: { startTime, endTime } }
+  );
+  return validateResponse(hostOverviewSchema, res);
 }
 
 /** Series endpoint for InfraMultiSeriesChart; pass `metric` via extraParams. */

@@ -97,17 +97,12 @@ export default function DeploymentComparePage() {
     );
   }
 
-  if (compare.isError || !compare.data) {
+  if (compare.isError) {
     return (
       <PageShell>
         <PageHeader title={`${service} · ${version}`} icon={<Rocket size={24} />} />
         <PageSurface>
-          <EmptyState
-            title="Deployment unavailable"
-            description={
-              compare.error?.message ?? "This version was not observed in the selected time range."
-            }
-          />
+          <EmptyState title="Deployment unavailable" description={compare.error.message} />
         </PageSurface>
       </PageShell>
     );
@@ -214,7 +209,7 @@ export default function DeploymentComparePage() {
         </div>
         {traffic.isError ? (
           <div className="rounded-md border border-error/30 bg-error-subtle px-3 py-8 text-center text-[11.5px] text-error">
-            Traffic could not be loaded. {traffic.error?.message}
+            Traffic could not be loaded. {traffic.error.message}
           </div>
         ) : timestamps.length === 0 && !traffic.isPending ? (
           <EmptyState title="No traffic" description="No versioned requests were observed." />
@@ -242,7 +237,7 @@ export default function DeploymentComparePage() {
           loading={errors.isPending}
           error={
             errors.isError
-              ? `Error changes could not be loaded. ${errors.error?.message}`
+              ? `Error changes could not be loaded. ${errors.error.message}`
               : undefined
           }
         />
@@ -253,7 +248,7 @@ export default function DeploymentComparePage() {
           loading={errors.isPending}
           error={
             errors.isError
-              ? `Error changes could not be loaded. ${errors.error?.message}`
+              ? `Error changes could not be loaded. ${errors.error.message}`
               : undefined
           }
         />
@@ -266,7 +261,7 @@ export default function DeploymentComparePage() {
         loading={endpoints.isPending}
         error={
           endpoints.isError
-            ? `Endpoint comparison could not be loaded. ${endpoints.error?.message}`
+            ? `Endpoint comparison could not be loaded. ${endpoints.error.message}`
             : undefined
         }
       />
@@ -277,7 +272,7 @@ export default function DeploymentComparePage() {
         loading={dependencies.isPending}
         error={
           dependencies.isError
-            ? `Dependency comparison could not be loaded. ${dependencies.error?.message}`
+            ? `Dependency comparison could not be loaded. ${dependencies.error.message}`
             : undefined
         }
       />

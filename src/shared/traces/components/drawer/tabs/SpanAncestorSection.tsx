@@ -32,7 +32,7 @@ function SpanAncestorSectionComponent({ ancestors, onSpanClick }: Props) {
                   <span className="text-foreground-muted">{anc.serviceName}</span>
                   <span className="font-mono text-foreground">{anc.operationName}</span>
                   <span className="font-mono text-[10.5px] text-foreground-caption">
-                    ({formatDuration(anc.durationMs ?? 0)})
+                    ({formatDuration(anc.durationMs)})
                   </span>
                 </button>
               </div>

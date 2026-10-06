@@ -1,3 +1,4 @@
+import { errorMessage } from "@shared/api/utils/errorNormalization";
 import { Mail } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -29,7 +30,7 @@ export function ForgotPasswordForm() {
       setIsSuccess(true);
       toast.success("If your email is registered, a reset link has been sent.");
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Failed to request password reset");
+      toast.error(errorMessage(error));
     } finally {
       setIsSubmitting(false);
     }

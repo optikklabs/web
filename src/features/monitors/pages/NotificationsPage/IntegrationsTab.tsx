@@ -2,7 +2,7 @@ import { useIntegrations } from "../../hooks/useNotifications";
 
 export default function IntegrationsTab() {
   const q = useIntegrations();
-  if (q.isPending && !q.data) {
+  if (q.isPending) {
     return (
       <div className="rounded-lg border border-border bg-card p-6 text-center text-foreground-muted text-xs">
         Loading integrations…

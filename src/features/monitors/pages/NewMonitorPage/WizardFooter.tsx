@@ -1,6 +1,6 @@
 import { Check, FlaskConical } from "lucide-react";
 
-import type { TestResult } from "./useWizardSubmit";
+import type { MonitorTestResult } from "../../api/monitorsApi";
 
 interface Props {
   readonly evalEverySec: number;
@@ -8,14 +8,14 @@ interface Props {
   readonly saving: boolean;
   readonly error: string | null;
   readonly testing: boolean;
-  readonly testResult: TestResult | null;
+  readonly testResult: MonitorTestResult | null;
   readonly testError: string | null;
   readonly onCancel: () => void;
   readonly onSave: () => void;
   readonly onTest: () => void;
 }
 
-function TestReadout({ result }: { readonly result: TestResult }) {
+function TestReadout({ result }: { readonly result: MonitorTestResult }) {
   return (
     <div className="flex flex-wrap items-center gap-3 text-[11px]">
       <span className="font-mono text-foreground-secondary">

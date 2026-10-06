@@ -1,9 +1,8 @@
 import { KpiCard, type KpiTone } from "@shared/components/ui/cards/StatCard";
+import type { ServiceSummary } from "@shared/metrics/hooks/useServiceSummaryQuery";
 import { fmtMs, fmtNum, fmtPct } from "@shared/utils/formatters";
-import type { ServiceSummary } from "../hooks/useServiceSummary";
 
 interface ServiceKpiStripProps {
-  readonly serviceName: string;
   readonly summary: ServiceSummary | null;
 }
 
@@ -25,45 +24,48 @@ function saturationTone(sat: number): KpiTone {
   return "ok";
 }
 
-function safeSummary(summary: ServiceSummary | null, serviceName: string): ServiceSummary {
-  return (
-    summary ?? {
-      serviceName,
-      requestCount: 0,
-      errorCount: 0,
-      errorRate: 0,
-      p50Ms: 0,
-      p95Ms: 0,
-      p99Ms: 0,
-      rps: 0,
-      cpuUtilization: 0,
-      memoryUtilization: 0,
-      diskUtilization: 0,
-    }
+/** The highest utilization reported, or null when none was. */
+function saturation(s: ServiceSummary): number | null {
+  const reported = [s.cpuUtilization, s.memoryUtilization, s.diskUtilization].filter(
+    (v): v is number => v !== null
   );
+  return reported.length > 0 ? Math.max(...reported) : null;
 }
 
-export function ServiceKpiStrip({ serviceName, summary }: ServiceKpiStripProps) {
-  const s = safeSummary(summary, serviceName);
-  const errorsPerSec = (s.errorRate / 100) * s.rps;
-  const satVal = Math.max(s.cpuUtilization, s.memoryUtilization, s.diskUtilization);
+export function ServiceKpiStrip({ summary }: ServiceKpiStripProps) {
+  if (!summary) {
+    return (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {["Requests", "Error rate", "p99 Latency", "Saturation"].map((label) => (
+          <KpiCard key={label} label={label} value="—" />
+        ))}
+      </div>
+    );
+  }
+  const errorsPerSec = (summary.errorRate / 100) * summary.rps;
+  const sat = saturation(summary);
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <KpiCard
         label="Requests"
-        value={fmtNum(s.requestCount)}
+        value={fmtNum(summary.requestCount)}
         secondary="req"
-        subtext={`${s.rps >= 1 ? fmtNum(s.rps) : s.rps.toFixed(2)} rps`}
+        subtext={`${summary.rps >= 1 ? fmtNum(summary.rps) : summary.rps.toFixed(2)} rps`}
       />
       <KpiCard
         label="Error rate"
-        value={fmtPct(s.errorRate, s.errorRate < 0.1 ? 3 : 2)}
-        tone={errorTone(s.errorRate)}
+        value={fmtPct(summary.errorRate, summary.errorRate < 0.1 ? 3 : 2)}
+        tone={errorTone(summary.errorRate)}
         subtext={`${fmtNum(errorsPerSec)} errors/s`}
       />
-      <KpiCard label="p99 Latency" value={fmtMs(s.p99Ms)} tone={p99Tone(s.p99Ms)} />
-      <KpiCard label="Saturation" value={fmtPct(satVal / 100, 1)} tone={saturationTone(satVal)} />
+      <KpiCard label="p99 Latency" value={fmtMs(summary.p99Ms)} tone={p99Tone(summary.p99Ms)} />
+      <KpiCard
+        label="Saturation"
+        value={sat === null ? "—" : fmtPct(sat, 1)}
+        tone={sat === null ? undefined : saturationTone(sat)}
+        subtext={sat === null ? "not reported" : undefined}
+      />
     </div>
   );
 }

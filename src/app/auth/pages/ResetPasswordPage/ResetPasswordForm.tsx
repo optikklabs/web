@@ -1,3 +1,4 @@
+import { errorMessage } from "@shared/api/utils/errorNormalization";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { useState } from "react";
@@ -43,7 +44,7 @@ export function ResetPasswordForm() {
       toast.success("Password reset successfully. You can now sign in.");
       navigate({ to: ROUTES.login });
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Failed to reset password");
+      toast.error(errorMessage(error));
     } finally {
       setIsSubmitting(false);
     }

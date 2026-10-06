@@ -35,7 +35,7 @@ export default function NewMonitorPage() {
 
   const title = editMode ? "Edit monitor" : "New monitor";
 
-  if (editMode && detailQ.isPending && !detailQ.data) {
+  if (editMode && detailQ.isPending) {
     return (
       <PageShell>
         <div className="p-8 text-foreground-muted text-sm">Loading monitor…</div>

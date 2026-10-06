@@ -39,7 +39,7 @@ export default function SparklineChart({
     [color, effectiveFill, lineWidth]
   );
 
-  if (!data || data.length < 2) return null;
+  if (data.length < 2) return null;
 
   return (
     <div style={{ width, height: effectiveHeight }}>

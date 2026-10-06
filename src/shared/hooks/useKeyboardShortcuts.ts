@@ -1,3 +1,4 @@
+import { ownEntry } from "@shared/utils/ownEntry";
 import { useEffect } from "react";
 
 import { useAppStore } from "@app/store/appStore";
@@ -89,7 +90,7 @@ const TIME_SHORTCUTS = {
 function handleKeyboardShortcut(event: KeyboardEvent): void {
   if (isInputElement(document.activeElement)) return;
   const store = useAppStore.getState();
-  const timeShortcut = event.shiftKey ? TIME_SHORTCUTS[event.key] : undefined;
+  const timeShortcut = event.shiftKey ? ownEntry(TIME_SHORTCUTS, event.key) : undefined;
   if (timeShortcut) {
     event.preventDefault();
     const bounds = timeShortcut();

@@ -1,6 +1,6 @@
 import type { TraceLog } from "@shared/api/traces/schemas";
 
-import { coerceTimestampToIso } from "../api/logsQueryApi";
+import { nsToIso } from "../api/logsQueryApi";
 import type { LogRecord } from "../types/log";
 
 /**
@@ -13,8 +13,8 @@ import type { LogRecord } from "../types/log";
 export function traceLogToLogRecord(log: TraceLog): LogRecord {
   return {
     id: log.id,
-    timestamp: coerceTimestampToIso(log.timestamp),
-    observedTimestamp: coerceTimestampToIso(log.observedTimestamp),
+    timestamp: nsToIso(log.timestamp),
+    observedTimestamp: nsToIso(log.observedTimestamp),
     serviceName: log.serviceName,
     severityText: log.severityText,
     severityBucket: log.severityBucket,

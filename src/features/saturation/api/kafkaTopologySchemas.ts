@@ -1,50 +1,48 @@
 import { z } from "zod";
 
-import { numericValue, stringValue } from "./saturationClient";
-
 // Mirrors query/internal/modules/saturation/kafka/topology models.
 
 const producerNodeSchema = z.object({
-  service: stringValue,
-  ratePerSec: numericValue,
-  errorRate: numericValue,
-  p50Ms: numericValue,
-  p95Ms: numericValue,
-  p99Ms: numericValue,
+  service: z.string(),
+  ratePerSec: z.number(),
+  errorRate: z.number(),
+  p50Ms: z.number(),
+  p95Ms: z.number(),
+  p99Ms: z.number(),
 });
 
 const topicNodeSchema = z.object({
-  topic: stringValue,
-  ratePerSec: numericValue,
-  producerCount: numericValue,
-  consumerGroupCount: numericValue,
+  topic: z.string(),
+  ratePerSec: z.number(),
+  producerCount: z.number(),
+  consumerGroupCount: z.number(),
 });
 
 const consumerNodeSchema = z.object({
-  service: stringValue,
-  group: stringValue,
-  ratePerSec: numericValue,
-  errorRate: numericValue,
-  p50Ms: numericValue,
-  p95Ms: numericValue,
-  p99Ms: numericValue,
+  service: z.string(),
+  group: z.string(),
+  ratePerSec: z.number(),
+  errorRate: z.number(),
+  p50Ms: z.number(),
+  p95Ms: z.number(),
+  p99Ms: z.number(),
 });
 
 const streamEdgeSchema = z.object({
-  source: stringValue,
-  target: stringValue,
+  source: z.string(),
+  target: z.string(),
   kind: z.enum(["produce", "consume"]),
-  ratePerSec: numericValue,
+  ratePerSec: z.number(),
 });
 
 const pathwaySchema = z.object({
-  producer: stringValue,
-  topic: stringValue,
-  group: stringValue,
-  consumer: stringValue,
-  produceRatePerSec: numericValue,
-  consumeRatePerSec: numericValue,
-  errorRate: numericValue,
+  producer: z.string(),
+  topic: z.string(),
+  group: z.string(),
+  consumer: z.string(),
+  produceRatePerSec: z.number(),
+  consumeRatePerSec: z.number(),
+  errorRate: z.number(),
 });
 
 // Every slice is built with `make(..., 0, n)` server-side, so none are null.
@@ -56,6 +54,6 @@ export const kafkaTopologySchema = z.object({
   pathways: z.array(pathwaySchema),
 });
 
-export const kafkaClientsSchema = z.array(stringValue);
+export const kafkaClientsSchema = z.array(z.string());
 
 export type KafkaTopology = z.infer<typeof kafkaTopologySchema>;

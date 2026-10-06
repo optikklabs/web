@@ -5,13 +5,12 @@ import type {
   MetricSpaceAggregation,
   TimeStep,
 } from "@shared/metrics/types";
-import {
-  type DashboardLayout,
-  type DashboardLayoutVariant,
-  type DashboardMetricsQuerySpec,
-  type DashboardPanelSpec,
-  type DashboardPanelType,
-  isMetricsQuerySpec,
+import type {
+  DashboardLayout,
+  DashboardLayoutVariant,
+  DashboardMetricsQuerySpec,
+  DashboardPanelSpec,
+  DashboardPanelType,
 } from "@shared/types/dashboardConfig";
 
 import type { CreateWidgetPayload } from "../api/dashboardsApi";
@@ -128,12 +127,9 @@ export function editorStateToPayload(
     id,
     panelType,
     layoutVariant,
-    sectionId: "main",
-    order: position,
     query,
     layout,
     title,
-    dataSource: id,
     legend: state.display.legend,
     smooth: state.display.smooth,
   };
@@ -143,16 +139,15 @@ export function editorStateToPayload(
 
 /** Rehydrate editor state from a saved metrics widget spec for re-editing. */
 export function specToEditorState(spec: DashboardPanelSpec): WidgetEditorState {
-  const query = spec.query;
-  if (!isMetricsQuerySpec(query)) return createDefaultEditorState();
+  const { query } = spec;
   return {
-    title: spec.title ?? "",
+    title: spec.title,
     viz: panelTypeToViz(spec.panelType),
-    queries: query.queries.length > 0 ? query.queries : createDefaultEditorState().queries,
+    queries: query.queries,
     formulas: query.formulas ?? [],
     step: query.step,
     spaceAgg: query.spaceAggregation,
-    display: { legend: spec.legend ?? true, smooth: spec.smooth ?? true },
+    display: { legend: spec.legend, smooth: spec.smooth },
     size: spanToSize(spec.layout),
   };
 }

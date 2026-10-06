@@ -1,4 +1,4 @@
-import type { TraceRecord } from "@shared/api/traces/schemas";
+import type { CriticalPathSpanRecord, TraceRecord } from "@shared/api/traces/schemas";
 import { cn } from "@shared/lib/utils";
 import { memo, useMemo } from "react";
 import { computeMaxDepth, summarizeCriticalPath } from "../../utils/criticalPath";
@@ -7,8 +7,7 @@ import { DurationKpiCard } from "./DurationKpiCard";
 
 interface Stats {
   readonly totalSpans: number;
-  readonly duration?: number;
-  readonly durationMs?: number;
+  readonly durationMs: number;
   readonly services: Set<string>;
   readonly errors: number;
 }
@@ -16,7 +15,7 @@ interface Stats {
 interface Props {
   readonly stats: Stats;
   readonly spans: readonly TraceRecord[];
-  readonly criticalPathSpanIds: ReadonlySet<string>;
+  readonly criticalPath: readonly CriticalPathSpanRecord[];
   readonly p50Ms?: number;
   readonly p95Ms?: number;
 }
@@ -25,8 +24,8 @@ const kpiBase = "p-3.5 flex flex-col justify-between min-w-0 bg-background";
 const kpiK = "text-[11px] font-medium text-foreground-caption uppercase tracking-[0.05em]";
 const kpiV = "font-mono text-[20px] font-semibold text-foreground tracking-[-0.02em]";
 
-function KPIStripComponent({ stats, spans, criticalPathSpanIds, p50Ms, p95Ms }: Props) {
-  const duration = stats.durationMs ?? stats.duration ?? 0;
+function KPIStripComponent({ stats, spans, criticalPath, p50Ms, p95Ms }: Props) {
+  const duration = stats.durationMs;
   const errors = stats.errors;
   const totalSpans = stats.totalSpans;
   const services = stats.services.size;
@@ -34,10 +33,7 @@ function KPIStripComponent({ stats, spans, criticalPathSpanIds, p50Ms, p95Ms }: 
 
   const maxDepth = computeMaxDepth(spans);
 
-  const critical = useMemo(
-    () => summarizeCriticalPath(spans, criticalPathSpanIds, duration),
-    [spans, criticalPathSpanIds, duration]
-  );
+  const critical = useMemo(() => summarizeCriticalPath(criticalPath), [criticalPath]);
 
   return (
     <div

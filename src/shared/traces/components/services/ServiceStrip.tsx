@@ -25,9 +25,9 @@ function serviceStats(spans: readonly TraceRecord[]): { list: ServiceStat[]; tra
   let traceTotal = 0;
   for (const s of spans) {
     const name = s.serviceName || "unknown";
-    const dur = s.durationMs ?? 0;
+    const dur = s.durationMs;
     traceTotal += dur;
-    const isErr = (s.status ?? "").toUpperCase() === "ERROR";
+    const isErr = s.status.toUpperCase() === "ERROR";
     const cur = map.get(name);
     if (cur) {
       cur.count += 1;

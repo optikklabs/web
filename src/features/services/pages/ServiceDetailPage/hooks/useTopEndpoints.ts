@@ -15,7 +15,7 @@ function buildDelta(now: TopEndpoint, prev: TopEndpoint | undefined): number | n
 export function useTopEndpoints(serviceName: string, limit = 50, cursor?: string) {
   return useTimeRangeQuery<PaginatedResponse<EndpointWithDelta[]>>(
     "service-detail.top-endpoints",
-    async (_tenant, start, end): Promise<PaginatedResponse<EndpointWithDelta[]>> => {
+    async (start, end): Promise<PaginatedResponse<EndpointWithDelta[]>> => {
       const payload = await getTopEndpoints(
         start,
         end,
@@ -24,7 +24,7 @@ export function useTopEndpoints(serviceName: string, limit = 50, cursor?: string
         "previous_period",
         cursor
       );
-      const primary = payload.data?.results ?? [];
+      const primary = payload.data.results;
       const previousByOp = new Map<string, TopEndpoint>();
       for (const row of payload.comparison?.results ?? []) {
         previousByOp.set(row.operationName, row);
@@ -35,7 +35,7 @@ export function useTopEndpoints(serviceName: string, limit = 50, cursor?: string
       }));
       return {
         results,
-        pageInfo: payload.data?.pageInfo ?? { hasMore: false, limit },
+        pageInfo: payload.data.pageInfo,
       };
     },
     { extraKeys: [serviceName, limit, cursor], enabled: Boolean(serviceName) }

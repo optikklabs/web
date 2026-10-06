@@ -23,7 +23,7 @@ export function TableSparkline({
   trend = "flat",
   className,
 }: TableSparklineProps) {
-  if (!data || data.length < 2) {
+  if (data.length < 2) {
     return <span className={cn("text-[11px] text-foreground-muted", className)}>—</span>;
   }
   return (

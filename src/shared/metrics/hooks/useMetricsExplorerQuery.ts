@@ -1,5 +1,5 @@
 import { useStandardQuery } from "@/shared/hooks/useStandardQuery";
-import { useResolvedTimeBounds, useTenantId } from "@app/store/appStore";
+import { useResolvedTimeBounds } from "@app/store/appStore";
 import {
   buildExplorerQueryRequest,
   metricsExplorerApi,
@@ -7,7 +7,6 @@ import {
 import type { MetricQueryDefinition, TimeStep } from "@shared/metrics/types";
 
 export function useMetricsExplorerQuery(queries: MetricQueryDefinition[], step: TimeStep) {
-  const selectedTenantId = useTenantId();
   const { startTime, endTime } = useResolvedTimeBounds();
 
   const activeQueries = queries.filter((q) => q.metricName);
@@ -21,7 +20,6 @@ export function useMetricsExplorerQuery(queries: MetricQueryDefinition[], step: 
         signal
       );
     },
-    enabled: Boolean(selectedTenantId) && activeQueries.length > 0,
-    retry: false,
+    enabled: activeQueries.length > 0,
   });
 }

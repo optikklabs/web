@@ -37,9 +37,9 @@ export interface LogsFacetValue {
 export interface LogsFacets {
   readonly severityBucket: readonly string[];
   readonly service: readonly LogsFacetValue[];
-  readonly host?: readonly LogsFacetValue[];
-  readonly pod?: readonly LogsFacetValue[];
-  readonly environment?: readonly LogsFacetValue[];
+  readonly host: readonly LogsFacetValue[];
+  readonly pod: readonly LogsFacetValue[];
+  readonly environment: readonly LogsFacetValue[];
 }
 
 /** Mirrors logs models.Summary — no field is `omitempty`. */
@@ -56,40 +56,31 @@ const summarySchema = z
 /** Mirrors logs models.TrendBucket. */
 const trendSchema = z
   .object({
-    trend: z
-      .array(
-        z.object({
-          timeBucketMs: z.number(),
-          total: z.number(),
-          error: z.number(),
-          warn: z.number(),
-          info: z.number(),
-          debug: z.number(),
-        })
-      )
-      .nullable()
-      .transform((v) => v ?? []),
+    trend: z.array(
+      z.object({
+        timeBucketMs: z.number(),
+        total: z.number(),
+        error: z.number(),
+        warn: z.number(),
+        info: z.number(),
+        debug: z.number(),
+      })
+    ),
   })
   .transform((r): readonly LogsTrendBucket[] => r.trend);
 
 /** Mirrors logs models.FacetValue. */
 const facetValueSchema = z.object({ value: z.string(), count: z.number() });
 
-/** Mirrors logs models.Facets; host/pod/environment are `omitempty`. */
+/** Mirrors logs models.Facets. */
 const facetsSchema = z
   .object({
     facets: z.object({
-      severityBucket: z
-        .array(z.string())
-        .nullable()
-        .transform((v) => v ?? []),
-      service: z
-        .array(facetValueSchema)
-        .nullable()
-        .transform((v) => v ?? []),
-      host: z.array(facetValueSchema).optional(),
-      pod: z.array(facetValueSchema).optional(),
-      environment: z.array(facetValueSchema).optional(),
+      severityBucket: z.array(z.string()),
+      service: z.array(facetValueSchema),
+      host: z.array(facetValueSchema),
+      pod: z.array(facetValueSchema),
+      environment: z.array(facetValueSchema),
     }),
   })
   .transform((r): LogsFacets => r.facets);

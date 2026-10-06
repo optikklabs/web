@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-query";
 
 import { useTenantId } from "@app/store/appStore";
-import { toApiErrorShape } from "@shared/api/utils/errorNormalization";
+import { type ApiErrorShape, toApiErrorShape } from "@shared/api/utils/errorNormalization";
 
 /**
  * Query key convention (all data queries):
@@ -14,6 +14,8 @@ import { toApiErrorShape } from "@shared/api/utils/errorNormalization";
  *
  * - tenantId is appended as the LAST element by the wrapper, so feature
  *   code keeps invalidating by domain prefix (e.g. ["llm", "prompts"]).
+ * - Queries stay disabled while no tenant is selected (the logout window),
+ *   so features never check the tenant themselves.
  * - Refresh is invalidation (useAppRefreshSubscriber), never a key part.
  * - Time bounds in keys come from the store (useResolvedTimeBounds),
  *   resolved once per user action — never Date.now() during render.
@@ -27,17 +29,18 @@ export function retryUnlessClientError(failureCount: number, error: unknown): bo
 }
 
 export function useStandardQuery<T>(
-  options: Omit<UseQueryOptions<T, Error, T>, "queryKey" | "queryFn"> & {
+  options: Omit<UseQueryOptions<T, ApiErrorShape, T>, "queryKey" | "queryFn"> & {
     queryKey: readonly unknown[];
     queryFn: QueryFunction<T, readonly unknown[]>;
   }
 ) {
   const tenantId = useTenantId();
-  return useQuery<T, Error, T>({
+  return useQuery({
     placeholderData: keepPreviousData,
     staleTime: 5_000,
     retry: retryUnlessClientError,
     ...options,
     queryKey: [...options.queryKey, tenantId],
-  } as UseQueryOptions<T, Error, T>);
+    enabled: tenantId !== null && options.enabled !== false,
+  });
 }

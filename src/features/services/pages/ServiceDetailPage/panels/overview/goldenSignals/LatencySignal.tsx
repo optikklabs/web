@@ -20,7 +20,7 @@ import { SIGNAL_CHART_HEIGHT, SignalLegend } from "./SignalCardShell";
 export function LatencySignal({ serviceName }: { serviceName: string }) {
   const query = useTimeRangeQuery<LatencyPercentilesPoint[]>(
     `service-detail.latency:${serviceName}`,
-    (_tenant, start, end) => getLatencyPercentilesTimeseries(start, end, serviceName),
+    (start, end) => getLatencyPercentilesTimeseries(start, end, serviceName),
     { enabled: Boolean(serviceName) }
   );
 

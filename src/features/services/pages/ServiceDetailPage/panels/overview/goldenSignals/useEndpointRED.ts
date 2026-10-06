@@ -9,7 +9,7 @@ import { useTimeRangeQuery } from "@shared/hooks/useTimeRangeQuery";
 export function useEndpointRED(serviceName: string) {
   return useTimeRangeQuery<EndpointRateSeries>(
     `service-detail.red-by-endpoint:${serviceName}`,
-    (_tenant, start, end) => getREDByEndpoint(start, end, serviceName),
+    (start, end) => getREDByEndpoint(start, end, serviceName),
     { enabled: Boolean(serviceName) }
   );
 }

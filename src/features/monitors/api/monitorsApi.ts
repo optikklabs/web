@@ -1,130 +1,149 @@
 import api from "@/shared/api/http/client";
+import { validateResponse } from "@/shared/api/utils/validate";
 import { API_CONFIG } from "@config/apiConfig";
+import { z } from "zod";
 
 const V1 = API_CONFIG.ENDPOINTS.V1_BASE;
 
-export type MonitorType = "metric" | "apm" | "log";
-export type MonitorPriority = "P1" | "P2" | "P3" | "P4";
-export type MonitorStatus = "alert" | "warn" | "ok" | "no_data";
+const monitorTypeSchema = z.enum(["metric", "apm", "log"]);
+const monitorPrioritySchema = z.enum(["P1", "P2", "P3", "P4"]);
+const monitorStatusSchema = z.enum(["alert", "warn", "ok", "no_data"]);
 
-interface ScopeTag {
-  readonly key: string;
-  readonly value: string;
-}
-interface MonitorScope {
-  readonly tags?: ScopeTag[];
-}
+export type MonitorType = z.infer<typeof monitorTypeSchema>;
+export type MonitorPriority = z.infer<typeof monitorPrioritySchema>;
+export type MonitorStatus = z.infer<typeof monitorStatusSchema>;
 
-export interface MetricQueryShape {
-  readonly metric: string;
-  readonly aggregation: string;
-  readonly windowSec: number;
-}
-export interface APMQueryShape {
-  readonly service: string;
-  readonly resource?: string;
-  readonly track: string;
-  readonly windowSec: number;
-}
-export interface LogQueryShape {
-  readonly query: string;
-  readonly windowSec: number;
-}
-interface MonitorQuery {
-  readonly metric?: MetricQueryShape;
-  readonly apm?: APMQueryShape;
-  readonly log?: LogQueryShape;
-}
+const scopeSchema = z.object({
+  tags: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
+});
 
-export interface MonitorConditions {
-  readonly comparator: "above" | "below" | "equal";
-  readonly alertThreshold?: number;
-  readonly warnThreshold?: number;
-  readonly recoveryThreshold?: number;
-  readonly noDataAfterSec: number;
-  readonly noDataAs?: "no_data" | "alert" | "ok";
-  readonly minSample?: number;
-}
+const metricQuerySchema = z.object({
+  metric: z.string(),
+  aggregation: z.string(),
+  windowSec: z.number(),
+});
+const apmQuerySchema = z.object({
+  service: z.string(),
+  resource: z.string().optional(),
+  track: z.string(),
+  windowSec: z.number(),
+});
+const logQuerySchema = z.object({
+  query: z.string(),
+  windowSec: z.number(),
+});
 
-interface MonitorNotifyTargets {
-  readonly channelIds: number[];
-}
+export type MetricQueryShape = z.infer<typeof metricQuerySchema>;
+export type APMQueryShape = z.infer<typeof apmQuerySchema>;
+export type LogQueryShape = z.infer<typeof logQuerySchema>;
 
-export interface Monitor {
-  readonly id: number;
-  readonly name: string;
-  readonly type: MonitorType;
-  readonly priority: MonitorPriority;
-  readonly status: MonitorStatus;
-  readonly currentValue?: number;
-  readonly scope: MonitorScope;
-  readonly query: MonitorQuery;
-  readonly conditions: MonitorConditions;
-  readonly notify: MonitorNotifyTargets;
-  readonly messageBody?: string;
-  readonly runbookUrl?: string;
-  readonly tags: string[];
-  readonly evalEverySec: number;
-  readonly renotifyEverySec?: number;
-  readonly mutedUntil?: string;
-  readonly active: boolean;
-  readonly lastEvaluatedAt?: string;
-  readonly triggeredAt?: string;
-  readonly createdAt: string;
-  readonly updatedAt?: string;
-}
+const conditionsSchema = z.object({
+  comparator: z.enum(["above", "below", "equal"]),
+  alertThreshold: z.number().optional(),
+  warnThreshold: z.number().optional(),
+  recoveryThreshold: z.number().optional(),
+  noDataAfterSec: z.number(),
+  noDataAs: z.enum(["no_data", "alert", "ok"]),
+  minSample: z.number().optional(),
+});
 
-export interface MonitorListStatusCounts {
-  readonly alert: number;
-  readonly warn: number;
-  readonly ok: number;
-  readonly noData: number;
-  readonly muted: number;
-  readonly total: number;
-}
+export type MonitorConditions = z.infer<typeof conditionsSchema>;
 
-export interface MonitorListResponse {
-  readonly items: Monitor[];
-  readonly counts: MonitorListStatusCounts;
-}
+const monitorSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  type: monitorTypeSchema,
+  priority: monitorPrioritySchema,
+  status: monitorStatusSchema,
+  currentValue: z.number().optional(),
+  scope: scopeSchema,
+  query: z.object({
+    metric: metricQuerySchema.optional(),
+    apm: apmQuerySchema.optional(),
+    log: logQuerySchema.optional(),
+  }),
+  conditions: conditionsSchema,
+  notify: z.object({ channelIds: z.array(z.number()) }),
+  messageBody: z.string().optional(),
+  runbookUrl: z.string().optional(),
+  tags: z.array(z.string()),
+  evalEverySec: z.number(),
+  renotifyEverySec: z.number().optional(),
+  mutedUntil: z.string().optional(),
+  active: z.boolean(),
+  lastEvaluatedAt: z.string().optional(),
+  triggeredAt: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string().optional(),
+});
 
-export interface MonitorEvent {
-  readonly id: number;
-  readonly monitorId: number;
-  readonly monitorName: string;
-  readonly kind: "triggered" | "recovered" | "acked" | "muted" | "test";
-  readonly value?: number;
-  readonly threshold?: number;
-  readonly startedAt: string;
-  readonly endedAt?: string;
-}
+export type Monitor = z.infer<typeof monitorSchema>;
 
-interface SeriesPoint {
-  readonly bucketMs: number;
-  readonly value: number;
-}
+const statusCountsSchema = z.object({
+  alert: z.number(),
+  warn: z.number(),
+  ok: z.number(),
+  noData: z.number(),
+  muted: z.number(),
+  total: z.number(),
+});
 
-export interface MonitorSeriesResponse {
-  readonly points: SeriesPoint[];
-  readonly alertThreshold?: number;
-  readonly warnThreshold?: number;
-  readonly recoveryThreshold?: number;
-}
+export type MonitorListStatusCounts = z.infer<typeof statusCountsSchema>;
 
-interface StatusBand {
-  readonly status: MonitorStatus;
-  readonly startedAt: string;
-  readonly endedAt: string;
-}
+const monitorListSchema = z.object({
+  items: z.array(monitorSchema),
+  counts: statusCountsSchema,
+});
 
-export interface StatusTimelineResponse {
-  readonly bands: StatusBand[];
-  readonly startedAt: string;
-  readonly endedAt: string;
-}
+export type MonitorListResponse = z.infer<typeof monitorListSchema>;
+
+const monitorEventSchema = z.object({
+  id: z.number(),
+  monitorId: z.number(),
+  monitorName: z.string(),
+  kind: z.enum(["triggered", "recovered"]),
+  value: z.number().optional(),
+  threshold: z.number().optional(),
+  peakValue: z.number().optional(),
+  resolvedBy: z.string().optional(),
+  note: z.string().optional(),
+  startedAt: z.string(),
+  endedAt: z.string().optional(),
+});
+const monitorEventsSchema = z.array(monitorEventSchema);
+
+export type MonitorEvent = z.infer<typeof monitorEventSchema>;
+
+const monitorSeriesSchema = z.object({
+  points: z.array(z.object({ bucketMs: z.number(), value: z.number() })),
+  alertThreshold: z.number().optional(),
+  warnThreshold: z.number().optional(),
+  recoveryThreshold: z.number().optional(),
+});
+
+export type MonitorSeriesResponse = z.infer<typeof monitorSeriesSchema>;
+
+const statusTimelineSchema = z.object({
+  bands: z.array(
+    z.object({ status: monitorStatusSchema, startedAt: z.string(), endedAt: z.string() })
+  ),
+  startedAt: z.string(),
+  endedAt: z.string(),
+});
+
+export type StatusTimelineResponse = z.infer<typeof statusTimelineSchema>;
+
+const testResultSchema = z.object({
+  value: z.number(),
+  hasData: z.boolean(),
+  wouldDecideAs: monitorStatusSchema,
+  threshold: z.number(),
+});
+
+export type MonitorTestResult = z.infer<typeof testResultSchema>;
 
 export interface ListMonitorsParams {
-  readonly status?: MonitorStatus;
+  readonly status?: readonly MonitorStatus[];
   readonly type?: MonitorType;
   readonly priority?: MonitorPriority;
   readonly muted?: boolean;
@@ -133,22 +152,14 @@ export interface ListMonitorsParams {
   readonly offset?: number;
 }
 
-export async function listMonitors(params: ListMonitorsParams = {}): Promise<MonitorListResponse> {
-  return api.get<MonitorListResponse>(`${V1}/monitors`, { params });
-}
-
-export async function getMonitor(id: number): Promise<Monitor> {
-  return api.get<Monitor>(`${V1}/monitors/${id}`);
-}
-
 export interface CreateMonitorPayload {
   name: string;
   type: MonitorType;
   priority: MonitorPriority;
-  scope: MonitorScope;
-  query: MonitorQuery;
+  scope: Monitor["scope"];
+  query: Monitor["query"];
   conditions: MonitorConditions;
-  notify: MonitorNotifyTargets;
+  notify: Monitor["notify"];
   messageBody?: string;
   runbookUrl?: string;
   tags?: string[];
@@ -156,12 +167,20 @@ export interface CreateMonitorPayload {
   renotifyEverySec?: number;
 }
 
+export async function listMonitors(params: ListMonitorsParams = {}): Promise<MonitorListResponse> {
+  return validateResponse(monitorListSchema, await api.get<unknown>(`${V1}/monitors`, { params }));
+}
+
+export async function getMonitor(id: number): Promise<Monitor> {
+  return validateResponse(monitorSchema, await api.get<unknown>(`${V1}/monitors/${id}`));
+}
+
 export async function createMonitor(payload: CreateMonitorPayload): Promise<Monitor> {
-  return api.post<Monitor>(`${V1}/monitors`, payload);
+  return validateResponse(monitorSchema, await api.post<unknown>(`${V1}/monitors`, payload));
 }
 
 export async function updateMonitor(id: number, payload: CreateMonitorPayload): Promise<Monitor> {
-  return api.put<Monitor>(`${V1}/monitors/${id}`, payload);
+  return validateResponse(monitorSchema, await api.put<unknown>(`${V1}/monitors/${id}`, payload));
 }
 
 export async function deleteMonitor(id: number): Promise<void> {
@@ -173,47 +192,54 @@ export async function ackMonitor(id: number): Promise<void> {
 }
 
 export async function muteMonitor(id: number, durationSec: number): Promise<void> {
-  await api.post<unknown>(`${V1}/monitors/${id}/mute`, { durationSec: durationSec });
+  await api.post<unknown>(`${V1}/monitors/${id}/mute`, { durationSec });
 }
 
-export async function testMonitor(id: number): Promise<{
-  value: number;
-  hasData: boolean;
-  wouldDecideAs: string;
-  threshold: number;
-}> {
-  return api.post<{
-    value: number;
-    hasData: boolean;
-    wouldDecideAs: string;
-    threshold: number;
-  }>(`${V1}/monitors/${id}/test`, {});
+export async function unmuteMonitor(id: number): Promise<void> {
+  await api.post<unknown>(`${V1}/monitors/${id}/unmute`, {});
+}
+
+export async function testMonitor(id: number): Promise<MonitorTestResult> {
+  return validateResponse(
+    testResultSchema,
+    await api.post<unknown>(`${V1}/monitors/${id}/test`, {})
+  );
 }
 
 export async function getMonitorSeries(
   id: number,
   windowMs: number
 ): Promise<MonitorSeriesResponse> {
-  return api.get<MonitorSeriesResponse>(`${V1}/monitors/${id}/series`, {
-    params: { windowMs: windowMs },
-  });
+  return validateResponse(
+    monitorSeriesSchema,
+    await api.get<unknown>(`${V1}/monitors/${id}/series`, { params: { windowMs } })
+  );
 }
 
-export async function getMonitorEvents(id: number, limit = 20): Promise<MonitorEvent[]> {
-  return api.get<MonitorEvent[]>(`${V1}/monitors/${id}/events`, { params: { limit } });
+export async function getMonitorEvents(id: number, limit: number): Promise<MonitorEvent[]> {
+  return validateResponse(
+    monitorEventsSchema,
+    await api.get<unknown>(`${V1}/monitors/${id}/events`, { params: { limit } })
+  );
 }
 
 export async function getMonitorStatusTimeline(
   id: number,
-  windowMs = 24 * 60 * 60 * 1000
+  windowMs: number
 ): Promise<StatusTimelineResponse> {
-  return api.get<StatusTimelineResponse>(`${V1}/monitors/${id}/status-timeline`, {
-    params: { windowMs: windowMs },
-  });
+  return validateResponse(
+    statusTimelineSchema,
+    await api.get<unknown>(`${V1}/monitors/${id}/status-timeline`, { params: { windowMs } })
+  );
 }
 
-export async function getMonitorsActivity(sinceMs?: number, limit = 20): Promise<MonitorEvent[]> {
-  const params: Record<string, number> = { limit };
-  if (sinceMs) params.since = sinceMs;
-  return api.get<MonitorEvent[]>(`${V1}/monitors/activity`, { params });
+/** Events since `sinceMs`; the server defaults to the last hour when omitted. */
+export async function getMonitorsActivity(
+  limit: number,
+  sinceMs?: number
+): Promise<MonitorEvent[]> {
+  return validateResponse(
+    monitorEventsSchema,
+    await api.get<unknown>(`${V1}/monitors/activity`, { params: { limit, since: sinceMs } })
+  );
 }

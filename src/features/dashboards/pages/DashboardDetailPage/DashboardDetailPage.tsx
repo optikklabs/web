@@ -239,7 +239,7 @@ function DetailHeader({ page, editing, onToggleEditing, onAddWidget }: DetailHea
           </h1>
         )}
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
-          {(page.tags || []).map((tag) => (
+          {page.tags.map((tag) => (
             <span
               key={tag}
               className="rounded bg-secondary px-1.5 py-0.5 font-mono text-[11px] text-foreground-secondary"

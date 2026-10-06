@@ -16,7 +16,7 @@ interface DeploymentIdentity {
 }
 
 export function useDeploymentsList() {
-  return useTimeRangeQuery("deployments.list", (_tenant, start, end, signal) =>
+  return useTimeRangeQuery("deployments.list", (start, end, signal) =>
     getDeployments(start, end, signal)
   );
 }
@@ -32,7 +32,7 @@ function keys(identity: DeploymentIdentity): readonly string[] {
 export function useDeploymentCompare(identity: DeploymentIdentity) {
   return useTimeRangeQuery(
     "deployments.compare",
-    (_tenant, start, end, signal) =>
+    (start, end, signal) =>
       getDeploymentCompare(
         identity.service,
         identity.version,
@@ -48,7 +48,7 @@ export function useDeploymentCompare(identity: DeploymentIdentity) {
 export function useDeploymentTraffic(identity: DeploymentIdentity) {
   return useTimeRangeQuery(
     "deployments.traffic",
-    (_tenant, start, end, signal) =>
+    (start, end, signal) =>
       getDeploymentTraffic(
         identity.service,
         identity.version,
@@ -64,7 +64,7 @@ export function useDeploymentTraffic(identity: DeploymentIdentity) {
 export function useDeploymentErrors(identity: DeploymentIdentity) {
   return useTimeRangeQuery(
     "deployments.errors",
-    (_tenant, start, end, signal) =>
+    (start, end, signal) =>
       getDeploymentErrors(
         identity.service,
         identity.version,
@@ -81,7 +81,7 @@ export function useDeploymentErrors(identity: DeploymentIdentity) {
 export function useDeploymentEndpoints(identity: DeploymentIdentity) {
   return useTimeRangeQuery(
     "deployments.endpoints",
-    (_tenant, start, end, signal) =>
+    (start, end, signal) =>
       getDeploymentEndpoints(
         identity.service,
         identity.version,
@@ -98,7 +98,7 @@ export function useDeploymentEndpoints(identity: DeploymentIdentity) {
 export function useDeploymentDependencies(identity: DeploymentIdentity) {
   return useTimeRangeQuery(
     "deployments.dependencies",
-    (_tenant, start, end, signal) =>
+    (start, end, signal) =>
       getDeploymentDependencies(
         identity.service,
         identity.version,

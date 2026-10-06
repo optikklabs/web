@@ -10,8 +10,8 @@ export function OverviewDbQueries({ serviceName }: { serviceName: string }) {
   const queriesQ = useTopDBQueries(serviceName, 12, cursor);
 
   const results = queriesQ.data?.results ?? [];
-  const hasMore = queriesQ.data?.pageInfo?.hasMore ?? false;
-  const nextCursor = queriesQ.data?.pageInfo?.nextCursor;
+  const hasMore = queriesQ.data?.pageInfo.hasMore ?? false;
+  const nextCursor = queriesQ.data?.pageInfo.nextCursor;
 
   const handleNext = () => {
     if (hasMore) {

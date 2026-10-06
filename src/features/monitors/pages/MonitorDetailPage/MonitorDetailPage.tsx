@@ -1,9 +1,10 @@
+import { errorMessage } from "@shared/api/utils/errorNormalization";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 
 import { PageShell } from "@shared/components/ui/layout/PageShell";
 
-import { ackMonitor, muteMonitor } from "../../api/monitorsApi";
+import { ackMonitor, muteMonitor, unmuteMonitor } from "../../api/monitorsApi";
 import { DEFAULT_MUTE_SECONDS } from "../../constants";
 import {
   useMonitorDetail,
@@ -46,20 +47,23 @@ export default function MonitorDetailPage() {
       detailQ.refetch();
       eventsQ.refetch();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Failed to acknowledge monitor");
+      setActionError(errorMessage(err));
     }
   }, [id, detailQ, eventsQ]);
 
-  const handleMute = useCallback(async () => {
-    if (id === undefined) return;
-    setActionError(null);
-    try {
-      await muteMonitor(id, DEFAULT_MUTE_SECONDS);
-      detailQ.refetch();
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Failed to mute monitor");
-    }
-  }, [id, detailQ]);
+  const handleMute = useCallback(
+    async (muted: boolean) => {
+      if (id === undefined) return;
+      setActionError(null);
+      try {
+        await (muted ? unmuteMonitor(id) : muteMonitor(id, DEFAULT_MUTE_SECONDS));
+        detailQ.refetch();
+      } catch (err) {
+        setActionError(errorMessage(err));
+      }
+    },
+    [id, detailQ]
+  );
 
   const handleEdit = useCallback(() => {
     if (id === undefined) return;
@@ -73,8 +77,7 @@ export default function MonitorDetailPage() {
       await deleteMutation.mutateAsync(id);
       navigate({ to: "/monitors" });
     } catch (err) {
-      const e = err as { response?: { data?: { error?: { message?: string } } } };
-      setDeleteError(e?.response?.data?.error?.message ?? "Failed to delete monitor");
+      setDeleteError(errorMessage(err));
     }
   }, [id, deleteMutation, navigate]);
 
@@ -95,7 +98,7 @@ export default function MonitorDetailPage() {
     );
   }
 
-  if (detailQ.isPending && !detailQ.data) {
+  if (detailQ.isPending) {
     return (
       <PageShell>
         <div className="p-8 text-foreground-muted text-sm">Loading monitor…</div>
@@ -103,7 +106,7 @@ export default function MonitorDetailPage() {
     );
   }
 
-  if (detailQ.isError || !detailQ.data) {
+  if (detailQ.isError) {
     return (
       <PageShell>
         <div className="p-8 text-error text-sm">

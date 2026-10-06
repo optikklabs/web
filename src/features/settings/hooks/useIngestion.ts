@@ -1,8 +1,5 @@
+import { getIngestionOverview } from "@shared/api/ingestion";
 import { useStandardQuery } from "@shared/hooks/useStandardQuery";
-
-import { useTenantId } from "@app/store/appStore";
-
-import { getIngestionOverview } from "../api/ingestionApi";
 
 // Ingestion is a billing-period view, so it ignores the global time selector
 // and always reports the current calendar month to date (UTC).
@@ -14,12 +11,10 @@ function monthToDateRange(): { startTime: number; endTime: number; monthKey: str
 }
 
 export function useIngestionOverview() {
-  const tenantId = useTenantId();
   const { startTime, endTime, monthKey } = monthToDateRange();
   return useStandardQuery({
-    queryKey: ["ingestion.overview", tenantId, monthKey],
+    queryKey: ["ingestion", "overview", monthKey],
     queryFn: ({ signal }) => getIngestionOverview(startTime, endTime, signal),
-    enabled: Boolean(tenantId),
     staleTime: 60_000,
   });
 }

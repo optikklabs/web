@@ -11,9 +11,7 @@ interface DensityProviderProps {
 }
 
 function DensityProvider({ children }: DensityProviderProps) {
-  const density = useAppStore(
-    (state) => state.viewPreferences?.density ?? "comfortable"
-  ) as Density;
+  const density = useAppStore((state) => state.viewPreferences.density) as Density;
 
   useEffect(() => {
     if (density === "compact") {

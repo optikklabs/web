@@ -67,11 +67,11 @@ export default function DatasetDetailPage() {
 
           <section>
             <h3 className="mb-2 font-semibold text-foreground text-sm">Runs</h3>
-            {(d.runs ?? []).length === 0 ? (
+            {d.runs.length === 0 ? (
               <p className="text-[12px] text-foreground-muted">No runs yet.</p>
             ) : (
               <div className="flex flex-col gap-2">
-                {d.runs?.map((r) => (
+                {d.runs.map((r) => (
                   <Card key={r.id} className="flex items-center justify-between p-3">
                     <div className="min-w-0">
                       <div className="truncate text-[12px] text-foreground">{r.name}</div>
@@ -80,7 +80,7 @@ export default function DatasetDetailPage() {
                       </div>
                     </div>
                     <div className="flex gap-4 font-mono text-[11px] text-foreground-secondary">
-                      {Object.entries(r.avgScores ?? {}).map(([k, v]) => (
+                      {Object.entries(r.avgScores).map(([k, v]) => (
                         <span key={k}>
                           {k}: {v.toFixed(2)}
                         </span>
@@ -97,7 +97,7 @@ export default function DatasetDetailPage() {
           <section>
             <h3 className="mb-2 font-semibold text-foreground text-sm">Items</h3>
             <div className="flex flex-col gap-1">
-              {d.items?.slice(0, 50).map((it) => (
+              {d.items.slice(0, 50).map((it) => (
                 <div
                   key={it.id}
                   className="grid grid-cols-2 gap-3 rounded border border-border bg-surface px-3 py-1.5 font-mono text-[11px]"

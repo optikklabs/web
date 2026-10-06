@@ -7,7 +7,7 @@ import type { KafkaTopology } from "@/features/saturation/api/kafkaTopologySchem
 export function useKafkaTopology(service: string | null) {
   return useTimeRangeQuery<KafkaTopology>(
     "saturation-kafka.topology",
-    (_tenant, s, e) => getKafkaTopology(s, e, service ?? ""),
+    (s, e) => getKafkaTopology(s, e, service ?? ""),
     {
       extraKeys: [service ?? ""],
       enabled: service != null,

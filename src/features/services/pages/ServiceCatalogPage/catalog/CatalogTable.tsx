@@ -16,10 +16,10 @@ function ErrorCell({ rate }: { rate: number }) {
 
 function NameCell({ row }: { row: CatalogRow }) {
   const metadata = [
-    row.lang === "—" ? null : row.lang,
-    row.instances == null ? null : `${row.instances} inst`,
-    row.version === "—" ? null : row.version,
-  ].filter((value): value is string => value != null);
+    row.version,
+    row.environment,
+    row.instances > 0 ? `${row.instances} inst` : "",
+  ].filter((value) => value !== "");
   return (
     <div className="flex min-w-0 items-center gap-2.5">
       <StatusDot status={row.status} ring className="h-2 w-2" />

@@ -69,22 +69,22 @@ export default function ErrorGroupDetailPage(): JSX.Element {
 
   const detailQ = useTimeRangeQuery(
     `error-group-detail-${groupId}`,
-    (_t, s, e) => getErrorGroupDetail(groupId, Number(s), Number(e)),
+    (s, e) => getErrorGroupDetail(groupId, Number(s), Number(e)),
     { extraKeys: [groupId], enabled: !!groupId }
   );
   const occurrenceQ = useTimeRangeQuery(
     `error-group-latest-${groupId}`,
-    (_t, s, e) => getErrorGroupLatestOccurrence(groupId, Number(s), Number(e)),
+    (s, e) => getErrorGroupLatestOccurrence(groupId, Number(s), Number(e)),
     { extraKeys: [groupId], enabled: !!groupId }
   );
   const timeseriesQ = useTimeRangeQuery(
     `error-group-ts-${groupId}`,
-    (_t, s, e) => getErrorGroupTimeseries(groupId, Number(s), Number(e)),
+    (s, e) => getErrorGroupTimeseries(groupId, Number(s), Number(e)),
     { extraKeys: [groupId], enabled: !!groupId }
   );
   const facetsQ = useTimeRangeQuery(
     `error-group-facets-${groupId}`,
-    (_t, s, e) => getErrorGroupFacets(groupId, Number(s), Number(e)),
+    (s, e) => getErrorGroupFacets(groupId, Number(s), Number(e)),
     { extraKeys: [groupId], enabled: !!groupId }
   );
   const [tracePage, setTracePage] = useState(0);
@@ -93,13 +93,13 @@ export default function ErrorGroupDetailPage(): JSX.Element {
 
   const tracesQ = useTimeRangeQuery(
     `error-group-traces-${groupId}`,
-    (_t, s, e) => getErrorGroupTraces(groupId, Number(s), Number(e), { cursor: traceCursor }),
+    (s, e) => getErrorGroupTraces(groupId, Number(s), Number(e), { cursor: traceCursor }),
     { extraKeys: [groupId, tracePage, traceCursor], enabled: !!groupId }
   );
 
   const traceResults = tracesQ.data?.results ?? [];
-  const traceHasMore = tracesQ.data?.pageInfo?.hasMore ?? false;
-  const traceNextCursor = tracesQ.data?.pageInfo?.nextCursor;
+  const traceHasMore = tracesQ.data?.pageInfo.hasMore ?? false;
+  const traceNextCursor = tracesQ.data?.pageInfo.nextCursor;
 
   useEffect(() => {
     if (traceNextCursor) {
@@ -110,13 +110,11 @@ export default function ErrorGroupDetailPage(): JSX.Element {
   const detail = detailQ.data;
   const occurrence = occurrenceQ.data;
   const points = timeseriesQ.data ?? [];
+  // The API answers 404 when the group has no errors in the selected window.
+  const absent = detailQ.error?.status === 404;
 
-  const totalErrors = detail?.errorCount ?? points.reduce((a, p) => a + (p.errorCount ?? 0), 0);
   const cutoff = Date.now() - 3_600_000;
-  const lastHour = points.reduce(
-    (a, p) => (p.timestampMs >= cutoff ? a + (p.errorCount ?? 0) : a),
-    0
-  );
+  const lastHour = points.reduce((a, p) => (p.timestampMs >= cutoff ? a + p.errorCount : a), 0);
 
   const title = detail?.exceptionType || detail?.operationName || groupId;
 
@@ -137,24 +135,32 @@ export default function ErrorGroupDetailPage(): JSX.Element {
             ? `${detail.serviceName} · ${detail.operationName}`
             : detailQ.isPending
               ? "Loading…"
-              : "No occurrences in this window"
+              : absent
+                ? "No occurrences in this window"
+                : "Failed to load this error group"
         }
         icon={<AlertOctagon size={24} className="text-[var(--err)]" />}
       />
 
       <Surface elevation={1} padding="md">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <MetaStat label="First seen" value={formatTimestamp(detail?.firstOccurrence ?? "")} />
-          <MetaStat label="Last seen" value={formatTimestamp(detail?.lastOccurrence ?? "")} />
+          <MetaStat
+            label="First seen"
+            value={detail ? formatTimestamp(detail.firstOccurrence) : "—"}
+          />
+          <MetaStat
+            label="Last seen"
+            value={detail ? formatTimestamp(detail.lastOccurrence) : "—"}
+          />
           <MetaStat
             label="Occurrences"
-            value={formatNumber(totalErrors)}
+            value={detail ? formatNumber(detail.errorCount) : "—"}
             sub={`${formatNumber(lastHour)} in 1h`}
           />
         </div>
       </Surface>
 
-      <OccurrenceTimeline counts={points.map((p) => p.errorCount ?? 0)} />
+      <OccurrenceTimeline counts={points.map((p) => p.errorCount)} />
 
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1.55fr_1fr]">
         <RequestContextCard occurrence={occurrence} />

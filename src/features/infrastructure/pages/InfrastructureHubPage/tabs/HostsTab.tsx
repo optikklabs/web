@@ -1,20 +1,17 @@
 import { useNavigate } from "@tanstack/react-router";
 
-import { API_CONFIG } from "@config/apiConfig";
 import { KpiCard } from "@shared/components/ui/cards/StatCard";
 import { useTimeRangeQuery } from "@shared/hooks/useTimeRangeQuery";
 import { ClientExplorerLayout } from "@shared/search/components/chrome/ClientExplorerLayout";
 import type { ClientExplorerDefinition } from "@shared/search/hooks/useClientExplorer";
 import { useClientExplorerController } from "@shared/search/hooks/useClientExplorerController";
-
-const V1 = API_CONFIG.ENDPOINTS.V1_BASE;
+import { fmtPct } from "@shared/utils/formatters";
 
 import { ROUTES } from "@/shared/constants/routes";
 
-import { infraGet } from "../../../api/infrastructureApi";
-import { getNodes, getNodesSummary } from "../../../api/nodesApi";
+import { getFleetAverage, getNodes, getNodesSummary } from "../../../api/nodesApi";
 import { InfraHostsTable } from "../../../components/InfraHostsTable";
-import type { InfrastructureNode, InfrastructureNodeSummary, MetricValue } from "../../../types";
+import type { InfrastructureNode, InfrastructureNodeSummary } from "../../../types";
 import { tierForErrorRate } from "../../../utils/nodeHealth";
 
 const HOSTS_EXPLORER: ClientExplorerDefinition<InfrastructureNode> = {
@@ -38,28 +35,19 @@ export default function HostsTab() {
 
   const query = useTimeRangeQuery<readonly InfrastructureNode[]>(
     "infrastructure.hosts.list",
-    (_tenant, s, e) => getNodes(s, e)
+    (s, e) => getNodes(s, e)
   );
 
   const summaryQ = useTimeRangeQuery<InfrastructureNodeSummary>(
     "infrastructure.nodes-summary",
-    (_tenant, s, e) => getNodesSummary(s, e)
+    (s, e) => getNodesSummary(s, e)
   );
 
-  const avgCpuQ = useTimeRangeQuery<MetricValue>(
-    "infrastructure.kpi.cpu-avg",
-    async (tenantId, start, end) => {
-      if (!tenantId) return { value: 0 };
-      return infraGet<MetricValue>(`${V1}/infrastructure/cpu/avg`, Number(start), Number(end));
-    }
+  const avgCpuQ = useTimeRangeQuery("infrastructure.kpi.cpu-avg", (s, e) =>
+    getFleetAverage("cpu", s, e)
   );
-
-  const avgMemQ = useTimeRangeQuery<MetricValue>(
-    "infrastructure.kpi.memory-avg",
-    async (tenantId, start, end) => {
-      if (!tenantId) return { value: 0 };
-      return infraGet<MetricValue>(`${V1}/infrastructure/memory/avg`, Number(start), Number(end));
-    }
+  const avgMemQ = useTimeRangeQuery("infrastructure.kpi.memory-avg", (s, e) =>
+    getFleetAverage("memory", s, e)
   );
 
   const nodes = query.data ?? [];
@@ -78,12 +66,8 @@ export default function HostsTab() {
     : 0;
   const hostsUpVal = summary ? summary.healthyNodes + summary.degradedNodes : 0;
 
-  const avgCpuVal = avgCpuQ.data
-    ? `${(avgCpuQ.data.value <= 1 ? avgCpuQ.data.value * 100 : avgCpuQ.data.value).toFixed(0)}%`
-    : "—";
-  const avgMemVal = avgMemQ.data
-    ? `${(avgMemQ.data.value <= 1 ? avgMemQ.data.value * 100 : avgMemQ.data.value).toFixed(0)}%`
-    : "—";
+  const avgCpuVal = fmtPct(avgCpuQ.data?.value, 0);
+  const avgMemVal = fmtPct(avgMemQ.data?.value, 0);
 
   return (
     <ClientExplorerLayout

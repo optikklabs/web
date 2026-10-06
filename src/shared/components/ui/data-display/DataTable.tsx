@@ -158,7 +158,8 @@ function DataTableInner<TData, TValue>({
               >
                 {headerGroup.headers.map((header) => {
                   const align =
-                    (header.column.columnDef.meta as { align?: string })?.align || "left";
+                    (header.column.columnDef.meta as { align?: string } | undefined)?.align ??
+                    "left";
                   const isCustomWidth =
                     resizable &&
                     header.column.columnDef.size !== undefined &&
@@ -207,7 +208,8 @@ function DataTableInner<TData, TValue>({
                 <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} {...rowProps}>
                   {row.getVisibleCells().map((cell) => {
                     const align =
-                      (cell.column.columnDef.meta as { align?: string })?.align || "left";
+                      (cell.column.columnDef.meta as { align?: string } | undefined)?.align ??
+                      "left";
                     return (
                       <TableCell
                         key={cell.id}

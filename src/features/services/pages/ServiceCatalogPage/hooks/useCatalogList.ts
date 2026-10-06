@@ -25,12 +25,12 @@ export interface UseCatalogListResult {
 function useRedSummary() {
   return useTimeRangeQuery<Comparable<ServiceCatalogRedSummary>>(
     "service-hub.red-summary-cmp",
-    (_tenant, s, e, signal) => getRedSummaryWithComparison(s, e, undefined, signal)
+    (s, e, signal) => getRedSummaryWithComparison(s, e, undefined, signal)
   );
 }
 
 function useRateSeries() {
-  return useTimeRangeQuery<RequestRateSeries>("service-hub.request-rate", (_tenant, s, e, signal) =>
+  return useTimeRangeQuery<RequestRateSeries>("service-hub.request-rate", (s, e, signal) =>
     getRequestRateSeries(s, e, undefined, signal)
   );
 }

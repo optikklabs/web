@@ -1,3 +1,4 @@
+import { errorMessage } from "@shared/api/utils/errorNormalization";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Lock, Mail } from "lucide-react";
 import { useState } from "react";
@@ -43,7 +44,7 @@ export function LoginForm() {
     try {
       await session.login(parsed.data.email, parsed.data.password);
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Login failed");
+      toast.error(errorMessage(error));
       setIsSubmitting(false);
       return;
     }

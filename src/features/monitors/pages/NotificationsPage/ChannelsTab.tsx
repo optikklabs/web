@@ -26,7 +26,7 @@ function formFromChannel(ch: Channel): ChannelForm {
   };
 }
 
-import { getErrorMessage } from "@shared/utils/errorUtils";
+import { errorMessage } from "@shared/api/utils/errorNormalization";
 
 export default function ChannelsTab() {
   const channelsQ = useChannels();
@@ -52,7 +52,7 @@ export default function ChannelsTab() {
       }
       setForm(emptyForm());
     } catch (err) {
-      setStatus(getErrorMessage(err, "Failed to save channel"));
+      setStatus(errorMessage(err));
     }
   };
 
@@ -62,7 +62,7 @@ export default function ChannelsTab() {
       await remove.mutateAsync(id);
       if (form.id === id) setForm(emptyForm());
     } catch (err) {
-      setStatus(getErrorMessage(err, "Failed to delete channel"));
+      setStatus(errorMessage(err));
     }
   };
 
@@ -73,7 +73,7 @@ export default function ChannelsTab() {
       setStatus(res.ok ? "Test delivery sent." : `Test failed: ${res.errorText}`);
       channelsQ.refetch();
     } catch (err) {
-      setStatus(getErrorMessage(err, "Failed to test channel"));
+      setStatus(errorMessage(err));
     }
   };
 

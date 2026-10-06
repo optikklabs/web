@@ -45,11 +45,11 @@ const ENDPOINT_COLUMNS: ColumnDef<EndpointRow>[] = [
       formatPercentage(row.requestCount > 0 ? (row.errorCount * 100) / row.requestCount : 0),
   },
   {
-    header: "Avg",
-    accessorKey: "avgLatency",
+    header: "p50",
+    accessorKey: "p50Latency",
     size: 80,
     meta: { align: "right" },
-    cell: ({ row: { original: row } }) => formatDuration(row.avgLatency),
+    cell: ({ row: { original: row } }) => formatDuration(row.p50Latency),
   },
   {
     header: "p95",

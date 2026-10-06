@@ -2,7 +2,6 @@ import { Pencil, Trash2 } from "lucide-react";
 
 import { Card as Surface } from "@shared/components/primitives/ui/card";
 import { useMetricsExplorerQuery } from "@shared/metrics/hooks/useMetricsExplorerQuery";
-import { isMetricsQuerySpec } from "@shared/types/dashboardConfig";
 import type { DashboardPanelSpec } from "@shared/types/dashboardConfig";
 
 import type { Dashboard } from "@shared/dashboards/api/dashboardsApi";
@@ -64,10 +63,8 @@ function MetricsWidgetBody({
   readonly spec: DashboardPanelSpec;
   readonly bodyHeight: number;
 }) {
-  // Narrow before the hook; parent only mounts this for metrics specs.
-  const query = isMetricsQuerySpec(spec.query) ? spec.query : null;
-  const result = useMetricsExplorerQuery(query?.queries ?? [], query?.step ?? "5m");
-  if (!query) return null;
+  const { query } = spec;
+  const result = useMetricsExplorerQuery(query.queries, query.step);
 
   return (
     <Surface
@@ -76,7 +73,7 @@ function MetricsWidgetBody({
       className="chart-card flex h-full min-h-0 flex-col overflow-hidden"
     >
       <div className="chart-card__title">
-        <span className="chart-card__title-text">{spec.title ?? spec.id}</span>
+        <span className="chart-card__title-text">{spec.title}</span>
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">
         <WidgetVizRenderer
@@ -84,7 +81,7 @@ function MetricsWidgetBody({
           queries={query.queries}
           formulas={query.formulas ?? []}
           results={result.data?.results}
-          display={{ legend: spec.legend ?? true, smooth: spec.smooth ?? true }}
+          display={{ legend: spec.legend, smooth: spec.smooth }}
           isLoading={result.isLoading}
           isError={result.isError}
           height={Math.max(120, bodyHeight - 44)}

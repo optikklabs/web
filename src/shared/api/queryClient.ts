@@ -1,4 +1,12 @@
+import type { ApiErrorShape } from "@shared/api/utils/errorNormalization";
 import { QueryClient } from "@tanstack/react-query";
+
+// Every API call rejects with an ApiErrorShape (see errorInterceptor).
+declare module "@tanstack/react-query" {
+  interface Register {
+    defaultError: ApiErrorShape;
+  }
+}
 
 export const queryClient = new QueryClient({
   defaultOptions: {
