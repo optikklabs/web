@@ -75,7 +75,6 @@ export function OverviewEndpointsAndResources({ serviceName }: { serviceName: st
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      {}
       <div className="rounded-lg border border-border bg-card p-5 shadow-sm lg:col-span-2">
         <div className="mb-4">
           <h3 className="font-semibold text-[14px] text-foreground">Top endpoints</h3>
@@ -95,7 +94,6 @@ export function OverviewEndpointsAndResources({ serviceName }: { serviceName: st
         />
       </div>
 
-      {}
       <div className="flex flex-col rounded-lg border border-border bg-card p-5 shadow-sm">
         <h3 className="font-semibold text-[14px] text-foreground">Resource use · max fleet</h3>
         <p className="mt-0.5 mb-4 text-[12px] text-foreground-muted">
@@ -108,7 +106,6 @@ export function OverviewEndpointsAndResources({ serviceName }: { serviceName: st
           </div>
         ) : (
           <div className="flex flex-1 flex-col justify-center gap-5">
-            {}
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between text-[12px]">
                 <div className="flex items-center gap-1.5">
@@ -138,7 +135,6 @@ export function OverviewEndpointsAndResources({ serviceName }: { serviceName: st
               </div>
             </div>
 
-            {}
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between text-[12px]">
                 <div className="flex items-center gap-1.5">

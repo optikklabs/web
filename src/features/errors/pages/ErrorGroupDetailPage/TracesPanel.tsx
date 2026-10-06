@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { Skeleton } from "@shared/components/primitives/ui/skeleton";
 import { PageSurface } from "@shared/components/ui/layout/PageShell";
 import { buildTraceDetailHref } from "@shared/observability/deepLinks";
+import { formatDuration, formatTimestamp } from "@shared/utils/formatters";
 
 import type { ErrorGroupTrace } from "@shared/api/errors";
 
@@ -14,16 +15,6 @@ interface Props {
   readonly hasMore: boolean;
   readonly onPrev: () => void;
   readonly onNext: () => void;
-}
-
-function fmtTime(iso: string): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleString();
-}
-
-function fmtDuration(ms: number): string {
-  return ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${Math.round(ms)}ms`;
 }
 
 export function TracesPanel({
@@ -68,10 +59,10 @@ export function TracesPanel({
               </div>
               <div className="flex shrink-0 items-center gap-4">
                 <span className="font-mono text-[11.5px] text-foreground-muted tabular-nums">
-                  {fmtDuration(t.durationMs)}
+                  {formatDuration(t.durationMs)}
                 </span>
                 <span className="w-[150px] text-right font-mono text-[11px] text-foreground-muted">
-                  {fmtTime(t.timestamp)}
+                  {formatTimestamp(t.timestamp)}
                 </span>
               </div>
             </button>

@@ -6,7 +6,7 @@ import { Card as Surface } from "@shared/components/primitives/ui/card";
 import PageHeader from "@shared/components/ui/layout/PageHeader";
 import { PageShell, PageSurface } from "@shared/components/ui/layout/PageShell";
 import { useTimeRangeQuery } from "@shared/hooks/useTimeRangeQuery";
-import { formatNumber } from "@shared/utils/formatters";
+import { formatNumber, formatTimestamp } from "@shared/utils/formatters";
 
 import {
   getErrorGroupDetail,
@@ -19,12 +19,6 @@ import {
 import { RequestContextCard } from "./RequestContextCard";
 import { TracesPanel } from "./TracesPanel";
 import { WhereItHappensCard } from "./WhereItHappensCard";
-
-function fmtDate(iso: string): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleString();
-}
 
 function MetaStat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -138,15 +132,20 @@ export default function ErrorGroupDetailPage(): JSX.Element {
             <span className="font-mono">{title}</span>
           </span>
         }
-        subtitle={detail ? `${detail.serviceName} · ${detail.operationName}` : "Loading…"}
+        subtitle={
+          detail
+            ? `${detail.serviceName} · ${detail.operationName}`
+            : detailQ.isPending
+              ? "Loading…"
+              : "No occurrences in this window"
+        }
         icon={<AlertOctagon size={24} className="text-[var(--err)]" />}
       />
 
-      {}
       <Surface elevation={1} padding="md">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <MetaStat label="First seen" value={fmtDate(detail?.firstOccurrence ?? "")} />
-          <MetaStat label="Last seen" value={fmtDate(detail?.lastOccurrence ?? "")} />
+          <MetaStat label="First seen" value={formatTimestamp(detail?.firstOccurrence ?? "")} />
+          <MetaStat label="Last seen" value={formatTimestamp(detail?.lastOccurrence ?? "")} />
           <MetaStat
             label="Occurrences"
             value={formatNumber(totalErrors)}

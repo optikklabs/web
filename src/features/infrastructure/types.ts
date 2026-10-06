@@ -1,7 +1,6 @@
 export interface InfrastructureNode {
   readonly host: string;
   readonly podCount: number;
-  readonly containerCount: number;
   readonly services: readonly string[];
   readonly requestCount: number;
   readonly errorCount: number;

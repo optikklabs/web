@@ -56,7 +56,6 @@ export function MetricsExplorerToolbar({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      {}
       <div className="flex flex-wrap items-center gap-3">
         <MetricSegmentedControl
           options={CHART_TYPE_SEGMENTS}
@@ -76,7 +75,6 @@ export function MetricsExplorerToolbar({
         <Switch label="Smooth" checked={smooth} onChange={(e) => setSmooth(e.target.checked)} />
       </div>
 
-      {}
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1.5">
           <span className="font-semibold text-[11px] text-foreground-muted uppercase tracking-wide">

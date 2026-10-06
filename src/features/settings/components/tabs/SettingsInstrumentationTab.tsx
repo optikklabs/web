@@ -41,7 +41,6 @@ export default function SettingsInstrumentationTab(): JSX.Element {
         />
       </div>
 
-      {}
       <div className="flex flex-wrap gap-1 border-border border-b">
         {guides.map((g) => (
           <button
@@ -74,7 +73,6 @@ export default function SettingsInstrumentationTab(): JSX.Element {
         </div>
       )}
 
-      {}
       <div className="mt-lg border-t pt-md">
         <div className="mb-xs flex items-center gap-xs">
           <Boxes size={16} className="text-muted" />

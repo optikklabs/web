@@ -9,8 +9,8 @@ interface Props {
 }
 
 function SpanAttributesSectionComponent({ spanAttributes, onAddFilter }: Props) {
-  const attrs = spanAttributes.attributesString ?? spanAttributes.attributes ?? {};
-  const resAttrs = spanAttributes.resourceAttributes ?? {};
+  const attrs = spanAttributes.attributesString;
+  const resAttrs = spanAttributes.resourceAttributes;
 
   return (
     <div className="flex flex-col gap-4">

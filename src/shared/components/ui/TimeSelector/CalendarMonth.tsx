@@ -47,7 +47,6 @@ export function CalendarMonth({
 
   return (
     <div>
-      {}
       <div className="mb-1 grid grid-cols-7">
         {DAYS.map((d) => (
           <div key={d} className="text-center font-medium text-[11px] text-foreground-tertiary">
@@ -56,7 +55,6 @@ export function CalendarMonth({
         ))}
       </div>
 
-      {}
       <div className="grid grid-cols-7 gap-y-0.5">
         {totalCells.map((day, idx) => {
           if (!day) return <div key={idx} />;

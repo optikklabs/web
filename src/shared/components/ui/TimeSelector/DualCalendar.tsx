@@ -30,7 +30,6 @@ export function DualCalendar({
 
   return (
     <div className="flex gap-4 px-3 pt-3 pb-2">
-      {}
       <div className="flex flex-1 flex-col">
         <div className="mb-2 flex items-center justify-between">
           <button
@@ -56,10 +55,8 @@ export function DualCalendar({
         />
       </div>
 
-      {}
       <div className="w-px self-stretch bg-border" />
 
-      {}
       <div className="flex flex-1 flex-col">
         <div className="mb-2 flex items-center justify-between">
           <div className="w-6" />

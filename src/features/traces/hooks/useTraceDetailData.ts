@@ -191,12 +191,7 @@ export function useTraceDetailData(selectedTenantId: number | null, traceIdParam
     criticalPathSpanIds,
     errorPathSpanIds,
     spanEvents: spanQueries.events.data ?? [],
-    spanAttributes: spanQueries.attributes.data
-      ? {
-          ...spanQueries.attributes.data,
-          attributes: spanQueries.attributes.data.attributes ?? {},
-        }
-      : null,
+    spanAttributes: spanQueries.attributes.data ?? null,
     spanAttributesLoading: spanQueries.attributes.isPending,
     relatedTraces: related.query.data ?? [],
     relatedTracesRequested: related.requested,

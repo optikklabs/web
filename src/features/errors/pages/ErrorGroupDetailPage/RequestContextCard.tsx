@@ -1,4 +1,5 @@
 import { PageSurface } from "@shared/components/ui/layout/PageShell";
+import { formatDuration } from "@shared/utils/formatters";
 
 import type { ErrorLatestOccurrence } from "@shared/api/errors";
 
@@ -10,10 +11,6 @@ interface Row {
   readonly k: string;
   readonly v: string;
   readonly bad?: boolean;
-}
-
-function fmtDuration(ms: number): string {
-  return ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${Math.round(ms)}ms`;
 }
 
 /** Key/value request context of the group's most recent error span. */
@@ -29,7 +26,7 @@ export function RequestContextCard({ occurrence }: Props): JSX.Element | null {
       v: occurrence.httpStatusCode,
       bad: Number.isFinite(statusNum) && statusNum >= 400,
     },
-    { k: "duration", v: fmtDuration(occurrence.durationMs), bad: occurrence.durationMs >= 1000 },
+    { k: "duration", v: formatDuration(occurrence.durationMs), bad: occurrence.durationMs >= 1000 },
     { k: "traceId", v: occurrence.traceId },
     { k: "spanId", v: occurrence.spanId },
     { k: "service.version", v: occurrence.serviceVersion },

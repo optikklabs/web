@@ -36,7 +36,6 @@ export interface SpanAttributes {
   readonly dbName?: string;
   readonly dbStatement?: string;
   readonly dbStatementNormalized?: string;
-  readonly attributes: Record<string, string>;
   readonly links?: readonly SpanLink[];
 
   // Extended LLM fields for LLM Observability span inspection

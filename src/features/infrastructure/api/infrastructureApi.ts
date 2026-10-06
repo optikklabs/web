@@ -7,8 +7,8 @@ export async function infraGet<T>(
   extraParams?: Record<string, string | number | undefined>
 ): Promise<T> {
   const params: Record<string, string | number> = {
-    start: startMs,
-    end: endMs,
+    startTime: startMs,
+    endTime: endMs,
   };
   if (extraParams) {
     for (const [k, v] of Object.entries(extraParams)) {

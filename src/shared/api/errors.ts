@@ -160,11 +160,11 @@ export async function getErrorGroupDetail(
   groupId: string,
   s: RequestTime,
   e: RequestTime
-): Promise<ErrorGroupDetail> {
+): Promise<ErrorGroupDetail | null> {
   const res = await api.get<unknown>(`${V1}/errors/groups/${encodeURIComponent(groupId)}`, {
     params: range(s, e),
   });
-  return validateResponse(errorGroupDetailSchema, res);
+  return validateResponse(errorGroupDetailSchema.nullable(), res ?? null);
 }
 
 export async function getErrorGroupLatestOccurrence(

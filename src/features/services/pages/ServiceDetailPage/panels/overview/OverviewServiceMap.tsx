@@ -58,7 +58,6 @@ export function OverviewServiceMap({ serviceName }: { serviceName: string }) {
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-3">
-        {}
         <div className="relative rounded-lg border border-border bg-muted/10 p-2 lg:col-span-2">
           <ErrorBoundary variant="visualization">
             <TopologySVG
@@ -71,7 +70,6 @@ export function OverviewServiceMap({ serviceName }: { serviceName: string }) {
           </ErrorBoundary>
         </div>
 
-        {}
         <div className="flex flex-col gap-3">
           <div className="font-semibold text-[11px] text-foreground-muted uppercase tracking-wider">
             Service Dependencies ({upstreamList.length + downstreamList.length})

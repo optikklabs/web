@@ -32,7 +32,6 @@ export const RANGE_GROUPS: RangeGroup[] = [
       { kind: "relative", label: "Last 2 days", preset: "2d", minutes: 2880 },
       { kind: "relative", label: "Last 7 days", preset: "7d", minutes: 10080 },
       { kind: "relative", label: "Last 30 days", preset: "30d", minutes: 43200 },
-      { kind: "relative", label: "Last 90 days", preset: "90d", minutes: 129600 },
     ],
   },
 ];
@@ -49,7 +48,6 @@ export const DISPLAY_MAP: Record<string, string> = {
   "2d": "Last 2 days",
   "7d": "Last 7 days",
   "30d": "Last 30 days",
-  "90d": "Last 90 days",
 };
 
 const COMPARISON_OPTIONS = [

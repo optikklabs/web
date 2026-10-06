@@ -106,7 +106,6 @@ function spanAttributes(
     serviceName: span.service || detail.service,
     attributesString: attributes,
     resourceAttributes: llmResourceAttributes(detail, span),
-    attributes,
     exceptionMessage: span.hasError ? "LLM execution returned an error." : undefined,
     llmPrompt: io.prompt,
     llmCompletion: io.completion,

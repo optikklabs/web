@@ -132,7 +132,6 @@ export const spanAttributesSchema = z.object({
   dbName: z.string().optional(),
   dbStatement: z.string().optional(),
   dbStatementNormalized: z.string().optional(),
-  attributes: z.record(z.string(), z.string()).optional(),
 });
 
 /** Mirrors detail.RelatedTrace — GET /traces/{traceId}/related. */
