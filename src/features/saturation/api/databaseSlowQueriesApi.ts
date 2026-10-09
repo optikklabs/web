@@ -17,6 +17,4 @@ export type SlowQueryPatternRow = z.infer<typeof slowQueryPatternSchema>;
 export interface DatabaseFilters {
   readonly dbSystem?: string;
   readonly collection?: string;
-  readonly server?: string;
-  readonly namespace?: string;
 }

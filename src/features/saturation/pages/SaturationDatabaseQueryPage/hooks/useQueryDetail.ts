@@ -11,7 +11,7 @@ import {
 import type { DatabaseFilters } from "@/features/saturation/api/databaseSlowQueriesApi";
 
 function scopeKeys(hash: string, filters: DatabaseFilters) {
-  return [hash, filters.dbSystem, filters.collection, filters.namespace, filters.server];
+  return [hash, filters.dbSystem, filters.collection];
 }
 
 export function useQueryDetailSummary(hash: string, filters: DatabaseFilters, enabled: boolean) {
